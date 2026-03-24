@@ -24,19 +24,30 @@ GLOBAL_LIST_INIT(roguetown_areas_typecache, typecacheof(/area/rogue/indoors/town
 	var/necra_area = FALSE
 	var/ceiling_protected = FALSE //Prevents tunneling into these from above
 
-/area/rogue/Entered(mob/living/carbon/human/guy)
+/area/rogue/Entered(atom/movable/AM)
 	. = ..()
-	if((src.town_area == TRUE) && HAS_TRAIT(guy, TRAIT_GUARDSMAN) && !guy.has_status_effect(/datum/status_effect/buff/guardbuffone)) //man at arms
+
+	if(!ishuman(AM))
+		return
+
+	var/mob/living/carbon/human/guy = AM
+
+	if(src.town_area && HAS_TRAIT(guy, TRAIT_GUARDSMAN) && !guy.has_status_effect(/datum/status_effect/buff/guardbuffone))
 		guy.apply_status_effect(/datum/status_effect/buff/guardbuffone)
-	if((src.tavern_area == TRUE) && HAS_TRAIT(guy, TRAIT_TAVERN_FIGHTER) && !guy.has_status_effect(/datum/status_effect/buff/innkeeperbuff)) // THE FIGHTER
+
+	if(src.tavern_area && HAS_TRAIT(guy, TRAIT_TAVERN_FIGHTER) && !guy.has_status_effect(/datum/status_effect/buff/innkeeperbuff))
 		guy.apply_status_effect(/datum/status_effect/buff/innkeeperbuff)
-	if((src.warden_area == TRUE) && HAS_TRAIT(guy, TRAIT_WOODSMAN) && !guy.has_status_effect(/datum/status_effect/buff/wardenbuff)) // Warden
+
+	if(src.warden_area && HAS_TRAIT(guy, TRAIT_WOODSMAN) && !guy.has_status_effect(/datum/status_effect/buff/wardenbuff))
 		guy.apply_status_effect(/datum/status_effect/buff/wardenbuff)
-	if((src.drow_area == TRUE) && HAS_TRAIT(guy, TRAIT_ANTHRAXI) && !guy.has_status_effect(/datum/status_effect/buff/anthraxbuff)) // Drow Mercenaries
+
+	if(src.drow_area && HAS_TRAIT(guy, TRAIT_ANTHRAXI) && !guy.has_status_effect(/datum/status_effect/buff/anthraxbuff))
 		guy.apply_status_effect(/datum/status_effect/buff/anthraxbuff)
-	if((src.holy_area == TRUE) && HAS_TRAIT(guy, TRAIT_UNDIVIDED)) // get a long-lingering mood buff so long as we visit the church daily as Undivided.
+
+	if(src.holy_area && HAS_TRAIT(guy, TRAIT_UNDIVIDED))
 		guy.add_stress(/datum/stressevent/seeblessed)
-	if((src.necra_area == TRUE) && !(guy.has_status_effect(/datum/status_effect/debuff/necrandeathdoorwilloss)||(guy.has_status_effect(/datum/status_effect/debuff/deathdoorwilloss)))) //Necra saps at wil
+
+	if(src.necra_area && !(guy.has_status_effect(/datum/status_effect/debuff/necrandeathdoorwilloss) || guy.has_status_effect(/datum/status_effect/debuff/deathdoorwilloss)))
 		if(HAS_TRAIT(guy, TRAIT_SOUL_EXAMINE))
 			guy.apply_status_effect(/datum/status_effect/debuff/necrandeathdoorwilloss)
 		else

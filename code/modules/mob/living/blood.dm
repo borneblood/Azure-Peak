@@ -232,7 +232,8 @@
 		amt = amt / 4 // Helps yield condition not be a bloodloss failure state. Approx to grabbing all of your bodyparts at once
 	var/old_volume = blood_volume
 	blood_volume = max(blood_volume - amt, 0)
-	if (old_volume > 0 && !blood_volume) // it looks like we've just bled out. bummer.
+	if(old_volume > 0 && !blood_volume && world.time >= next_bleedout_message) // it looks like we've just bled out. bummer.
+		next_bleedout_message = world.time + 600 // this should prevent spam by only happening once every minute, now that you can actually regain blood while KO'd
 		to_chat(src, span_userdanger("The last of your lyfeblood ebbs from your ravaged body and soaks the cold earth below..."))
 	record_round_statistic(STATS_BLOOD_SPILT, amt)
 	if(isturf(src.loc)) //Blood loss still happens in locker, floor stays clean

@@ -186,9 +186,11 @@
 
 #undef CHURN_FILTER
 
+
+
 /obj/effect/proc_holder/spell/targeted/locate_dead
 	name = "Locate Corpse"
-	desc = "Call upon the Undermaiden to guide you to a lost soul."
+	desc = "Beseech the Undermaiden to guide you to the fallen and reveal what still clings to their remains."
 	overlay_state = "necraeye"
 	sound = 'sound/magic/whiteflame.ogg'
 	releasedrain = 30
@@ -198,34 +200,51 @@
 	miracle = TRUE
 	associated_skill = /datum/skill/magic/holy
 	req_items = list(/obj/item/clothing/neck/roguetown/psicross)
-	invocations = list("Undermaiden, guide my hand to those who have lost their way.")
-	invocation_type = "whisper"
-	recharge_time = 15 SECONDS
-	devotion_cost = 35
+	recharge_time = 7 SECONDS
+	devotion_cost = 15
+
+/mob/living
+	var/mob/living/necra_tracked_corpse = null
+	var/last_necra_ping = 0
+
 
 /obj/effect/proc_holder/spell/targeted/locate_dead/cast(list/targets, mob/living/user = usr)
 	. = ..()
-	var/list/mob/corpses = list()
+
+	if(user.necra_tracked_corpse)
+		to_chat(user, span_notice("The Undermaiden releases your hand."))
+		user.necra_tracked_corpse = null
+		STOP_PROCESSING(SSprocessing, user)
+		return
+
+	user.whisper("Undermaiden, guide my hand to those who have lost their way.")
+
+	var/list/player_corpses = list()
+	var/list/npc_corpses = list()
+
 	for(var/mob/living/C in GLOB.dead_mob_list)
-		if(!C.mind)
+		if(!C)
 			continue
+
 		if(istype(C, /mob/living/carbon/human))
-			var/mob/living/carbon/human/B = C
-			if(B.buried)
+			var/mob/living/carbon/human/H = C
+			if(H.buried)
 				continue
+
 		var/time_dead = 0
 		if(C.timeofdeath)
 			time_dead = world.time - C.timeofdeath
-		var/corpse_name
 
+		var/corpse_age
 		if(time_dead < 5 MINUTES)
-			corpse_name = "Fresh corpse "
+			corpse_age = "Fresh"
 		else if(time_dead < 10 MINUTES)
-			corpse_name = "Recently deceased "
+			corpse_age = "Recent"
 		else if(time_dead < 30 MINUTES)
-			corpse_name = "Long dead "
+			corpse_age = "Old"
 		else
-			corpse_name = "Forgotten remains of "
+			corpse_age = "Forgotten"
+
 		var/list/d_list = C.get_mob_descriptors()
 		var/trait_desc = "[capitalize(build_coalesce_description_nofluff(d_list, C, list(MOB_DESCRIPTOR_SLOT_TRAIT), "%DESC1%"))]"
 		var/stature_desc = "[capitalize(build_coalesce_description_nofluff(d_list, C, list(MOB_DESCRIPTOR_SLOT_STATURE), "%DESC1%"))]"
@@ -233,50 +252,325 @@
 		if(descriptor_name == " ")
 			descriptor_name = "Unknown"
 
-		corpse_name += " of \a [descriptor_name]..."
-		corpses[corpse_name] = C
+		var/soul_state = "unclear"
 
-	if(!length(corpses))
-		to_chat(user, span_warning("The Undermaiden's grasp lets slip."))
-		return .
+		var/datum/antagonist/skeleton/skel = C.mind?.has_antag_datum(/datum/antagonist/skeleton)
+		var/datum/antagonist/zombie/zomb = C.mind?.has_antag_datum(/datum/antagonist/zombie)
 
-	var/mob/selected = tgui_input_list(user, "Which body shall I seek?", "Available Bodies", corpses)
-
-	if(QDELETED(src) || QDELETED(user) || QDELETED(corpses[selected]))
-		to_chat(user, span_warning("The Undermaiden's grasp lets slip."))
-		return .
-
-	var/corpse = corpses[selected]
-
-	var/turf/turf_user = get_turf(user)
-	var/turf/turf_corpse = get_turf(corpse)
-	var/direction_name = "unknown"
-	if(turf_user.z != turf_corpse.z)
-		if(turf_corpse.z > turf_user.z)
-			direction_name = "above"
+		if(C.stat != DEAD)
+			soul_state = "walking"
+		else if(skel || zomb)
+			soul_state = "defiled"
+		else if(!C.key && !C.get_ghost(FALSE, TRUE))
+			soul_state = "claimed"
 		else
-			direction_name = "below"
-	else
-		var/direction = get_dir(user, corpse)
-		switch(direction)
-			if(NORTH)
-				direction_name = "north"
-			if(SOUTH)
-				direction_name = "south"
-			if(EAST)
-				direction_name = "east"
-			if(WEST)
-				direction_name = "west"
-			if(NORTHEAST)
-				direction_name = "northeast"
-			if(NORTHWEST)
-				direction_name = "northwest"
-			if(SOUTHEAST)
-				direction_name = "southeast"
-			if(SOUTHWEST)
-				direction_name = "southwest"
+			soul_state = "earthbound"
 
-	to_chat(user, span_notice("The Undermaiden pulls on your hand, guiding you [direction_name]."))
+		var/label = "[corpse_age] body of [descriptor_name] ([soul_state])"
+
+		if(C.key || C.get_ghost(FALSE, TRUE))
+			player_corpses[label] = C
+		else
+			npc_corpses[label] = C
+
+	if(!length(player_corpses) && !length(npc_corpses))
+		to_chat(user, span_userdanger("You reach out. Nothing answers. No souls linger, no bodies call. The Undermaiden is silent..."))
+		return
+
+	var/list/display = list()
+	var/list/lookup = list()
+	var/list/headers = list()
+
+	if(length(player_corpses))
+		var/header = "--- Player Corpses ---"
+		display += header
+		headers += header
+		for(var/entry in player_corpses)
+			display += entry
+			lookup[entry] = player_corpses[entry]
+
+	if(length(npc_corpses))
+		var/header = "--- Other Dead ---"
+		display += header
+		headers += header
+		for(var/entry in npc_corpses)
+			display += entry
+			lookup[entry] = npc_corpses[entry]
+
+	if(!length(display))
+		to_chat(user, span_warning("The Undermaiden's grasp lets slip."))
+		return
+
+	var/selection = tgui_input_list(user, "Which body shall I seek?", "Available Bodies", display)
+
+if(QDELETED(user) || isnull(selection) || (selection in headers) || !lookup[selection] || QDELETED(lookup[selection]))
+		to_chat(user, span_warning("The Undermaiden's grasp lets slip."))
+		return
+	
+	var/mob/living/target = lookup[selection]
+
+	user.necra_tracked_corpse = target
+	user.last_necra_ping = 0
+
+	to_chat(user, span_userdanger("The Undermaiden takes your hand."))
+	START_PROCESSING(SSprocessing, user)
+
+
+/mob/living/process()
+	..()
+
+	if(!necra_tracked_corpse)
+		STOP_PROCESSING(SSprocessing, src)
+		return
+
+	if(world.time < last_necra_ping + 20)
+		return
+
+	last_necra_ping = world.time
+
+	if(QDELETED(necra_tracked_corpse))
+		to_chat(src, span_warning("The Undermaiden's thread snaps."))
+		necra_tracked_corpse = null
+		STOP_PROCESSING(SSprocessing, src)
+		return
+
+	var/turf/user_turf = get_turf(src)
+	var/turf/target_turf = get_turf(necra_tracked_corpse)
+
+	if(!user_turf || !target_turf)
+		return
+
+	var/direction_name = "unknown"
+	var/z_hint = ""
+
+	if(target_turf.z != user_turf.z)
+		var/z_diff = abs(target_turf.z - user_turf.z)
+		z_hint = target_turf.z > user_turf.z ? "[z_diff] level\s above" : "[z_diff] level\s below"
+	else
+		var/dir = get_dir(src, necra_tracked_corpse)
+		switch(dir)
+			if(NORTH) direction_name = "north"
+			if(SOUTH) direction_name = "south"
+			if(EAST) direction_name = "east"
+			if(WEST) direction_name = "west"
+			if(NORTHEAST) direction_name = "northeast"
+			if(NORTHWEST) direction_name = "northwest"
+			if(SOUTHEAST) direction_name = "southeast"
+			if(SOUTHWEST) direction_name = "southwest"
+
+	var/state = "still"
+
+	var/datum/antagonist/skeleton/skel = necra_tracked_corpse.mind?.has_antag_datum(/datum/antagonist/skeleton)
+	var/datum/antagonist/zombie/zomb = necra_tracked_corpse.mind?.has_antag_datum(/datum/antagonist/zombie)
+
+	if(necra_tracked_corpse.stat != DEAD)
+		state = "not dead"
+	else if(skel || zomb)
+		state = "defiled"
+	else if(!necra_tracked_corpse.mind)
+		state = "claimed"
+	else
+		state = "lingers"
+
+	var/msg = "The Undermaiden guides you [direction_name]"
+	if(z_hint)
+		msg += " ([z_hint])"
+	msg += ". It feels [state]."
+
+	to_chat(src, span_userdanger(msg))
+
+
+
+
+#define SOUL_REAP_FILTER "soul_reap_outline"
+
+/obj/effect/proc_holder/spell/self/soul_reap
+	name = "Soul Reap"
+	desc = "Consecrate your weapon to harvest souls. The next strike ignores defenses and restores vitality."
+	overlay_state = "soulreap"
+	associated_skill = /datum/skill/magic/holy
+	recharge_time = 40 SECONDS
+	devotion_cost = 75
+	miracle = TRUE
+
+/obj/effect/proc_holder/spell/self/soul_reap/cast(mob/living/user)
+	if(!isliving(user))
+		return FALSE
+
+	var/obj/item/I = user.get_active_held_item()
+	if(!I)
+		to_chat(user, span_warning("I must hold a weapon to enact the rite."))
+		revert_cast()
+		return FALSE
+
+	var/list/intents = I.gripped_intents
+	if(!intents || !intents.len)
+		to_chat(user, span_warning("This weapon cannot channel the rite."))
+		revert_cast()
+		return FALSE
+
+	var/valid = FALSE
+	for(var/path in intents)
+		if(findtext("[path]", "/cut") || findtext("[path]", "/chop"))
+			valid = TRUE
+			break
+
+	if(!valid)
+		to_chat(user, span_warning("The rite recoils. This weapon cannot reap a soul."))
+		revert_cast()
+		return FALSE
+
+	user.apply_status_effect(/datum/status_effect/soul_reap, I)
+	return TRUE
+
+
+/atom/movable/screen/alert/status_effect/buff/soul_reap
+	name = "Soul Reap"
+	desc = "My next strike will ignore defenses and steal vitality."
+	icon_state = "buff"
+
+
+/datum/status_effect/soul_reap
+	id = "soul_reap"
+	status_type = STATUS_EFFECT_UNIQUE
+	duration = 10 SECONDS
+	alert_type = /atom/movable/screen/alert/status_effect/buff/soul_reap
+	on_remove_on_mob_delete = TRUE
+
+	var/datum/weakref/bound_item
+
+
+/datum/status_effect/soul_reap/on_creation(mob/living/new_owner, obj/item/I)
+	. = ..()
+	if(!.)
+		return
+
+	if(!istype(I) || (I.item_flags & ABSTRACT))
+		qdel(src)
+		return
+
+	bound_item = WEAKREF(I)
+	RegisterSignal(I, COMSIG_ITEM_AFTERATTACK, PROC_REF(on_hit))
+
+
+/datum/status_effect/soul_reap/on_remove()
+	. = ..()
+
+	if(bound_item)
+		var/obj/item/I = bound_item.resolve()
+		if(istype(I))
+			UnregisterSignal(I, COMSIG_ITEM_AFTERATTACK)
+
+
+/datum/status_effect/soul_reap/proc/on_hit(obj/item/source, atom/target, mob/user, proximity_flag, click_params)
+	if(!proximity_flag || !isliving(target))
+		return
+
+	var/obj/item/I = bound_item?.resolve()
+	if(!I || source != I)
+		return
+
+	var/list/intents = source.gripped_intents
+	var/valid = FALSE
+
+	if(intents)
+		for(var/path in intents)
+			if(findtext("[path]", "/cut") || findtext("[path]", "/chop"))
+				valid = TRUE
+				break
+
+	if(!valid)
+		return
+
+	var/mob/living/T = target
+
+	handle_reap(user, T)
+
+	qdel(src)
+
+
+/datum/status_effect/soul_reap/proc/handle_reap(mob/living/user, mob/living/target)
+
+	var/is_dead = (target.stat == DEAD)
+	var/is_downed = (target.stat != CONSCIOUS)
+	var/is_player = (target.client || target.mind)
+
+	var/datum/antagonist/skeleton/skel = target.mind?.has_antag_datum(/datum/antagonist/skeleton)
+	var/datum/antagonist/zombie/zomb = target.mind?.has_antag_datum(/datum/antagonist/zombie)
+
+	if(!is_dead)
+		if((skel || zomb) && is_downed)
+			target.visible_message(span_danger("[target] is torn apart as their animating force is ripped away!"))
+
+			user.visible_message(
+				span_danger("[user]'s strike severs the tether binding [target] to this world!"),
+				span_notice("I reap what should not walk."))
+
+			if(!is_player)
+				qdel(target)
+			else
+				target.death()
+		else
+			target.adjustOxyLoss(75)
+			target.emote("breathgasp", forced = TRUE)
+	else
+		if(skel)
+			target.visible_message(span_danger("[target] crumbles as their soul is devoured!"))
+			if(!is_player)
+				qdel(target)
+		else if(zomb)
+			target.adjustToxLoss(50)
+			target.visible_message(span_warning("[target] writhes as something is torn from within!"))
+		else
+			target.visible_message(span_danger("[target]'s soul is ripped away!"))
+			if(!is_player)
+				qdel(target)
+
+	apply_healing(user, target)
+
+	user.visible_message(
+		span_danger("[user]'s strike rends both flesh and soul!"),
+		span_notice("Lux-infused vitality floods back into me."))
+
+
+/datum/status_effect/soul_reap/proc/apply_healing(mob/living/user, mob/living/target)
+
+	var/heal_power = 15
+
+	if(target.stat == DEAD)
+		heal_power = 30
+
+	var/datum/antagonist/skeleton/skel = target.mind?.has_antag_datum(/datum/antagonist/skeleton)
+	var/datum/antagonist/zombie/zomb = target.mind?.has_antag_datum(/datum/antagonist/zombie)
+
+	if(skel || zomb)
+		heal_power += 20
+
+	if(target.client)
+		heal_power += 10
+
+	if(!target.client && target.stat == DEAD)
+		heal_power *= 0.5
+
+	if(user.blood_volume < BLOOD_VOLUME_NORMAL)
+		user.blood_volume = min(user.blood_volume + (heal_power * 2), BLOOD_VOLUME_NORMAL)
+
+	var/list/wounds = user.get_wounds()
+	if(wounds?.len)
+		user.heal_wounds(heal_power * 4)
+		user.update_damage_overlays()
+
+	user.adjustOxyLoss(-heal_power * 2)
+	user.adjustOrganLoss(ORGAN_SLOT_BRAIN, -heal_power)
+
+	user.adjustBruteLoss(-heal_power)
+	user.adjustFireLoss(-heal_power)
+	user.adjustToxLoss(-heal_power)
+	user.adjustCloneLoss(-heal_power)
+	user.adjustStaminaLoss(-heal_power)
+
+
+#undef SOUL_REAP_FILTER
 
 /obj/effect/proc_holder/spell/invoked/necra_vow
 	name = "Vow to Necra"
