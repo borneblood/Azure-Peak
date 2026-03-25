@@ -1152,41 +1152,57 @@
 	icon = 'icons/roguetown/items/natural.dmi'
 	icon_state = "luxthread"
 	var/strungtogether = 1
+	var/max_threads = 10
 	sellprice = 3
 	grid_width = 32
 	grid_height = 32
 
 /obj/item/soulthread/examine(mob/user)
 	. = ..()
-	. += "</br>[strungtogether] / 10 threads gathered..."
+	. += "</br>[strungtogether] / [max_threads] threads gathered..."
 
+/obj/item/soulthread/proc/process_total(total, mob/user)
+	var/turf/T = get_turf(src)
+	var/tolls_to_make = floor(total / max_threads)
+	var/remainder = total % max_threads
 
-/obj/item/soulthread/attackby(obj/item/attacking_item, mob/user)
-	if(istype(attacking_item, /obj/item/soulthread))
-		var/obj/item/soulthread/T = attacking_item
-
-		var/total = strungtogether + T.strungtogether
-		var/tolls_to_make = total / 10
-		var/remainder = total % 10
-
-		to_chat(user, "...[total] of 10 to the toll...")
-
-		if(tolls_to_make > 0)
-			for(var/i in 1 to tolls_to_make)
-				new /obj/item/thetoll(get_turf(user))
+	if(user)
+		to_chat(user, "...[total] of [max_threads] to the toll...")
+	// spawn tolls at src location
+	if(tolls_to_make > 0)
+		for(var/i in 1 to tolls_to_make)
+			new /obj/item/thetoll(T)
+		if(user)
 			to_chat(user, "The lux-stuff coalesces into [tolls_to_make] toll\s!")
 
-		if(remainder > 0)
-			strungtogether = remainder
-			sellprice = 3 * remainder
-		else
-			qdel(src)
+	// apply remainder
+	if(remainder > 0)
+		strungtogether = remainder
+		sellprice = 3 * remainder
+		if(user)
+			to_chat(user, "...[remainder] of [max_threads] remain in your grasp...")
+	else
+		qdel(src)
 
-		qdel(T)
+/obj/item/soulthread/attackby(obj/item/attacking_item, mob/user)
 
+	if(!istype(attacking_item, /obj/item/soulthread))
+		return ..()
+
+	var/obj/item/soulthread/held = attacking_item
+
+	if(held == src)
+		return
+
+	// Transfer THIS into the held one instead
+	var/total = held.strungtogether + src.strungtogether
+
+	held.process_total(total, user)
+
+	qdel(src)
 
 /obj/item/soulthread/afterattack(atom/target, mob/user, proximity_flag, click_params)
-	if(proximity_flag)
+	if(!proximity_flag)
 		return
 
 	var/turf/T = get_turf(target)
@@ -1194,28 +1210,24 @@
 		return
 
 	var/total = strungtogether
+	var/list/to_delete = list()
 
 	for(var/obj/item/soulthread/other in T)
 		if(other == src)
 			continue
 
 		total += other.strungtogether
+		to_delete += other
+
+	// only proceed if we actually found something
+	if(!length(to_delete))
+		return
+
+	// delete AFTER counting
+	for(var/obj/item/soulthread/other in to_delete)
 		qdel(other)
 
-	var/tolls_to_make = total / 10
-	var/remainder = total % 10
-
-	if(tolls_to_make > 0)
-		for(var/i in 1 to tolls_to_make)
-			new /obj/item/thetoll(get_turf(user))
-		to_chat(user, "The lux-stuff coalesces into [tolls_to_make] toll\s!")
-
-	if(remainder > 0)
-		strungtogether = remainder
-		sellprice = 3 * remainder
-		to_chat(user, "...[remainder] of 10 remain in your grasp...")
-	else
-		qdel(src)
+	process_total(total, user)
 
 /obj/item/thetoll
 	grid_width = 32
@@ -1225,7 +1237,6 @@
 	icon = 'icons/roguetown/underworld/enigma_husks.dmi'
 	icon_state = "soultoken"
 	sellprice = 30
-
 
 /obj/structure/ritualcircle/eora
 	name = "Rune of Love"

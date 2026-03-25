@@ -221,7 +221,7 @@ GLOBAL_VAR_INIT(underworld_strands, 0)
 
 /obj/item/soulthread/deathsdoor
 	name = "shimmering lux-thread"
-	desc = "Eerie glowing thread, cometh from the grave"
+	desc = "An eerie, faintly glowing thread said to be drawn from the boundary between life and death. Cold to the touch and unnaturally light, it hums with a quiet, mournful presence. Some swear it writhes ever so slightly when left alone, as though remembering the hands that once grasped for life."
 
 
 /mob/living/proc/extract_from_deaths_edge()//for total exhaustion in death's precipice

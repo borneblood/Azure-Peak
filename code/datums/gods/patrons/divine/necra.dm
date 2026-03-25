@@ -11,10 +11,11 @@
 					/obj/effect/proc_holder/spell/invoked/avert					= CLERIC_T1,
 					/obj/effect/proc_holder/spell/targeted/locate_dead 			= CLERIC_T1,
 					/obj/effect/proc_holder/spell/invoked/fog_ward				= CLERIC_T1, // Not bugged, only appears on fog rounds!
-					/obj/effect/proc_holder/spell/targeted/abrogation			= CLERIC_T2, // Imagine that, another disabled Necran spell. Replaced with bless_cross for now.
+					/obj/effect/proc_holder/spell/self/grave_embrace			= CLERIC_T3, // the reverse absolver skill
+					/obj/effect/proc_holder/spell/invoked/abrogation			= CLERIC_T2, // Reworked into a corpse disposal spell.
 					/obj/effect/proc_holder/spell/invoked/bless_cross			= CLERIC_T3,
-					/obj/effect/proc_holder/spell/self/corpse_harvest			= CLERIC_T3,
 					/obj/effect/proc_holder/spell/invoked/raise_spirits_vengeance = CLERIC_T2,
+					/obj/effect/proc_holder/spell/self/death_harvest			= CLERIC_T4, // Most flashy (and expensive) thing ever that basically just skips the procedure of burying vast amounts of corpses, or fucks up undead NPCs.
 					/obj/effect/proc_holder/spell/invoked/deaths_door			= CLERIC_T4
 	)
 	confess_lines = list(
