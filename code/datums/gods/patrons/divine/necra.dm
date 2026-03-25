@@ -10,6 +10,7 @@
 					/obj/effect/proc_holder/spell/invoked/blood_heal			= CLERIC_T1,
 					/obj/effect/proc_holder/spell/invoked/avert					= CLERIC_T1,
 					/obj/effect/proc_holder/spell/targeted/locate_dead 			= CLERIC_T1,
+					/obj/effect/proc_holder/spell/invoked/blink/shadowstep/miracle = CLERIC_T3, // im losing my mind here
 					/obj/effect/proc_holder/spell/invoked/fog_ward				= CLERIC_T1, // Not bugged, only appears on fog rounds!
 					/obj/effect/proc_holder/spell/self/grave_embrace			= CLERIC_T3, // the reverse absolver skill
 					/obj/effect/proc_holder/spell/invoked/abrogation			= CLERIC_T2, // Reworked into a corpse disposal spell.

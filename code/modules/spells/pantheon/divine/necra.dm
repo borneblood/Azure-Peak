@@ -3,12 +3,13 @@
 
 /obj/effect/proc_holder/spell/invoked/avert
 	name = "Borrowed Time"
-	desc = "Shield your fellow man from the Undermaiden's gaze, preventing them from slipping into death for as long as your faith and fatigue may muster."
+	desc = "Shield your fellow man from the Undermaiden's gaze, preventing them from slipping into death for as long as your faith and fatigue may muster. A Toll can be offered to this Miracle, empowering it..."
 	overlay_state = "borrowtime"
 	req_items = list(/obj/item/clothing/neck/roguetown/psicross)
 	associated_skill = /datum/skill/magic/holy
 	miracle = TRUE
 	devotion_cost = 10
+	
 	var/list/near_death_lines = list(
 		"A pale haze seeps into my vision, dulling the world to muted greys, then it shudders and pulls back as if something unseen refuses to let me pass.",
 		"A crushing weight bears down on my chest, as though the wyrld itself would grind me into the soil, yet it pauses, held at bay by an unseen hand.",
@@ -41,22 +42,73 @@
 		"My limbs grow numb and distant, yet still respond, as if moved by something other than my own will. I can't die.",
 		"A quiet pressure surrounds my mind, patient and immovable, ensuring I do not slip away just yet. I need to wake up."
 	)
+	var/empowered_charge = FALSE
+
+/obj/effect/proc_holder/spell/invoked/avert/examine(mob/user)
+	. = ..()
+	if(empowered_charge)
+		. += "</br><span class='danger'>A toll has been offered. Necra is closely watching.</span>"
+		. += "</br><span class='danger'>Your next Borrowed Time will last for several seconds upon your target, preventing their death for up to 30 seconds. But beware! If they are not sufficiently healthy by the end of it, they might not survive the backlash!</span>"
 
 /obj/effect/proc_holder/spell/invoked/avert/cast(list/targets, mob/living/carbon/human/user)
 	. = ..()
+
 	var/atom/target = targets[1]
-	if (!isliving(target))
+
+	// Offer Toll to empower the spell
+	if(istype(target, /obj/item/thetoll))
+		if(empowered_charge)
+			to_chat(user, span_warning("The miracle is already burdened with a Toll."))
+			revert_cast()
+			return FALSE
+
+		var/obj/item/thetoll/T = target
+
+		user.visible_message(
+			span_danger("[user] crushes a Toll into dust, whispering a grave prayer..."),
+			span_danger("I offer the Toll to the Undermaiden. Let Her watch closely...")
+		)
+
+		qdel(T)
+		empowered_charge = TRUE
+
+		return TRUE
+
+	// Invalid target
+	if(!isliving(target))
 		revert_cast()
 		return FALSE
 
 	var/mob/living/living_target = target
-	if (!user.Adjacent(target))
-		to_chat(user, span_warning("I must be beside [living_target] to avert Her gaze from [living_target.p_them()]!"))
+
+	// No self-cast unless empowered
+	if(living_target == user && !empowered_charge)
+		to_chat(user, span_warning("I cannot invoke this miracle upon myself... not without a Toll."))
 		revert_cast()
 		return FALSE
 
-	// add the no-death trait to them....
-	user.visible_message(span_notice("Whispering motes gently bead from [user]'s fingers as [user.p_they()] place a hand near [living_target], scriptures of the Undermaiden spilling from their lips..."), span_notice("I stand beside [living_target] and utter the hallowed words of Aeon's Intercession, staying Her grasp for just a little while longer..."))
+	// Must be adjacent unless empowered
+	if(!user.Adjacent(living_target) && !empowered_charge)
+		to_chat(user, span_warning("I must be beside [living_target]!"))
+		revert_cast()
+		return FALSE
+
+	var/is_empowered = empowered_charge
+
+	if(is_empowered)
+		return cast_empowered(living_target, user)
+	
+	empowered_charge = FALSE
+
+	return cast_normal(living_target, user)
+
+/obj/effect/proc_holder/spell/invoked/avert/proc/cast_normal(mob/living/living_target, mob/user)
+
+	user.visible_message(
+		span_notice("Whispering motes gently bead from [user]'s fingers as [user.p_they()] place a hand near [living_target]..."),
+		span_notice("I utter the hallowed words, staying Her grasp for a little while longer...")
+	)
+
 	to_chat(user, span_small("I must remain still and at [living_target]'s side..."))
 	to_chat(living_target, span_warning("An odd sensation blossoms in my chest, cold and unknown..."))
 
@@ -65,25 +117,171 @@
 	var/our_holy_skill = user.get_skill_level(associated_skill)
 	var/tickspeed = 30 + (5 * our_holy_skill)
 
-	while (do_after(user, tickspeed, target = living_target))
+	while(do_after(user, tickspeed, target = living_target))
 		user.stamina_add(2.5)
 
 		living_target.adjustOxyLoss(-10)
 		living_target.blood_volume = max((BLOOD_VOLUME_SURVIVE * 1.5), living_target.blood_volume)
-
-		if (living_target.health <= 5)
-			if (prob(5))
-				to_chat(living_target, span_small(pick(near_death_lines)))
-
-		if (user.devotion?.check_devotion(src))
-			user.devotion?.update_devotion(-10)
+		var/mob/living/carbon/human/H = user
+		if(H.devotion?.check_devotion(src))
+			H.devotion?.update_devotion(-10)
 		else
-			to_chat(span_warning("My devotion runs dry - the Intercession fades from my lips!"))
+			to_chat(user, span_warning("My devotion runs dry - the Intercession fades!"))
 			break
 
 	REMOVE_TRAIT(living_target, TRAIT_NODEATH, "avert_spell")
 
-	user.visible_message(span_danger("[user]'s concentration breaks, the motes receding from [living_target] and into [user.p_their()] hand once more."), span_danger("My concentration breaks, and the Intercession falls silent."))
+	user.visible_message(
+		span_danger("[user]'s concentration breaks."),
+		span_danger("My concentration breaks, and the Intercession falls silent.")
+	)
+
+	return TRUE
+
+/obj/effect/proc_holder/spell/invoked/avert/proc/cast_empowered(mob/living/living_target, mob/user)
+
+	user.visible_message(
+		span_danger("[user] presses a hand into [living_target], whispering a grave promise..."),
+		span_danger("I bind [living_target] to borrowed time. Necra will collect what is owed...")
+	)
+
+	to_chat(living_target, span_userdanger("Death recoils from me... but something waits."))
+
+	living_target.apply_status_effect(/datum/status_effect/buff/borrowed_time_empowered)
+
+	return TRUE
+
+/datum/status_effect/buff/borrowed_time_empowered
+	id = "borrowed_time_empowered"
+	duration = 30 SECONDS
+	status_type = STATUS_EFFECT_REFRESH
+	tick_interval = 20 SECONDS
+	alert_type = /atom/movable/screen/alert/status_effect/buff/divine_strike
+	on_remove_on_mob_delete = TRUE
+
+/datum/status_effect/buff/borrowed_time_empowered/tick()
+	. = ..()
+
+	var/static/list/borrowed_time_messages = list(
+
+		"IT SEES ME— WHY DOES IT SEE ME—",
+		"I WASN'T MEANT TO LIVE THIS LONG—",
+		"IT'S BEHIND MY EYES— GET IT OUT— GET IT OUT—",
+		"MY HEART STOPPED— WHY DID IT START AGAIN—",
+		"I CAN FEEL IT COUNTING— PLEASE STOP COUNTING—",
+		"SHE'S WAITING— SHE'S BEEN WAITING—",
+		"I HEARD MYSELF DIE— I HEARD IT—",
+		"THIS ISN'T LIFE— THIS ISN'T LIFE—",
+		"I'M STILL FALLING— WHY AM I STILL FALLING—",
+		"SOMETHING ELSE IS BREATHING FOR ME—",
+
+		"WHY DOES MY BODY FEEL EMPTY—",
+		"I CAN'T FEEL MY BLOOD— WHERE IS MY BLOOD—",
+		"MY BONES ARE WRONG— THEY'RE ALL WRONG—",
+		"I'M ALREADY DEAD— I KNOW I AM—",
+		"THIS IS AFTER— THIS HAS TO BE AFTER—",
+		"WHY WON'T IT TAKE ME—",
+		"IT'S HOLDING ME HERE— WHY—",
+
+		"SHE'S LOOKING RIGHT AT ME—",
+		"I CAN'T BLINK— IF I BLINK SHE'LL TAKE ME—",
+		"I CAN HEAR HER BREATHING—",
+		"SHE'S SMILING— WHY IS SHE SMILING—",
+		"I'M NOT SUPPOSED TO SEE THIS—",
+
+		"IT HURTS— IT HURTS— IT HURTS—",
+		"MAKE IT STOP— PLEASE MAKE IT STOP—",
+		"MY BODY IS TEARING— CAN'T YOU SEE IT—",
+		"I'M COMING APART— I'M COMING APART—",
+		"I CAN'T HOLD TOGETHER—",
+
+		"I OWE SOMETHING— I DON'T KNOW WHAT—",
+		"SOMETHING IS COMING TO COLLECT—",
+		"I CAN FEEL IT REACHING—",
+		"IT KNOWS MY NAME—",
+		"IT CALLED ME— I HEARD IT CALL ME—",
+
+		"WHY DID YOU SAVE ME— WHY—",
+		"I WAS SUPPOSED TO DIE—",
+		"YOU SHOULDN'T HAVE DONE THIS—",
+		"THIS IS WRONG— THIS IS WRONG—",
+		"I CAN'T STAY HERE—",
+
+		"IT'S SO CLOSE—",
+		"IT'S ALMOST TIME—",
+		"I CAN FEEL THE END—",
+		"I CAN SEE IT—",
+		"IT'S HERE— IT'S HERE—"
+
+	)
+
+	var/mob/living/M = owner
+	if(!M)
+		return
+
+	var/msg = pick(borrowed_time_messages)
+
+	M.visible_message(
+		span_danger("[M]'s body spasms violently, their form twisting as if something unseen tugs at their soul..."),
+		span_userdanger(msg)
+	)
+		// 🔊 Spooky audio cue
+	var/static/list/spooky_sounds = list(
+		'sound/vo/mobs/ghost/aggro (1).ogg',
+		'sound/vo/mobs/ghost/aggro (2).ogg',
+		'sound/vo/mobs/ghost/aggro (3).ogg',
+		'sound/vo/mobs/ghost/aggro (4).ogg',
+		'sound/vo/mobs/ghost/aggro (5).ogg',
+		'sound/vo/mobs/ghost/aggro (6).ogg'
+	)
+
+	var/spookyscary = pick(spooky_sounds)
+	playsound(get_turf(M), spookyscary, 50, TRUE)
+
+/datum/status_effect/buff/borrowed_time_empowered/on_apply()
+	. = ..()
+
+	var/mob/living/M = owner
+	if(!M)
+		return
+	
+	playsound(get_turf(M), 'sound/vo/mobs/ghost/death.ogg', 50, TRUE)
+
+	ADD_TRAIT(M, TRAIT_NODEATH, "borrowed_time_empowered")
+	ADD_TRAIT(M, TRAIT_NOPAIN, "borrowed_time_empowered")
+	ADD_TRAIT(M, TRAIT_DEATHLESS, "borrowed_time_empowered")
+	ADD_TRAIT(M, TRAIT_BLOODLOSS_IMMUNE, "borrowed_time_empowered")
+	ADD_TRAIT(M, TRAIT_PSYCHOSIS, "borrowed_time_empowered")
+
+/datum/status_effect/buff/borrowed_time_empowered/on_remove()
+	. = ..()
+
+	var/mob/living/M = owner
+	if(!M)
+		return
+
+	REMOVE_TRAIT(M, TRAIT_NODEATH, "borrowed_time_empowered")
+	REMOVE_TRAIT(M, TRAIT_NOPAIN, "borrowed_time_empowered")
+	REMOVE_TRAIT(M, TRAIT_DEATHLESS, "borrowed_time_empowered")
+	REMOVE_TRAIT(M, TRAIT_BLOODLOSS_IMMUNE, "borrowed_time_empowered")
+	REMOVE_TRAIT(M, TRAIT_PSYCHOSIS, "borrowed_time_empowered")
+
+	if(HAS_TRAIT_FROM(M, TRAIT_NODEATH, "avert_spell"))
+		return
+
+	var/health_percent = M.health / max(M.maxHealth, 1)
+
+	if(health_percent < 0.1)
+		M.visible_message(
+			span_danger("[M]'s body seizes as something unseen tears them apart!"),
+			span_userdanger("IT COMES DUE— IT COMES DUE!! I WAS ALREADY DEAD LONG AGO!!! AHHAHAHAHAHAHHAHAHAHAAAAA!!!")
+		)
+		M.emote("laugh")
+		playsound(get_turf(M), 'sound/vo/mobs/ghost/death.ogg', 50, TRUE)
+		M.gib(TRUE, TRUE, FALSE)
+	else
+		to_chat(M, span_warning("The weight of death recedes... for now."))
+		to_chat(M, span_green("Such bliss... In Paradise or Psydonia, I, was the one who dared dance with death."))
 
 /obj/effect/proc_holder/spell/targeted/locate_dead
 	name = "Locate Corpse"
@@ -247,6 +445,33 @@
 	msg += ". They feel [state]."
 
 	to_chat(src, span_warning(msg))
+
+/obj/effect/proc_holder/spell/invoked/blink/shadowstep/miracle // throwing another thing on the wall in hope it sticks
+	name = "Veil Passage"
+	desc = "A brief step through the veil, carrying the faithful a distance along the threshold of death. This is unorthodoxically exhausting to perform, but can travel farther than most teleportation techniques."
+	action_icon = 'icons/mob/actions/classuniquespells/spellfist.dmi'
+	overlay_state = "shadowstep"
+	invocations = list(
+		"Lady of the Veil, I walk in your shadow...",
+		"Necra, grant me passage...",
+		"In death's grace, I take this step...",
+		"O' Undermaiden, let the veil part by your will...",
+		"Errand spirits, guide my path...",
+		"O' Necra, let the threshold open...",
+		"In silence, I shall pass unhindered..."
+	)
+	invocation_type = "whisper"
+	phase = /obj/effect/temp_visual/blink/shadowstep
+	miracle = TRUE
+	devotion_cost = 75
+	releasedrain = 100
+	max_range = 6
+	recharge_time = 20 SECONDS
+	xp_gain = FALSE
+
+/obj/effect/temp_visual/blink/shadowstep
+	icon_state = "bluestream_fade"
+	light_color = COLOR_PALE_PURPLE_GRAY
 
 /obj/effect/proc_holder/spell/invoked/abrogation
 	name = "Abrogation"
