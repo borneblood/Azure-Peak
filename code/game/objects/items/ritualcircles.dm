@@ -1156,21 +1156,65 @@
 	grid_width = 32
 	grid_height = 32
 
-
 /obj/item/soulthread/examine(mob/user)
 	. = ..()
-	. += "</br>[strungtogether] threads are gathered of 10..."
+	. += "</br>[strungtogether] / 10 threads gathered..."
+
 
 /obj/item/soulthread/attackby(obj/item/attacking_item, mob/user)
 	if(istype(attacking_item, /obj/item/soulthread))
-		var/obj/item/soulthread/thread2combine = attacking_item
-		strungtogether += thread2combine.strungtogether
-		sellprice += 3
-		to_chat(user, "...[strungtogether] of 10 to the toll...")
-		qdel(thread2combine)
-	if(strungtogether >= 10)
-		to_chat(user, "The lux-stuff coalesces into a toll!")
-		new /obj/item/thetoll((get_turf(user)))
+		var/obj/item/soulthread/T = attacking_item
+
+		var/total = strungtogether + T.strungtogether
+		var/tolls_to_make = total / 10
+		var/remainder = total % 10
+
+		to_chat(user, "...[total] of 10 to the toll...")
+
+		if(tolls_to_make > 0)
+			for(var/i in 1 to tolls_to_make)
+				new /obj/item/thetoll(get_turf(user))
+			to_chat(user, "The lux-stuff coalesces into [tolls_to_make] toll\s!")
+
+		if(remainder > 0)
+			strungtogether = remainder
+			sellprice = 3 * remainder
+		else
+			qdel(src)
+
+		qdel(T)
+
+
+/obj/item/soulthread/afterattack(atom/target, mob/user, proximity_flag, click_params)
+	if(proximity_flag)
+		return
+
+	var/turf/T = get_turf(target)
+	if(!T)
+		return
+
+	var/total = strungtogether
+
+	for(var/obj/item/soulthread/other in T)
+		if(other == src)
+			continue
+
+		total += other.strungtogether
+		qdel(other)
+
+	var/tolls_to_make = total / 10
+	var/remainder = total % 10
+
+	if(tolls_to_make > 0)
+		for(var/i in 1 to tolls_to_make)
+			new /obj/item/thetoll(get_turf(user))
+		to_chat(user, "The lux-stuff coalesces into [tolls_to_make] toll\s!")
+
+	if(remainder > 0)
+		strungtogether = remainder
+		sellprice = 3 * remainder
+		to_chat(user, "...[remainder] of 10 remain in your grasp...")
+	else
 		qdel(src)
 
 /obj/item/thetoll
