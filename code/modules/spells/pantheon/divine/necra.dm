@@ -541,6 +541,9 @@
 				if(T)
 					C.dust(TRUE, FALSE, TRUE)
 					new /obj/item/soulthread(T)
+					if(C)
+						C.gib(TRUE, TRUE, TRUE)
+
 
 	user.apply_status_effect(/datum/status_effect/buff/healing/soul_drain)
 
