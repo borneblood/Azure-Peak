@@ -356,7 +356,7 @@
 
 /obj/effect/proc_holder/spell/self/soul_reap
 	name = "Soul Reap"
-	desc = "Consecrate your weapon to harvest souls. The next strike shall rend flesh and spirit, and perhaps put the dead to rest in Her embrace."
+	desc = "Consecrate your weapon to harvest souls. The next strike will rend flesh and spirit, bypass all defenses, and hurl the target back."
 	overlay_state = "soulreap"
 	associated_skill = /datum/skill/magic/holy
 	recharge_time = 15 SECONDS
@@ -400,13 +400,13 @@
 
 	user.visible_message(
 		span_danger("[user]'s weapon drinks in a dim, hungry glow!"),
-		span_notice("I utter the rite. The next strike will reap a soul."))
+		span_notice("I utter the rite. The next strike will reap essence."))
 
 	return TRUE
 
 /atom/movable/screen/alert/status_effect/buff/soul_reap
 	name = "Soul Reap"
-	desc = "My next strike will rend the soul and restore my vitality."
+	desc = "My next strike will ignore all defenses and hurl the target back."
 	icon_state = "buff"
 
 /datum/status_effect/buff/soul_reap
@@ -415,25 +415,21 @@
 	duration = 10 SECONDS
 	status_type = STATUS_EFFECT_UNIQUE
 
-
 /datum/status_effect/buff/soul_reap/on_apply()
 	. = ..()
 	RegisterSignal(owner, COMSIG_MOB_ITEM_ATTACK, PROC_REF(on_attack))
-	owner.add_filter(SOUL_REAP_FILTER, 2, list("type" = "outline", "color" = "#9956a1", "alpha" = 220, "size" = 3))
-
+	owner.add_filter(SOUL_REAP_FILTER, 2, list("type" = "outline", "color" = "#9956a1", "alpha" = 220, "size" = 1.5))
+	owner.update_damage_overlays()
 
 /datum/status_effect/buff/soul_reap/on_remove()
 	UnregisterSignal(owner, COMSIG_MOB_ITEM_ATTACK)
 	owner.remove_filter(SOUL_REAP_FILTER)
 	. = ..()
 
-
 /datum/status_effect/buff/soul_reap/proc/on_attack(mob/living/source, mob/living/target, mob/living/user, obj/item/weapon)
 	SIGNAL_HANDLER
 
-	if(!target || target == owner)
-		return
-	if(!isliving(target))
+	if(!target || target == owner || !isliving(target))
 		return
 
 	var/list/intents = weapon?.gripped_intents
@@ -446,72 +442,260 @@
 	if(!valid)
 		return
 
-	handle_reap(user, target)
+	target.adjustOxyLoss(50)
+	target.adjustStaminaLoss(30)
+	target.emote("breathgasp", forced = TRUE)
+
+	user.apply_status_effect(/datum/status_effect/buff/healing/soul_drain)
+
 	consume_reap()
-
 	return COMPONENT_ITEM_NO_DEFENSE
-
-/datum/status_effect/buff/soul_reap/proc/handle_reap(mob/living/user, mob/living/target)
-	var/is_dead = (target.stat == DEAD)
-	var/is_npc = !target.key
-	var/skel = target.mind?.has_antag_datum(/datum/antagonist/skeleton)
-	var/zomb = target.mind?.has_antag_datum(/datum/antagonist/zombie)
-
-	if(!is_dead)
-		target.adjustOxyLoss(50)
-		target.adjustStaminaLoss(25)
-		target.emote("breathgasp", forced = TRUE)
-
-	else
-		target.emote("scream", forced = TRUE)
-		target.Knockdown(40)
-
-		if(istype(target, /mob/living/carbon))
-			var/mob/living/carbon/C = target
-			var/has_ghost = (C.key || C.get_ghost(FALSE, TRUE))
-
-			if(!has_ghost && is_npc)
-				var/turf/T = get_turf(C)
-				C.dust(TRUE, FALSE, TRUE)
-				span_danger("[owner]'s strike reduces [target] to dust, leaving a curious glowing thread behind..."),
-				if(T)
-					new /obj/item/soulthread(T)
-
-	apply_healing(user)
-
-
-/datum/status_effect/buff/soul_reap/proc/apply_healing(mob/living/user)
-
-	var/heal_power = 20
-
-	if(user.blood_volume < BLOOD_VOLUME_NORMAL)
-		user.blood_volume = min(user.blood_volume + (heal_power * 2), BLOOD_VOLUME_NORMAL)
-
-	var/list/wounds = user.get_wounds()
-	if(wounds?.len)
-		user.heal_wounds(heal_power * 2)
-		user.update_damage_overlays()
-
-	user.adjustOxyLoss(-heal_power)
-	user.adjustOrganLoss(ORGAN_SLOT_BRAIN, -heal_power)
-
-	user.adjustBruteLoss(-heal_power)
-	user.adjustFireLoss(-heal_power)
-	user.adjustToxLoss(-heal_power)
-	user.adjustCloneLoss(-heal_power)
-	user.adjustStaminaLoss(-heal_power)
-
 
 /datum/status_effect/buff/soul_reap/proc/consume_reap()
 	playsound(get_turf(owner), 'sound/magic/antimagic.ogg', 50, TRUE)
 
 	owner.visible_message(
 		span_danger("[owner]'s strike rends both flesh and soul!"),
-		span_notice("Vitality floods back into me."))
+		span_notice("The harvested essence binds itself to me."))
 
 	owner.remove_status_effect(/datum/status_effect/buff/soul_reap)
 
+/datum/status_effect/buff/healing/soul_drain
+	id = "healing"
+	alert_type = /atom/movable/screen/alert/status_effect/buff/healing
+	duration = 8 SECONDS
+	healing_on_tick = 10
+	outline_colour = "#bbbbbb"
+
+/datum/status_effect/buff/healing/soul_drain/on_apply()
+	healing_on_tick = 10
+	return TRUE
+
+/datum/status_effect/buff/healing/soul_drain/tick()
+	var/obj/effect/temp_visual/heal/H = new /obj/effect/temp_visual/heal_rogue(get_turf(owner))
+	H.color = "#a5a5a5"
+
+	var/list/wCount = owner.get_wounds()
+
+	if(!owner.construct)
+		if(owner.blood_volume < BLOOD_VOLUME_NORMAL)
+			owner.blood_volume = min(owner.blood_volume + (healing_on_tick + 10), BLOOD_VOLUME_NORMAL)
+
+		if(wCount.len > 0)
+			owner.heal_wounds(healing_on_tick, list(/datum/wound/slash, /datum/wound/puncture, /datum/wound/bite, /datum/wound/bruise, /datum/wound/dynamic))
+			owner.update_damage_overlays()
+
+		owner.adjustBruteLoss(-healing_on_tick, 0)
+		owner.adjustFireLoss(-healing_on_tick, 0)
+		owner.adjustOxyLoss(-healing_on_tick, 0)
+		owner.adjustToxLoss(-healing_on_tick, 0)
+		owner.adjustOrganLoss(ORGAN_SLOT_BRAIN, -healing_on_tick)
+		owner.adjustCloneLoss(-healing_on_tick, 0)
+
 #undef SOUL_REAP_FILTER
+
+#define CORPSE_HARVEST_FILTER "corpse_harvest_outline"
+
+/obj/effect/proc_holder/spell/self/corpse_harvest
+	name = "Corpse Harvest"
+	desc = "Consecrate your weapon to harvest souls. Strike to begin the harvest."
+	overlay_state = "soulreap"
+	associated_skill = /datum/skill/magic/holy
+	recharge_time = 15 SECONDS
+	devotion_cost = 75
+	invocation_type = "shout"
+	invocations = list("Necra! Guide them to their final rest!")
+	miracle = TRUE
+
+/obj/effect/proc_holder/spell/self/corpse_harvest/cast(mob/living/user)
+	if(!isliving(user))
+		return FALSE
+
+	var/obj/item/I = user.get_active_held_item()
+	if(!I)
+		to_chat(user, span_warning("I must hold a weapon to enact the rite."))
+		revert_cast()
+		return FALSE
+
+	var/list/intents = I.gripped_intents
+	if(!intents || !intents.len)
+		to_chat(user, span_warning("This weapon cannot channel the rite."))
+		revert_cast()
+		return FALSE
+
+	var/valid = FALSE
+	for(var/path in intents)
+		if(findtext("[path]", "/cut") || findtext("[path]", "/chop"))
+			valid = TRUE
+			break
+
+	if(!valid)
+		to_chat(user, span_warning("The rite recoils. This weapon cannot harvest a soul."))
+		revert_cast()
+		return FALSE
+
+	if(user.has_status_effect(/datum/status_effect/buff/corpse_harvest))
+		to_chat(user, span_warning("The rite is already upon my weapon."))
+		revert_cast()
+		return FALSE
+
+	user.apply_status_effect(/datum/status_effect/buff/corpse_harvest)
+	playsound(get_turf(user), 'sound/magic/antimagic.ogg', 60, TRUE)
+
+	user.visible_message(
+		span_danger("[user]'s weapon drinks in a clear, pallid glow!"),
+		span_notice("You let your devotion to death guide your mind, body and soul, as the harvest begins."))
+
+	return TRUE
+
+/atom/movable/screen/alert/status_effect/buff/corpse_harvest
+	name = "Corpse Harvest"
+	desc = "My next strike will unleash a deadly harvest in Her name."
+	icon_state = "buff"
+
+/datum/status_effect/buff/corpse_harvest
+	id = "corpse_harvest"
+	alert_type = /atom/movable/screen/alert/status_effect/buff/corpse_harvest
+	duration = 10 SECONDS
+	status_type = STATUS_EFFECT_UNIQUE
+
+/datum/status_effect/buff/corpse_harvest/on_apply()
+	. = ..()
+	RegisterSignal(owner, COMSIG_MOB_ITEM_ATTACK, PROC_REF(on_attack))
+	owner.add_filter(CORPSE_HARVEST_FILTER, 2, list("type" = "outline", "color" = "#7a2ca3", "alpha" = 220, "size" = 3))
+
+/datum/status_effect/buff/corpse_harvest/on_remove()
+	UnregisterSignal(owner, COMSIG_MOB_ITEM_ATTACK)
+	owner.remove_filter(CORPSE_HARVEST_FILTER)
+	. = ..()
+
+/datum/status_effect/buff/corpse_harvest/proc/on_attack(mob/living/source, mob/living/target, mob/living/user, obj/item/weapon)
+	SIGNAL_HANDLER
+
+	if(!target || target == owner || !isliving(target))
+		return
+
+	var/list/intents = weapon?.gripped_intents
+	var/valid = FALSE
+	if(intents)
+		for(var/path in intents)
+			if(findtext("[path]", "/cut") || findtext("[path]", "/chop"))
+				valid = TRUE
+				break
+	if(!valid)
+		return
+
+	INVOKE_ASYNC(src, PROC_REF(reap_chain), user, target)
+
+	consume_reap()
+	return COMPONENT_ITEM_NO_DEFENSE
+
+/datum/status_effect/buff/corpse_harvest/proc/reap_chain(mob/living/user, mob/living/initial_target)
+	set waitfor = FALSE
+
+	var/turf/origin = get_turf(user)
+	var/turf/center = get_turf(initial_target)
+	if(!origin || !center)
+		return
+
+	user.emote("cackle", forced = TRUE)
+
+	var/list/targets = list()
+
+	for(var/mob/living/M in view(8, center))
+		if(M == user)
+			continue
+
+		var/is_undead = FALSE
+
+		if(istype(M, /mob/living/carbon/human/species/npc/deadite))
+			is_undead = TRUE
+		else if(istype(M, /mob/living/carbon/human/species/skeleton/npc))
+			is_undead = TRUE
+		else if(M.stat == DEAD)
+			is_undead = TRUE
+		else if(M.mind)
+			if(M.mind.has_antag_datum(/datum/antagonist/skeleton) || M.mind.has_antag_datum(/datum/antagonist/zombie))
+				is_undead = TRUE
+
+		if(is_undead)
+			targets += M
+
+	for(var/mob/living/T in targets)
+		if(QDELETED(T))
+			continue
+
+		var/turf/dest = get_turf(T)
+		if(!dest || dest.z != origin.z)
+			continue
+
+		var/list/path = getline(get_turf(user), dest)
+		INVOKE_ASYNC(src, PROC_REF(create_afterimage_trail), user, path)
+
+		do_teleport(user, dest, channel = TELEPORT_CHANNEL_MAGIC)
+		playsound(dest, 'sound/magic/blink.ogg', 25, TRUE)
+
+		sleep(10)
+
+		T.Stun(70)
+		T.Knockdown(70)
+		T.adjustFireLoss(80)
+
+		handle_reap(user, T)
+
+	var/list/return_path = getline(get_turf(user), origin)
+	INVOKE_ASYNC(src, PROC_REF(create_afterimage_trail), user, return_path)
+
+	do_teleport(user, origin, channel = TELEPORT_CHANNEL_MAGIC)
+	playsound(origin, 'sound/magic/blink.ogg', 30, TRUE)
+
+/datum/status_effect/buff/corpse_harvest/proc/handle_reap(mob/living/user, mob/living/target)
+	var/is_corpse = (target.stat == DEAD)
+	var/is_npc = !target.key
+
+	if(is_corpse)
+		if(istype(target, /mob/living/carbon))
+			var/mob/living/carbon/C = target
+			var/has_ghost = (C.key || C.get_ghost(FALSE, TRUE))
+			if(!has_ghost && is_npc && !QDELETED(C))
+				var/turf/T = get_turf(C)
+				if(T)
+					C.dust(TRUE, FALSE, TRUE)
+					new /obj/item/soulthread(T)
+
+	user.apply_status_effect(/datum/status_effect/buff/healing/soul_drain)
+
+/datum/status_effect/buff/corpse_harvest/proc/create_afterimage_trail(mob/living/user, list/path_turfs)
+	set waitfor = FALSE
+
+	var/list/images = list()
+	var/path_len = length(path_turfs)
+	if(path_len < 2)
+		return
+
+	var/travel_dir = get_dir(path_turfs[1], path_turfs[path_len])
+
+	for(var/i in 1 to path_len)
+		var/turf/T = path_turfs[i]
+		var/obj/effect/after_image/img = new(T, 0, 0, 0, 0, 0.5 SECONDS, 2 SECONDS, 0)
+		images += img
+		img.appearance = user.appearance
+		img.mouse_opacity = MOUSE_OPACITY_TRANSPARENT
+		img.dir = travel_dir
+		img.alpha = 120
+
+	QDEL_LIST_IN(images, 2 SECONDS)
+
+/datum/status_effect/buff/corpse_harvest/proc/consume_reap()
+	playsound(get_turf(owner), 'sound/magic/antimagic.ogg', 50, TRUE)
+
+	owner.visible_message(
+		span_danger("[owner]'s strike rends both flesh and soul!"),
+		span_notice("The harvest is bountiful..."))
+
+	owner.remove_status_effect(/datum/status_effect/buff/corpse_harvest)
+
+#undef CORPSE_HARVEST_FILTER
 
 /obj/effect/proc_holder/spell/invoked/necra_vow
 	name = "Vow to Necra"
