@@ -304,7 +304,10 @@
 
 /obj/effect/proc_holder/spell/targeted/locate_dead/cast(list/targets, mob/living/user = usr)
 	. = ..()
-	// Toggle off
+
+	// =========================
+	// TOGGLE OFF
+	// =========================
 	if(user.necra_tracked_corpse)
 		to_chat(user, span_notice("The Undermaiden releases your hand."))
 		user.necra_tracked_corpse = null
@@ -313,14 +316,23 @@
 		return
 
 	user.whisper("Undermaiden, guide my hand to those who have lost their way.")
-	var/list/earthbound = list()
-	var/mob/living/nearest = null
-	var/nearest_dist = INFINITY
+
+	var/list/player_bodies = list()
+	var/list/npc_bodies = list()
+
+	var/mob/living/nearest_player = null
+	var/mob/living/nearest_npc = null
+
+	var/nearest_player_dist = INFINITY
+	var/nearest_npc_dist = INFINITY
 
 	var/turf/user_turf = get_turf(user)
 
-	for(var/mob/living/C in GLOB.dead_mob_list)
-		if(!C)
+	// =========================
+	// SCAN (dead OR downed)
+	// =========================
+	for(var/mob/living/C in GLOB.mob_list)
+		if(!C || QDELETED(C))
 			continue
 
 		if(istype(C, /mob/living/carbon/human))
@@ -328,47 +340,97 @@
 			if(H.buried)
 				continue
 
+		var/is_dead = (C.stat == DEAD)
+		var/is_downed = (!(C.mobility_flags & MOBILITY_STAND) && !C.buckled)
+
+		if(!is_dead && !is_downed)
+			continue
+
 		var/turf/T = get_turf(C)
 		if(!T || !user_turf)
 			continue
 
 		var/dist = get_dist(user_turf, T)
-		if(dist < nearest_dist)
-			nearest_dist = dist
-			nearest = C
+		var/is_player = (C.mind != null)
 
-		if(C.key || C.get_ghost(FALSE, TRUE))
+		if(is_player)
 			var/name = C.real_name ? C.real_name : "Unknown"
-			earthbound["[name]"] = C
 
-	// No targets at all
-	if(!nearest && !length(earthbound))
+			var/has_soul = (C.key || C.get_ghost(FALSE, TRUE))
+			var/tag = has_soul ? "Earthbound" : "Departed"
+
+			player_bodies["[name] ([tag])"] = C
+
+			if(dist < nearest_player_dist)
+				nearest_player_dist = dist
+				nearest_player = C
+		else
+			var/name = C.name ? C.name : "Unknown"
+
+			npc_bodies["[name]"] = C
+
+			if(dist < nearest_npc_dist)
+				nearest_npc_dist = dist
+				nearest_npc = C
+
+	// =========================
+	// NOTHING FOUND
+	// =========================
+	if(!length(player_bodies) && !length(npc_bodies))
 		to_chat(user, span_userdanger("You reach out. Nothing answers. The Undermaiden is silent..."))
+		return
+
+	// =========================
+	// STEP 1 — TYPE
+	// =========================
+	var/type_choice = tgui_input_list(user, "What does the Undermaiden seek?", "Corpse Type", list(
+		"Strong-lux (Players)",
+		"Weak-lux (NPCs)"
+	))
+
+	if(!type_choice || QDELETED(user))
+		return
+
+	var/list/selected_list
+	var/mob/living/nearest_target
+
+	if(type_choice == "Strong-lux (Players)")
+		selected_list = player_bodies
+		nearest_target = nearest_player
+	else
+		selected_list = npc_bodies
+		nearest_target = nearest_npc
+
+	if(!length(selected_list))
+		to_chat(user, span_warning("The Undermaiden finds none of that kind."))
+		return
+
+	// =========================
+	// STEP 2 — MODE
+	// =========================
+	var/mode_choice = tgui_input_list(user, "How shall she guide you?", "Tracking Mode", list(
+		"Nearest",
+		"Choose specific"
+	))
+
+	if(!mode_choice || QDELETED(user))
 		return
 
 	var/mob/living/target = null
 
-	// If we have earthbound players, offer choice
-	if(length(earthbound))
-		var/list/options = list()
-		options += "Track nearest corpse"
-		for(var/name in earthbound)
-			options += name
+	if(mode_choice == "Nearest")
+		target = nearest_target
+	else
+		var/choice = tgui_input_list(user, "Which body shall I seek?", "Available Bodies", selected_list)
 
-		var/choice = tgui_input_list(user, "Who does the Undermaiden reveal?", "Lingering Souls", options)
-
-		if(QDELETED(user) || isnull(choice))
+		if(!choice || QDELETED(user))
 			return
 
-		if(choice == "Track nearest corpse")
-			target = nearest
-		else
-			target = earthbound[choice]
+		target = selected_list[choice]
 
-	else
-		// No players → auto-track nearest
-		target = nearest
-
+	// =========================
+	// FINAL VALIDATION
+	// =========================
 	if(!target || QDELETED(target))
 		to_chat(user, span_warning("The Undermaiden's grasp lets slip."))
 		return
@@ -379,7 +441,7 @@
 	if(target.key || target.get_ghost(FALSE, TRUE))
 		to_chat(user, span_userdanger("A soul still lingers. The Undermaiden guides your hand."))
 	else
-		to_chat(user, span_userdanger("The Undermaiden pulls you toward the nearest dead."))
+		to_chat(user, span_warning("Only a hollow remains. The pull is faint."))
 
 	START_PROCESSING(SSprocessing, user)
 
@@ -387,6 +449,7 @@
 	..()
 
 	if(!necra_tracked_corpse)
+		to_chat(src, span_warning("The Undermaiden's grasp lets slip."))
 		STOP_PROCESSING(SSprocessing, src)
 		return
 
@@ -426,23 +489,35 @@
 			if(SOUTHWEST) direction_name = "southwest"
 
 	var/state = "still"
+	var/sovl = "departed"
 
+	// Detect skeleton or zombie
 	var/datum/antagonist/skeleton/skel = necra_tracked_corpse.mind?.has_antag_datum(/datum/antagonist/skeleton)
 	var/datum/antagonist/zombie/zomb = necra_tracked_corpse.mind?.has_antag_datum(/datum/antagonist/zombie)
 
-	if(necra_tracked_corpse.stat != DEAD)
-		state = "walking..?"
-	else if(skel || zomb)
-		state = "decaying"
-	else if(!necra_tracked_corpse.mind)
-		state = "claimed"
+	// Determine physical state
+	if(skel)
+		state = "fleshless"                  // Skeletons always override
+	else if(zomb)
+		if(necra_tracked_corpse.stat != DEAD)
+			state = "walking"                // Active zombie
+		else if(!(necra_tracked_corpse.mobility_flags & MOBILITY_STAND) && !necra_tracked_corpse.buckled)
+			state = "collapsed"            // Collapsed zombie
+		else
+			state = "rotting"                // Dead zombie
+	else if(necra_tracked_corpse.stat != DEAD)
+		state = "awake"                     // Probably deadite
 	else
-		state = "earthbound"
+		state = "peaceful"                       // Normal corpse
+
+	// Determine soul status
+	if(necra_tracked_corpse.key || necra_tracked_corpse.get_ghost(FALSE, TRUE))
+		sovl = "earthbound"                   // corpse still has lingering soul
 
 	var/msg = "The Undermaiden guides you <b>[direction_name]</b>"
 	if(z_hint)
 		msg += " <b>([z_hint])</b>"
-	msg += ". They feel [state]."
+	msg += ". They might be [state] and [sovl]."
 
 	to_chat(src, span_warning(msg))
 
