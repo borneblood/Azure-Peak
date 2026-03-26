@@ -54,7 +54,10 @@
 						to_chat(L, span_warning("The foul blessing of the Undermaiden hurts us!"))
 				adjust_blurriness(2)
 				adjustBruteLoss(rand(5, 10))
+<<<<<<< Updated upstream
 //				apply_status_effect(/datum/status_effect/churned, L)
+=======
+>>>>>>> Stashed changes
 
 		if(L.checkmiss(src))
 			return

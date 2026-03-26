@@ -1094,7 +1094,7 @@
 						if(do_after(user, 20))
 							icon_state = "necra_active"
 							user.say("For this toll, a soul!!")
-							to_chat(user,span_cultsmall("[user] grasps the strands of Lux and attempts to pull a soul through the rift!"))
+							to_chat(user,span_cultsmall("[user] grasps the entangled strands of Lux, and attempts to pull the right soul through the rift!"))
 							thetoll(target, user)
 							spawn(120)
 								icon_state = "necra_chalky"
@@ -1111,7 +1111,7 @@
 		return
 	if(target.mob_biotypes & MOB_UNDEAD) //positive energy harms the undead
 		target.visible_message(span_danger("[target] is unmade by divine magic! The Toll is accepted, and [target] is dragged to ever-death!"), span_userdanger("I'm unmade by divine magic!"))
-		target.gib()
+		target.dust(drop_items = TRUE)
 		return
 	if(alert(target, "A Toll is being offered for your soul, BREAK FREE?", "Revival", "I need to wake up", "Don't let me go") != "I need to wake up")
 		target.visible_message(span_notice("Nothing happens. They are not being let go."))
@@ -1129,7 +1129,7 @@
 	target.emote("breathgasp")
 	target.Jitter(100)
 	target.update_body()
-	target.visible_message(span_notice("[target] JUMPS AWAKE! Spirits nearly break free from their shackles as they look for a exit in [target]!"), span_green("I BARELY MANAGED TO GET PAST OTHER DESPERATE SPIRITS TO MY EMPTY BODY... IT IS SO COLD"))
+	target.visible_message(span_notice("[target] JUMPS AWAKE! Spirits nearly break free from their binds as they look for a exit in [target]'s body!"), span_green("I BARELY MANAGED TO GET PAST OTHER DESPERATE SPIRITS TO MY EMPTY HUSK OF A BODY... IT IS SO COLD!"))
 	if(revive_pq && !HAS_TRAIT(target, TRAIT_IWASREVIVED) && user?.ckey)
 		adjust_playerquality(revive_pq, user.ckey)
 		ADD_TRAIT(target, TRAIT_IWASREVIVED, "[type]")

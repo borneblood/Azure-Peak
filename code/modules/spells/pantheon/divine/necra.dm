@@ -1,6 +1,9 @@
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
 // T1: Avert End (channel on an adjacent target to slowly spend devotion to grant them NODEATH and ticks of oxyloss healing)
-
+// Tweaked it to be able to target Tolls, in so to use a more powerful (and risky) version of it that can be used in combat.
 /obj/effect/proc_holder/spell/invoked/avert
 	name = "Borrowed Time"
 	desc = "Shield your fellow man from the Undermaiden's gaze, preventing them from slipping into death for as long as your faith and fatigue may muster. A Toll can be offered to this Miracle, empowering it..."
@@ -70,9 +73,16 @@
 		)
 
 		qdel(T)
+<<<<<<< Updated upstream
 		empowered_charge = TRUE
 
 		return TRUE
+=======
+
+		empowered_charge = TRUE
+		revert_cast()
+		return FALSE
+>>>>>>> Stashed changes
 
 	// Invalid target
 	if(!isliving(target))
@@ -95,12 +105,22 @@
 
 	var/is_empowered = empowered_charge
 
+<<<<<<< Updated upstream
 	if(is_empowered)
 		return cast_empowered(living_target, user)
 	
 	empowered_charge = FALSE
 
 	return cast_normal(living_target, user)
+=======
+	if(is_empowered && !(HAS_TRAIT(living_target, TRAIT_DEATHLESS))) // stinky immortal people dont get to feel immortal for 30s
+		empowered_charge = FALSE
+		return cast_empowered(living_target, user)
+	else
+		return cast_normal(living_target, user)
+
+	return FALSE
+>>>>>>> Stashed changes
 
 /obj/effect/proc_holder/spell/invoked/avert/proc/cast_normal(mob/living/living_target, mob/user)
 
@@ -151,19 +171,35 @@
 
 	return TRUE
 
+<<<<<<< Updated upstream
+=======
+/atom/movable/screen/alert/status_effect/buff/borrowed_time
+	name = "Living Dead"
+	desc = "My whole existence is tettering between lyfe and death, I shall not die until the last tick of this clock..."
+	icon_state = "buff"
+	alert_group = ALERT_BUFF
+
+>>>>>>> Stashed changes
 /datum/status_effect/buff/borrowed_time_empowered
 	id = "borrowed_time_empowered"
 	duration = 30 SECONDS
 	status_type = STATUS_EFFECT_REFRESH
 	tick_interval = 20 SECONDS
+<<<<<<< Updated upstream
 	alert_type = /atom/movable/screen/alert/status_effect/buff/divine_strike
+=======
+	alert_type = /atom/movable/screen/alert/status_effect/buff/borrowed_time
+>>>>>>> Stashed changes
 	on_remove_on_mob_delete = TRUE
 
 /datum/status_effect/buff/borrowed_time_empowered/tick()
 	. = ..()
 
 	var/static/list/borrowed_time_messages = list(
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
 		"IT SEES ME— WHY DOES IT SEE ME—",
 		"I WASN'T MEANT TO LIVE THIS LONG—",
 		"IT'S BEHIND MY EYES— GET IT OUT— GET IT OUT—",
@@ -174,7 +210,10 @@
 		"THIS ISN'T LIFE— THIS ISN'T LIFE—",
 		"I'M STILL FALLING— WHY AM I STILL FALLING—",
 		"SOMETHING ELSE IS BREATHING FOR ME—",
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
 		"WHY DOES MY BODY FEEL EMPTY—",
 		"I CAN'T FEEL MY BLOOD— WHERE IS MY BLOOD—",
 		"MY BONES ARE WRONG— THEY'RE ALL WRONG—",
@@ -182,31 +221,46 @@
 		"THIS IS AFTER— THIS HAS TO BE AFTER—",
 		"WHY WON'T IT TAKE ME—",
 		"IT'S HOLDING ME HERE— WHY—",
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
 		"SHE'S LOOKING RIGHT AT ME—",
 		"I CAN'T BLINK— IF I BLINK SHE'LL TAKE ME—",
 		"I CAN HEAR HER BREATHING—",
 		"SHE'S SMILING— WHY IS SHE SMILING—",
 		"I'M NOT SUPPOSED TO SEE THIS—",
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
 		"IT HURTS— IT HURTS— IT HURTS—",
 		"MAKE IT STOP— PLEASE MAKE IT STOP—",
 		"MY BODY IS TEARING— CAN'T YOU SEE IT—",
 		"I'M COMING APART— I'M COMING APART—",
 		"I CAN'T HOLD TOGETHER—",
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
 		"I OWE SOMETHING— I DON'T KNOW WHAT—",
 		"SOMETHING IS COMING TO COLLECT—",
 		"I CAN FEEL IT REACHING—",
 		"IT KNOWS MY NAME—",
 		"IT CALLED ME— I HEARD IT CALL ME—",
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
 		"WHY DID YOU SAVE ME— WHY—",
 		"I WAS SUPPOSED TO DIE—",
 		"YOU SHOULDN'T HAVE DONE THIS—",
 		"THIS IS WRONG— THIS IS WRONG—",
 		"I CAN'T STAY HERE—",
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
 		"IT'S SO CLOSE—",
 		"IT'S ALMOST TIME—",
 		"I CAN FEEL THE END—",
@@ -225,6 +279,7 @@
 		span_danger("[M]'s body spasms violently, their form twisting as if something unseen tugs at their soul..."),
 		span_userdanger(msg)
 	)
+<<<<<<< Updated upstream
 		// 🔊 Spooky audio cue
 	var/static/list/spooky_sounds = list(
 		'sound/vo/mobs/ghost/aggro (1).ogg',
@@ -235,6 +290,20 @@
 		'sound/vo/mobs/ghost/aggro (6).ogg'
 	)
 
+=======
+	M.emote("breathgasp")
+
+		// 🔊 Spooky audio cue
+	var/static/list/spooky_sounds = list(
+		'sound/vo/mobs/ghost/aggro (1).ogg',
+		'sound/vo/mobs/ghost/aggro (2).ogg',
+		'sound/vo/mobs/ghost/aggro (3).ogg',
+		'sound/vo/mobs/ghost/aggro (4).ogg',
+		'sound/vo/mobs/ghost/aggro (5).ogg',
+		'sound/vo/mobs/ghost/aggro (6).ogg'
+	)
+
+>>>>>>> Stashed changes
 	var/spookyscary = pick(spooky_sounds)
 	playsound(get_turf(M), spookyscary, 50, TRUE)
 
@@ -245,7 +314,11 @@
 	if(!M)
 		return
 	
+<<<<<<< Updated upstream
 	playsound(get_turf(M), 'sound/vo/mobs/ghost/death.ogg', 50, TRUE)
+=======
+	playsound(get_turf(M), 'sound/misc/deadbell.ogg', 50, TRUE)
+>>>>>>> Stashed changes
 
 	ADD_TRAIT(M, TRAIT_NODEATH, "borrowed_time_empowered")
 	ADD_TRAIT(M, TRAIT_NOPAIN, "borrowed_time_empowered")
@@ -254,18 +327,34 @@
 	ADD_TRAIT(M, TRAIT_PSYCHOSIS, "borrowed_time_empowered")
 
 /datum/status_effect/buff/borrowed_time_empowered/on_remove()
+<<<<<<< Updated upstream
 	. = ..()
 
 	var/mob/living/M = owner
 	if(!M)
 		return
 
+=======
+/datum/status_effect/buff/borrowed_time_empowered/on_remove()
+	. = ..()
+
+	to_chat(owner, span_warning("DEBUG: borrowed_time_empowered on_remove triggered."))
+
+	var/mob/living/M = owner
+	if(!M)
+		world.log << "DEBUG: No owner found in borrowed_time_empowered on_remove."
+		return
+
+	to_chat(M, span_warning("DEBUG: Owner exists: [M]"))
+
+>>>>>>> Stashed changes
 	REMOVE_TRAIT(M, TRAIT_NODEATH, "borrowed_time_empowered")
 	REMOVE_TRAIT(M, TRAIT_NOPAIN, "borrowed_time_empowered")
 	REMOVE_TRAIT(M, TRAIT_DEATHLESS, "borrowed_time_empowered")
 	REMOVE_TRAIT(M, TRAIT_BLOODLOSS_IMMUNE, "borrowed_time_empowered")
 	REMOVE_TRAIT(M, TRAIT_PSYCHOSIS, "borrowed_time_empowered")
 
+<<<<<<< Updated upstream
 	if(HAS_TRAIT_FROM(M, TRAIT_NODEATH, "avert_spell"))
 		return
 
@@ -282,6 +371,84 @@
 	else
 		to_chat(M, span_warning("The weight of death recedes... for now."))
 		to_chat(M, span_green("Such bliss... In Paradise or Psydonia, I, was the one who dared dance with death."))
+=======
+	to_chat(M, span_warning("DEBUG: Traits removed."))
+
+	if(HAS_TRAIT_FROM(M, TRAIT_NODEATH, "avert_spell"))
+		to_chat(M, span_warning("DEBUG: Avert spell NODEATH detected. Skipping death."))
+		to_chat(M, span_green("I am shielded from oblivion by an unseen force."))
+		return
+
+	// === DAMAGE CHECK INSTEAD OF HEALTH ===
+	var/brute = M.getBruteLoss()
+	var/fire = M.getFireLoss()
+	var/oxy = M.getOxyLoss()
+	var/tox = M.getToxLoss()
+
+	var/total_loss = brute + fire + oxy + tox
+	var/death_threshold = 200
+
+	to_chat(M, span_warning("DEBUG: Damage -> Brute:[brute] Fire:[fire] Oxy:[oxy] Tox:[tox] Total:[total_loss]"))
+
+	// === DEATH CONDITION ===
+	if(total_loss < death_threshold)
+		to_chat(M, span_warning("DEBUG: Entered DEATH branch (damage present)"))
+
+		M.emote("agony")
+		M.visible_message(
+			span_danger("[M]'s body seizes as something unseen tears them apart!"),
+			span_userdanger("IT COMES DUE, I KNEW IT, IT COMES DU--!")
+		)
+
+		playsound(get_turf(M), 'sound/vo/mobs/ghost/death.ogg', 50, TRUE)
+
+		to_chat(M, span_warning("DEBUG: Waiting before gib..."))
+		sleep(15)
+
+		to_chat(M, span_warning("DEBUG: Gibbing now."))
+		M.gib(TRUE, TRUE, FALSE)
+
+	// === SURVIVAL CONDITION ===
+	else
+		to_chat(M, span_warning("DEBUG: Entered SURVIVE branch (no damage)"))
+
+		to_chat(M, span_warning("The weight of death recedes... for now."))
+		to_chat(M, span_green("Such bliss... In Paradise or Psydonia, I, was the one who dared dance with death."))
+
+		var/list/wCount = M.get_wounds()
+		to_chat(M, span_warning("DEBUG: Wound count BEFORE = [wCount.len]"))
+
+		if(wCount.len > 0)
+			for(var/datum/wound/W in wCount)
+				to_chat(M, span_warning("DEBUG: BEFORE wound -> [W.type] | severity=[W.severity]"))
+
+		if(!M.construct)
+			to_chat(M, span_warning("DEBUG: Target is not a construct."))
+
+			if(wCount.len > 0)
+				to_chat(M, span_warning("DEBUG: Calling heal_wounds()."))
+
+				M.heal_wounds(999, list(/datum/wound/slash, /datum/wound/puncture, /datum/wound/bite, /datum/wound/bruise, /datum/wound/dynamic))
+
+				to_chat(M, span_warning("DEBUG: heal_wounds() finished."))
+
+				var/list/wCount_after = M.get_wounds()
+				to_chat(M, span_warning("DEBUG: Wound count AFTER = [wCount_after.len]"))
+
+				if(wCount_after.len > 0)
+					for(var/datum/wound/W2 in wCount_after)
+						to_chat(M, span_warning("DEBUG: AFTER wound -> [W2.type] | severity=[W2.severity]"))
+				else
+					to_chat(M, span_warning("DEBUG: All wounds healed."))
+
+				M.update_damage_overlays()
+				to_chat(M, span_warning("DEBUG: Damage overlays updated."))
+
+			if(M.blood_volume < BLOOD_VOLUME_BAD)
+				to_chat(M, span_warning("DEBUG: Restoring blood volume. Before = [M.blood_volume]"))
+				M.blood_volume = BLOOD_VOLUME_BAD
+				to_chat(M, span_warning("DEBUG: Blood volume after = [M.blood_volume]"))
+>>>>>>> Stashed changes
 
 /obj/effect/proc_holder/spell/targeted/locate_dead
 	name = "Locate Corpse"
@@ -536,7 +703,11 @@
 		"In silence, I shall pass unhindered..."
 	)
 	invocation_type = "whisper"
+<<<<<<< Updated upstream
 	phase = /obj/effect/temp_visual/blink/shadowstep
+=======
+	phase = /obj/effect/temp_visual/blink/shadowstep/miracle
+>>>>>>> Stashed changes
 	miracle = TRUE
 	devotion_cost = 75
 	releasedrain = 100
@@ -544,7 +715,11 @@
 	recharge_time = 20 SECONDS
 	xp_gain = FALSE
 
+<<<<<<< Updated upstream
 /obj/effect/temp_visual/blink/shadowstep
+=======
+/obj/effect/temp_visual/blink/shadowstep/miracle
+>>>>>>> Stashed changes
 	icon_state = "bluestream_fade"
 	light_color = COLOR_PALE_PURPLE_GRAY
 
@@ -1466,4 +1641,3 @@
 		return TRUE
 	revert_cast()
 	return FALSE
-

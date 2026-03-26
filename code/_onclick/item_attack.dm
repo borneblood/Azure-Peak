@@ -195,7 +195,10 @@
 					to_chat(M, span_warning("The foul blessing of the Undermaiden hurts us!"))
 			user.adjust_blurriness(3)
 			user.adjustBruteLoss(5)
+<<<<<<< Updated upstream
 //			user.apply_status_effect(/datum/status_effect/churned, M)
+=======
+>>>>>>> Stashed changes
 	
 	//Niche signal for post-swingdelay attacks when we want to care about those.
 	_attacker_signal = null

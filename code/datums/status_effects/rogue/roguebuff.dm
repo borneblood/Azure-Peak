@@ -1121,11 +1121,8 @@
 	icon = 'icons/roguetown/mob/rotten.dmi'
 	icon_state = "rotten"
 
-
 /datum/status_effect/buff/flylordstriage/on_remove()
 	to_chat(owner,span_userdanger("It's finally over..."))
-
-
 
 /atom/movable/screen/alert/status_effect/buff/undermaidenbargain
 	name = "Undermaiden's Bargain"
@@ -1147,13 +1144,13 @@
 	. = ..()
 	REMOVE_TRAIT(owner, TRAIT_DEATHBARGAIN, id)
 
-
 /datum/status_effect/buff/undermaidenbargainheal/on_apply()
 	. = ..()
 	owner.remove_status_effect(/datum/status_effect/buff/undermaidenbargain)
 	to_chat(owner, span_warning("You feel the deal struck in your name is being fulfilled..."))
 	playsound(owner, 'sound/misc/deadbell.ogg', 100, FALSE, -1)
 	ADD_TRAIT(owner, TRAIT_NODEATH, id)
+<<<<<<< Updated upstream
 	var/dirgeline = rand(1,20)
 	spawn(15)
 		switch(dirgeline)
@@ -1197,6 +1194,63 @@
 				to_chat(owner, span_userdanger("For a moment, you feel two heartbeats, one strong, one fading. The weaker one belongs to a distant man who clutches his chest and falls. Only yours remains."))
 			if(20)
 				to_chat(owner, span_userdanger("The certainty comes slowly. A life somewhere has ended. A man, a woman, a child. It is unclear who. It is clear why. It's all your fault."))
+=======
+	var/dirgeline = rand(1,26)
+	spawn(15)
+		switch(dirgeline)
+			if(1)
+				to_chat(owner, span_cultsmall("She watches the city skyline as her lyfeblood pours into the drain. You chose to keep breathing."))
+			if(2)
+				to_chat(owner, span_cultsmall("He only wanted more for his family. The Watchman's blade finds him anyway. You made sure it did."))
+			if(3)
+				to_chat(owner, span_cultsmall("A sailor's leg is caught in naval rope. He thrashes, thinking of home. You do not let him surface."))
+			if(4)
+				to_chat(owner, span_cultsmall("She sobs over the Venardine's corpse. The Brigand's mace ends her grief. You did not stop it."))
+			if(5)
+				to_chat(owner, span_cultsmall("A farmhand chokes on his last breath. His family weeps beside him. You took what little he had left."))
+			if(6)
+				to_chat(owner, span_cultsmall("A woman begs at a Headstone. No answer comes. You ensured it never would."))
+			if(7)
+				to_chat(owner, span_cultsmall("A dockworker loses his footing at dawn. The tide takes him. You needed breath."))
+			if(8)
+				to_chat(owner, span_cultsmall("A young mother goes still in her chair. Her child keeps calling for her. You do not answer."))
+			if(9)
+				to_chat(owner, span_cultsmall("An old watchman bleeds out beneath his post. No one comes. You made sure of that."))
+			if(10)
+				to_chat(owner, span_cultsmall("A temple priest falters mid-prayer. His Patron hears nothing. You took what would have saved him."))
+			if(11)
+				to_chat(owner, span_cultsmall("A farmhand collapses in the field, harvest unfinished. Your life outweighed his."))
+			if(12)
+				to_chat(owner, span_cultsmall("A street girl curls up in the cold and does not wake. You took the warmth she needed."))
+			if(13)
+				to_chat(owner, span_cultsmall("A sellsword falls with a blade in his gut. He was meant to live through it. You changed that."))
+			if(14)
+				to_chat(owner, span_cultsmall("A midwife's hands tremble, then still. Two lives falter. You chose yours instead."))
+			if(15)
+				to_chat(owner, span_cultsmall("A fisherman is dragged beneath the water by his nets. He does not surface. You held him there."))
+			if(16)
+				to_chat(owner, span_cultsmall("A scholar slumps over his desk, thoughts unfinished. You took the rest of his time."))
+			if(17)
+				to_chat(owner, span_cultsmall("A boy runs into the road. The carriage does not slow. You did not let it."))
+			if(18)
+				to_chat(owner, span_cultsmall("A wounded knight might have risen again. Instead, he exhales once more and is gone. You claimed it."))
+			if(19)
+				to_chat(owner, span_cultsmall("A baker leans too close to the oven. The flames take him. You left him no strength to pull away."))
+			if(20)
+				to_chat(owner, span_cultsmall("A nun clutches her rosary as her heart falters. Your hand was the weight that stilled it."))
+			if(21)
+				to_chat(owner, span_cultsmall("A miner's lantern dies in the dark. He does not find the way back. You took his chance."))
+			if(22)
+				to_chat(owner, span_cultsmall("A hunter slips along a cliffside. He almost catches himself. You deny him that."))
+			if(23)
+				to_chat(owner, span_cultsmall("A father shields his son. The blow lands harder than it should. You made it so."))
+			if(24)
+				to_chat(owner, span_cultsmall("A bride-to-be never wakes on her wedding day. You needed the morning more than she did."))
+			if(25)
+				to_chat(owner, span_cultsmall("A jailer chokes on his breath in an empty hall. You took the air from his lungs."))
+			if(26)
+				to_chat(owner, span_cultsmall("Somewhere, someone gasps as their breath is torn away. You feel it fill your lungs."))
+>>>>>>> Stashed changes
 
 /datum/status_effect/buff/undermaidenbargainheal/on_remove()
 	. = ..()
