@@ -1084,7 +1084,7 @@
 					folksonrune += persononrune
 			var/target = input(user, "Choose a supplicant") as null|anything in folksonrune
 			if(target)
-				loc.visible_message(span_warning("[user] draws spectral strands of Lux up through the air, tearing the veil between lyfe and death!"))
+				loc.visible_message(span_warning("[user] draws spectral strands of Lux up through the air, suddenly tearing wide the veil between lyfe and death!"))
 				playsound(user, 'sound/vo/mobs/ghost/whisper (3).ogg', 100, FALSE, -1)
 				if(do_after(user, 60))
 					playsound(user, 'sound/vo/mobs/ghost/whisper (1).ogg', 100, FALSE, -1)
@@ -1094,12 +1094,10 @@
 						if(do_after(user, 20))
 							icon_state = "necra_active"
 							user.say("For this toll, a soul!!")
-							to_chat(user,span_cultsmall("[user] grasps the strands of Lux and attempts to pull a soul through the rift!"))
+							to_chat(user,span_cultsmall("[user] grasps the entangled strands of Lux, and attempts to pull the right soul through the rift!"))
 							thetoll(target, user)
 							spawn(120)
 								icon_state = "necra_chalky"
-
-
 
 /obj/structure/ritualcircle/necra/proc/thetoll(mob/living/carbon/human/target, mob/living/user)
 	var/revive_pq = PQ_GAIN_REVIVE
@@ -1111,7 +1109,7 @@
 		return
 	if(target.mob_biotypes & MOB_UNDEAD) //positive energy harms the undead
 		target.visible_message(span_danger("[target] is unmade by divine magic! The Toll is accepted, and [target] is dragged to ever-death!"), span_userdanger("I'm unmade by divine magic!"))
-		target.gib()
+		target.dust(drop_items=TRUE)
 		return
 	if(alert(target, "A Toll is being offered for your soul, BREAK FREE?", "Revival", "I need to wake up", "Don't let me go") != "I need to wake up")
 		target.visible_message(span_notice("Nothing happens. They are not being let go."))
@@ -1129,7 +1127,7 @@
 	target.emote("breathgasp")
 	target.Jitter(100)
 	target.update_body()
-	target.visible_message(span_notice("[target] JUMPS AWAKE! Spirits nearly break free from their shackles as they look for a exit in [target]!"), span_green("I BARELY MANAGED TO GET PAST OTHER DESPERATE SPIRITS TO MY EMPTY BODY... IT IS SO COLD"))
+	target.visible_message(span_notice("[target] JUMPS AWAKE! Other spirits nearly break free from [user]'s binds as they look for a exit in [target]'s body!"), span_green("I BARELY MANAGED TO GET PAST OTHER DESPERATE SPIRITS, INTO THE EMPTY HUSK OF A BODY... I CAN'T STOP SHAKING!"))	
 	if(revive_pq && !HAS_TRAIT(target, TRAIT_IWASREVIVED) && user?.ckey)
 		adjust_playerquality(revive_pq, user.ckey)
 		ADD_TRAIT(target, TRAIT_IWASREVIVED, "[type]")
@@ -1152,26 +1150,83 @@
 	icon = 'icons/roguetown/items/natural.dmi'
 	icon_state = "luxthread"
 	var/strungtogether = 1
+	var/max_threads = 10
 	sellprice = 3
 	grid_width = 32
 	grid_height = 32
 
-
 /obj/item/soulthread/examine(mob/user)
 	. = ..()
-	. += "</br>[strungtogether] threads are gathered of 10..."
+	. += "</br>[strungtogether] / [max_threads] threads gathered..."
+
+/obj/item/soulthread/proc/process_total(total, mob/user)
+	var/turf/T = get_turf(src)
+	var/tolls_to_make = floor(total / max_threads)
+	var/remainder = total % max_threads
+
+	if(user)
+		to_chat(user, "...[total] of [max_threads] to the toll...")
+	// spawn tolls at src location
+	if(tolls_to_make > 0)
+		for(var/i in 1 to tolls_to_make)
+			new /obj/item/thetoll(T)
+		if(user)
+			to_chat(user, "The lux-stuff coalesces into [tolls_to_make] toll\s!")
+
+	// apply remainder
+	if(remainder > 0)
+		strungtogether = remainder
+		sellprice = 3 * remainder
+		if(user)
+			to_chat(user, "...[remainder] of [max_threads] remain in your grasp...")
+	else
+		qdel(src)
 
 /obj/item/soulthread/attackby(obj/item/attacking_item, mob/user)
-	if(istype(attacking_item, /obj/item/soulthread))
-		var/obj/item/soulthread/thread2combine = attacking_item
-		strungtogether += thread2combine.strungtogether
-		sellprice += 3
-		to_chat(user, "...[strungtogether] of 10 to the toll...")
-		qdel(thread2combine)
-	if(strungtogether >= 10)
-		to_chat(user, "The lux-stuff coalesces into a toll!")
-		new /obj/item/thetoll((get_turf(user)))
-		qdel(src)
+
+	if(!istype(attacking_item, /obj/item/soulthread))
+		return ..()
+
+	var/obj/item/soulthread/held = attacking_item
+
+	if(held == src)
+		return
+
+	// Transfer THIS into the held one instead
+	var/total = held.strungtogether + src.strungtogether
+
+	held.process_total(total, user)
+
+	qdel(src)
+
+/obj/item/soulthread/afterattack(atom/target, mob/user, proximity_flag, click_params)
+	if(!proximity_flag)
+		return
+
+	var/turf/T = get_turf(target)
+	if(!T)
+		return
+
+	var/total = strungtogether
+	var/list/to_delete = list()
+
+	for(var/obj/item/soulthread/other in T)
+		if(other == src)
+			continue
+
+		total += other.strungtogether
+		to_delete += other
+
+	// only proceed if we actually found something
+	if(!length(to_delete))
+		return
+
+	// delete AFTER counting
+	for(var/obj/item/soulthread/other in to_delete)
+		qdel(other)
+
+	process_total(total, user)
+
 
 /obj/item/thetoll
 	grid_width = 32

@@ -8,12 +8,14 @@
 					/obj/effect/proc_holder/spell/invoked/necras_sight			= CLERIC_T0,
 					/obj/effect/proc_holder/spell/invoked/lesser_heal 			= CLERIC_T1,
 					/obj/effect/proc_holder/spell/invoked/blood_heal			= CLERIC_T1,
-					/obj/effect/proc_holder/spell/invoked/avert					= CLERIC_T1,
-					/obj/effect/proc_holder/spell/targeted/locate_dead 			= CLERIC_T1,
+					/obj/effect/proc_holder/spell/invoked/avert					= CLERIC_T1, // tweaked, so now it can take tolls to become 'enhanced', the v2 can be used on self, as well as others, 30 secs of immortality, can be refreshed by further v2 casts, if your hp is below 20% by end of it, gibbed
+					/obj/effect/proc_holder/spell/targeted/locate_dead 			= CLERIC_T1, // tweaked, now will give better information so the paramedic ss13 gameplay is not a chore
+					/obj/effect/proc_holder/spell/invoked/blink/shadowstep/miracle = CLERIC_T3, // i ran out of ideas but this still fits, basically shadowstep but VERY VERY VERY VERY costy and bigger CD, not intended for combat
 					/obj/effect/proc_holder/spell/invoked/fog_ward				= CLERIC_T1, // Not bugged, only appears on fog rounds!
-					// /obj/effect/proc_holder/spell/targeted/abrogation			= CLERIC_T2, // Imagine that, another disabled Necran spell. Replaced with bless_cross for now.
+					/obj/effect/proc_holder/spell/self/grave_embrace			= CLERIC_T4, // no better way to give out a 'death' vibe, needs 2h weapon that cuts, autohits next target, then deals no-AP bonus dmg based on missing HP, if you're at stage 3 bleedout, also copy your wounds to target, has chance to KD undead mobs based on miracle skill
+					/obj/effect/proc_holder/spell/invoked/abrogation			= CLERIC_T2, // reworked, now just fast-forwards the procedure of getting lux-thread, with a feature of dusting undead mobs who are KD'd
 					/obj/effect/proc_holder/spell/invoked/bless_cross			= CLERIC_T3,
-					/obj/effect/proc_holder/spell/invoked/raise_spirits_vengeance = CLERIC_T2,
+					/obj/effect/proc_holder/spell/invoked/raise_spirits_vengeance = CLERIC_T2, // i got eyes on this but idk what to do, atm its a horrible spell with no sovl
 					/obj/effect/proc_holder/spell/invoked/deaths_door			= CLERIC_T4
 	)
 	confess_lines = list(

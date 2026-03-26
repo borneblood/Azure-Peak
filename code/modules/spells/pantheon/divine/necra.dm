@@ -1,37 +1,115 @@
-#define CHURN_FILTER "churn_glow"
-
 // T1: Avert End (channel on an adjacent target to slowly spend devotion to grant them NODEATH and ticks of oxyloss healing)
-
+// Tweaked it to be able to target Tolls, in so to use a more powerful (and risky) version of it that can be used in combat.
 /obj/effect/proc_holder/spell/invoked/avert
 	name = "Borrowed Time"
-	desc = "Shield your fellow man from the Undermaiden's gaze, preventing them from slipping into death for as long as your faith and fatigue may muster."
+	desc = "Shield your fellow man from the Undermaiden's gaze, preventing them from slipping into death for as long as your faith and fatigue may muster. A Toll can be offered to this Miracle, empowering it..."
 	overlay_state = "borrowtime"
 	req_items = list(/obj/item/clothing/neck/roguetown/psicross)
 	associated_skill = /datum/skill/magic/holy
 	miracle = TRUE
 	devotion_cost = 10
+	
 	var/list/near_death_lines = list(
-		"A haze begins to envelop me, but then suddenly recedes, as if warded back by some great light...",
-		"A terrible weight bears down upon me, as if the wyrld itself were crushing me with its heft...",
-		"The sound of a placid river drifts into hearing, followed by the ominous toll of a ferryman's bell...",
-		"Some vast, immeasurably distant figure looms beyond my perception - I feel it, more than I see. It waits. It watches.",
+		"A pale haze seeps into my vision, dulling the world to muted greys, then it shudders and pulls back as if something unseen refuses to let me pass.",
+		"A crushing weight bears down on my chest, as though the wyrld itself would grind me into the soil, yet it pauses, held at bay by an unseen hand.",
+		"The distant murmur of a slow, endless river fills my ears, accompanied by the hollow toll of a ferryman's bell that echoes through my bones.",
+		"A vast presence looms just beyond sight, formless, patient, and ancient. I feel its attention settle upon me, cold and absolute.",
+		"My breath falters into nothing, my lungs refusing to draw, then with a ragged gasp air is forced back into me against my will.",
+		"I feel myself slipping downward into a silent dark, only to be seized and dragged back by something cold, firm, and utterly uncaring.",
+		"The darkness gathers at the edges of my sight, thick and suffocating, yet it lingers there, denied its claim.",
+		"A deathly chill coils through my marrow, settling deep within me as if something has marked me and chosen to wait.",
+		"My heart stutters violently, skipping and faltering, then resumes with a slow, deliberate beat that does not feel like my own.",
+		"A whisper, thin as a blade and colder than frost, threads through my thoughts. Not yet.",
+		"For a fleeting instant I glimpse something beyond the veil, an endless expanse, still and silent, but I can't go in there.",
+		"My body feels distant and hollow, as though I have already begun to leave it behind, but someone refuses to let me go. Who?",
+		"Something like a hand, cold, immense, and unseen, steadies me at the brink, holding me in place. My soul can't slip away.",
+		"The silence of death presses close around me, thick as a shroud, yet stops just short of swallowing me whole. It trembles in anticipation.",
+		"I feel a tether wrapped tight around my being, pulling me back each time I begin to slip too far towards the other side.",
+		"A slow, inevitable pull drags at my very soul, urging me onward, then halts, denied by something stronger, kinder.",
+		"The world fades into dull, lifeless tones. As though all warmth and color have been leeched away... it suddenly stops.",
+		"I know, with dreadful certainty, that I should be gone, yet something has refused that end. I feel hope.",
+		"A presence lingers at my side, vast and unmoving, watching with quiet, inexorable patience. Who is that?...",
+		"My pulse dwindles to a faint, distant rhythm, each beat slower than the last, yet it stubbornly continues.",
+		"The ferryman waits in the distance, pole resting in still waters, but I am not permitted to board. Not yet.",
+		"Something has claimed me from Necra's grasp, not to save me, but to hold me in defiance of it. She smiles, amused.",
+		"I hang suspended between breaths, between moments, between life and the stillness beyond. I need to wake up.",
+		"The veil parts just enough for me to feel what lies beyond, an endless quiet, before sealing once more. Not yet.",
+		"A cold certainty settles deep within me. This is no mercy, only postponement. I need to wake up.",
+		"My veins feel heavy with stillness, as though death already flows within me, held in check by force alone. Not yet.",
+		"A faint echo of distant bells lingers in my skull, each toll marking a moment I was meant to lose. It grows fainter.",
+		"The air tastes stale and foreign, as though I no longer fully belong among the living. Yet, I do.",
+		"My limbs grow numb and distant, yet still respond, as if moved by something other than my own will. I can't die.",
+		"A quiet pressure surrounds my mind, patient and immovable, ensuring I do not slip away just yet. I need to wake up."
 	)
+	var/empowered_charge = FALSE
+
+/obj/effect/proc_holder/spell/invoked/avert/examine(mob/user)
+	. = ..()
+	if(empowered_charge)
+		. += "</br><span class='danger'>A toll has been offered. Necra is closely watching.</span>"
+		. += "</br><span class='danger'>Your next Borrowed Time will last for several seconds upon your target, preventing their death for up to 30 seconds. But beware! If they are not sufficiently healthy by the end of it, they might not survive the backlash!</span>"
 
 /obj/effect/proc_holder/spell/invoked/avert/cast(list/targets, mob/living/carbon/human/user)
 	. = ..()
+
 	var/atom/target = targets[1]
-	if (!isliving(target))
+
+	// Offer Toll to empower the spell
+	if(istype(target, /obj/item/thetoll))
+		if(empowered_charge)
+			to_chat(user, span_warning("The miracle is already burdened with a Toll."))
+			revert_cast()
+			return FALSE
+
+		var/obj/item/thetoll/T = target
+
+		user.visible_message(
+			span_danger("[user] crushes a Toll into dust, whispering a grave prayer..."),
+			span_danger("I offer the Toll to the Undermaiden. Let Her watch closely...")
+		)
+
+		qdel(T)
+
+		empowered_charge = TRUE
+		revert_cast()
+		return FALSE
+
+	// Invalid target
+	if(!isliving(target))
 		revert_cast()
 		return FALSE
 
 	var/mob/living/living_target = target
-	if (!user.Adjacent(target))
-		to_chat(user, span_warning("I must be beside [living_target] to avert Her gaze from [living_target.p_them()]!"))
+
+	// No self-cast unless empowered
+	if(living_target == user && !empowered_charge)
+		to_chat(user, span_warning("I cannot invoke this miracle upon myself... not without a Toll."))
 		revert_cast()
 		return FALSE
 
-	// add the no-death trait to them....
-	user.visible_message(span_notice("Whispering motes gently bead from [user]'s fingers as [user.p_they()] place a hand near [living_target], scriptures of the Undermaiden spilling from their lips..."), span_notice("I stand beside [living_target] and utter the hallowed words of Aeon's Intercession, staying Her grasp for just a little while longer..."))
+	// Must be adjacent unless empowered
+	if(!user.Adjacent(living_target) && !empowered_charge)
+		to_chat(user, span_warning("I must be beside [living_target]!"))
+		revert_cast()
+		return FALSE
+
+	var/is_empowered = empowered_charge
+
+	if(is_empowered && !(HAS_TRAIT(living_target, TRAIT_DEATHLESS))) // stinky immortal people dont get to feel immortal for 30s
+		empowered_charge = FALSE
+		return cast_empowered(living_target, user)
+	else
+		return cast_normal(living_target, user)
+
+	return FALSE
+
+/obj/effect/proc_holder/spell/invoked/avert/proc/cast_normal(mob/living/living_target, mob/user)
+
+	user.visible_message(
+		span_notice("Whispering motes gently bead from [user]'s fingers as [user.p_they()] place a hand near [living_target]..."),
+		span_notice("I utter the hallowed words, staying Her grasp for a little while longer...")
+	)
+
 	to_chat(user, span_small("I must remain still and at [living_target]'s side..."))
 	to_chat(living_target, span_warning("An odd sensation blossoms in my chest, cold and unknown..."))
 
@@ -40,155 +118,241 @@
 	var/our_holy_skill = user.get_skill_level(associated_skill)
 	var/tickspeed = 30 + (5 * our_holy_skill)
 
-	while (do_after(user, tickspeed, target = living_target))
+	while(do_after(user, tickspeed, target = living_target))
 		user.stamina_add(2.5)
 
 		living_target.adjustOxyLoss(-10)
 		living_target.blood_volume = max((BLOOD_VOLUME_SURVIVE * 1.5), living_target.blood_volume)
-
-		if (living_target.health <= 5)
-			if (prob(5))
-				to_chat(living_target, span_small(pick(near_death_lines)))
-
-		if (user.devotion?.check_devotion(src))
-			user.devotion?.update_devotion(-10)
+		var/mob/living/carbon/human/H = user
+		if(H.devotion?.check_devotion(src))
+			H.devotion?.update_devotion(-10)
 		else
-			to_chat(span_warning("My devotion runs dry - the Intercession fades from my lips!"))
+			to_chat(user, span_warning("My devotion runs dry - the Intercession fades!"))
 			break
 
 	REMOVE_TRAIT(living_target, TRAIT_NODEATH, "avert_spell")
 
-	user.visible_message(span_danger("[user]'s concentration breaks, the motes receding from [living_target] and into [user.p_their()] hand once more."), span_danger("My concentration breaks, and the Intercession falls silent."))
+	user.visible_message(
+		span_danger("[user]'s concentration breaks."),
+		span_danger("My concentration breaks, and the Intercession falls silent.")
+	)
 
-/obj/effect/proc_holder/spell/targeted/abrogation
-	name = "Abrogation"
-	desc = "Debuffs targeted undead as long as they remain near you, slowly getting set on fire if they stay."
-	range = 8
-	overlay_state = "necra"
-	releasedrain = 30
-	chargedloop = /datum/looping_sound/invokeholy
-	chargetime = 50
-	chargedrain = 0.5
-	recharge_time = 30 SECONDS
-	max_targets = 0
-	cast_without_targets = TRUE
-	req_items = list(/obj/item/clothing/neck/roguetown/psicross)
-	sound = 'sound/magic/churn.ogg'
-	associated_skill = /datum/skill/magic/holy
-	invocations = list("The Undermaiden rebukes!")
-	invocation_type = "shout" //can be none, whisper, emote and shout
-	miracle = TRUE
-	devotion_cost = 20
-
-/obj/effect/proc_holder/spell/targeted/abrogation/cast(list/targets, mob/living/user = usr)
-	. = ..()
-	var/debuff_power = 1
-	if (user && user.mind)
-		debuff_power = clamp((user.get_skill_level(/datum/skill/magic/holy) / 2), 1, 3)
-
-	var/too_powerful = FALSE
-	var/list/things_to_churn = list()
-	var/list/things_to_stun = list()
-	for (var/mob/living/L in targets)
-		var/is_vampire = FALSE
-		var/is_zombie = FALSE
-		if(L.stat == DEAD)
-			continue
-		if (L.mind)
-			var/datum/antagonist/vampire/V = L.mind.has_antag_datum(/datum/antagonist/vampire)
-			if(V && SEND_SIGNAL(L, COMSIG_DISGUISE_STATUS))
-				is_vampire = TRUE
-			if (L.mind.has_antag_datum(/datum/antagonist/zombie))
-				is_zombie = TRUE
-				things_to_stun += L
-			if (L.mind.special_role == "Vampire Lord")
-				too_powerful = L
-				user.visible_message(span_warning("[user] suddenly pales before an unseen presence, and gasps!"), span_warning("The sound of rushing blood fills my ears and mind, drowning out my abrogation!"))
-				break
-		if (L.mob_biotypes & MOB_UNDEAD || is_vampire || is_zombie)
-			things_to_churn += L
-
-	if (!too_powerful)
-		if (LAZYLEN(things_to_churn))
-			user.visible_message(span_warning("A frigid blue glower suddenly erupts in [user]'s eyes as a whispered prayer summons forth a winding veil of ghostly mists!"), span_notice("I perform the sacred rite of Abrogation, bringing forth Her servants to harry and weaken the unliving!"))
-			for(var/mob/living/thing in things_to_churn)
-				if(spell_guard_check(thing, TRUE))
-					thing.visible_message(span_warning("[thing] resists the abrogation!"))
-					things_to_churn -= thing
-					continue
-				thing.apply_status_effect(/datum/status_effect/churned, user, debuff_power)
-		if(LAZYLEN(things_to_stun))
-			for(var/mob/living/thing in things_to_churn)
-				thing.Stun(100)
-				thing.Knockdown(50)
-				thing.emote("scream")
-		if(!LAZYLEN(things_to_churn))
-			to_chat(user, span_notice("The rite of Abrogation passes from my lips in silence, having found nothing to assail."))
-			return
-	else
-		user.Stun(25)
-		user.throw_at(get_ranged_target_turf(user, get_dir(user,too_powerful), 7), 7, 1, too_powerful, spin = FALSE)
-		user.visible_message(span_warning("[user] ceases their prayer, suddenly choking upon a gout of blood in their throat!"), span_boldwarning("My vision swims in red!"))
-
-/atom/movable/screen/alert/status_effect/churned
-	name = "Churning Essence"
-	desc = "The magicks that bind me into being are being disrupted! I should get away from the source as soon as I can!"
-	icon_state = "stressvb"
-
-/datum/status_effect/churned
-	id = "necra_churned"
-	alert_type = /atom/movable/screen/alert/status_effect/churned
-	duration = 30 SECONDS
-	examine_text = "<b>SUBJECTPRONOUN is wreathed in a wild frenzy of ghostly motes!</b>"
-	effectedstats = list(STATKEY_STR = -2, STATKEY_CON = -2, STATKEY_WIL = -2, STATKEY_SPD = -2)
-	status_type = STATUS_EFFECT_REFRESH
-	var/datum/weakref/debuffer
-	var/outline_colour = "#33cabc"
-	var/base_tick = 0.2
-	var/intensity = 1
-	var/range = 10
-
-/datum/status_effect/churned/on_creation(mob/living/new_owner, mob/living/caster, potency)
-	intensity = potency
-	if (caster)
-		debuffer = WEAKREF(caster)
-	return ..()
-
-/datum/status_effect/churned/on_apply()
-	var/filter = owner.get_filter(CHURN_FILTER)
-	to_chat(owner, span_warning("Wisps leap from the cloying mists to surround me, their chill disrupting my body! FLEE!"))
-	if (!filter)
-		owner.add_filter(CHURN_FILTER, 2, list("type" = "outline", "color" = outline_colour, "alpha" = 200, "size" = 1))
 	return TRUE
 
-/datum/status_effect/churned/refresh()
-	. = ..()
-	intensity += 1
-	to_chat(owner, span_boldwarning("The mists intensify, the glowing wisps steadily disrupting my body..."))
+/obj/effect/proc_holder/spell/invoked/avert/proc/cast_empowered(mob/living/living_target, mob/user)
 
-/datum/status_effect/churned/process()
+	user.visible_message(
+		span_danger("[user] presses a hand into [living_target], whispering a grave promise..."),
+		span_danger("I bind [living_target] to borrowed time. Necra will collect what is owed...")
+	)
+
+	to_chat(living_target, span_userdanger("Death recoils from me... but something waits."))
+
+	living_target.apply_status_effect(/datum/status_effect/buff/borrowed_time_empowered)
+
+	return TRUE
+
+/atom/movable/screen/alert/status_effect/buff/borrowed_time
+	name = "Living Dead"
+	desc = "My whole existence is tettering between lyfe and death, I shall not die until the last tick of this clock..."
+	icon_state = "buff"
+	alert_group = ALERT_BUFF
+
+/datum/status_effect/buff/borrowed_time_empowered
+	id = "borrowed_time_empowered"
+	duration = 30 SECONDS
+	status_type = STATUS_EFFECT_REFRESH
+	tick_interval = 20 SECONDS
+	alert_type = /atom/movable/screen/alert/status_effect/buff/borrowed_time
+	on_remove_on_mob_delete = TRUE
+
+/datum/status_effect/buff/borrowed_time_empowered/tick()
 	. = ..()
-	if (!owner)
+
+	var/static/list/borrowed_time_messages = list(
+		"IT SEES ME— WHY DOES IT SEE ME—",
+		"I WASN'T MEANT TO LIVE THIS LONG—",
+		"IT'S BEHIND MY EYES— GET IT OUT— GET IT OUT—",
+		"MY HEART STOPPED— WHY DID IT START AGAIN—",
+		"I CAN FEEL IT COUNTING— PLEASE STOP COUNTING—",
+		"SHE'S WAITING— SHE'S BEEN WAITING—",
+		"I HEARD MYSELF DIE— I HEARD IT—",
+		"THIS ISN'T LIFE— THIS ISN'T LIFE—",
+		"I'M STILL FALLING— WHY AM I STILL FALLING—",
+		"SOMETHING ELSE IS BREATHING FOR ME—",
+		"WHY DOES MY BODY FEEL EMPTY—",
+		"I CAN'T FEEL MY BLOOD— WHERE IS MY BLOOD—",
+		"MY BONES ARE WRONG— THEY'RE ALL WRONG—",
+		"I'M ALREADY DEAD— I KNOW I AM—",
+		"THIS IS AFTER— THIS HAS TO BE AFTER—",
+		"WHY WON'T IT TAKE ME—",
+		"IT'S HOLDING ME HERE— WHY—",
+		"SHE'S LOOKING RIGHT AT ME—",
+		"I CAN'T BLINK— IF I BLINK SHE'LL TAKE ME—",
+		"I CAN HEAR HER BREATHING—",
+		"SHE'S SMILING— WHY IS SHE SMILING—",
+		"I'M NOT SUPPOSED TO SEE THIS—",
+		"IT HURTS— IT HURTS— IT HURTS—",
+		"MAKE IT STOP— PLEASE MAKE IT STOP—",
+		"MY BODY IS TEARING— CAN'T YOU SEE IT—",
+		"I'M COMING APART— I'M COMING APART—",
+		"I CAN'T HOLD TOGETHER—",
+		"I OWE SOMETHING— I DON'T KNOW WHAT—",
+		"SOMETHING IS COMING TO COLLECT—",
+		"I CAN FEEL IT REACHING—",
+		"IT KNOWS MY NAME—",
+		"IT CALLED ME— I HEARD IT CALL ME—",
+		"WHY DID YOU SAVE ME— WHY—",
+		"I WAS SUPPOSED TO DIE—",
+		"YOU SHOULDN'T HAVE DONE THIS—",
+		"THIS IS WRONG— THIS IS WRONG—",
+		"I CAN'T STAY HERE—",
+		"IT'S SO CLOSE—",
+		"IT'S ALMOST TIME—",
+		"I CAN FEEL THE END—",
+		"I CAN SEE IT—",
+		"IT'S HERE— IT'S HERE—"
+
+	)
+
+	var/mob/living/M = owner
+	if(!M)
 		return
-	if (prob(33))
-		owner.adjustFireLoss(base_tick * intensity)
-	if (prob(10))
-		to_chat(owner, span_warning("A frenzy of ghostly motes assail my form!"))
-		owner.emote("scream")
 
-	var/mob/living/our_debuffer = debuffer.resolve()
-	if (get_dist(our_debuffer, owner) > range)
-		to_chat(owner, span_notice("I've escaped the cloying mists!"))
-		qdel(src)
+	var/msg = pick(borrowed_time_messages)
 
-/datum/status_effect/churned/on_remove()
-	owner.remove_filter(CHURN_FILTER)
+	M.visible_message(
+		span_danger("[M]'s body spasms violently, their form twisting as if something unseen tugs at their soul..."),
+		span_userdanger(msg)
+	)
+	M.emote("breathgasp")
 
-#undef CHURN_FILTER
+		// 🔊 Spooky audio cue
+	var/static/list/spooky_sounds = list(
+		'sound/vo/mobs/ghost/aggro (1).ogg',
+		'sound/vo/mobs/ghost/aggro (2).ogg',
+		'sound/vo/mobs/ghost/aggro (3).ogg',
+		'sound/vo/mobs/ghost/aggro (4).ogg',
+		'sound/vo/mobs/ghost/aggro (5).ogg',
+		'sound/vo/mobs/ghost/aggro (6).ogg'
+	)
+
+	var/spookyscary = pick(spooky_sounds)
+	playsound(get_turf(M), spookyscary, 50, TRUE)
+
+/datum/status_effect/buff/borrowed_time_empowered/on_apply()
+	. = ..()
+
+	var/mob/living/M = owner
+	if(!M)
+		return
+	
+	playsound(get_turf(M), 'sound/misc/deadbell.ogg', 50, TRUE)
+
+	ADD_TRAIT(M, TRAIT_NODEATH, "borrowed_time_empowered")
+	ADD_TRAIT(M, TRAIT_NOPAIN, "borrowed_time_empowered")
+	ADD_TRAIT(M, TRAIT_DEATHLESS, "borrowed_time_empowered")
+	ADD_TRAIT(M, TRAIT_BLOODLOSS_IMMUNE, "borrowed_time_empowered")
+	ADD_TRAIT(M, TRAIT_PSYCHOSIS, "borrowed_time_empowered")
+
+/datum/status_effect/buff/borrowed_time_empowered/on_remove()
+	. = ..()
+
+	to_chat(owner, span_warning("DEBUG: borrowed_time_empowered on_remove triggered."))
+
+	var/mob/living/M = owner
+	if(!M)
+		world.log << "DEBUG: No owner found in borrowed_time_empowered on_remove."
+		return
+
+	to_chat(M, span_warning("DEBUG: Owner exists: [M]"))
+
+	REMOVE_TRAIT(M, TRAIT_NODEATH, "borrowed_time_empowered")
+	REMOVE_TRAIT(M, TRAIT_NOPAIN, "borrowed_time_empowered")
+	REMOVE_TRAIT(M, TRAIT_DEATHLESS, "borrowed_time_empowered")
+	REMOVE_TRAIT(M, TRAIT_BLOODLOSS_IMMUNE, "borrowed_time_empowered")
+	REMOVE_TRAIT(M, TRAIT_PSYCHOSIS, "borrowed_time_empowered")
+
+	to_chat(M, span_warning("DEBUG: Traits removed."))
+
+	if(HAS_TRAIT_FROM(M, TRAIT_NODEATH, "avert_spell"))
+		to_chat(M, span_warning("DEBUG: Avert spell NODEATH detected. Skipping death."))
+		to_chat(M, span_green("I am shielded from oblivion by an unseen force."))
+		return
+
+	// === DAMAGE CHECK INSTEAD OF HEALTH ===
+	var/brute = M.getBruteLoss()
+	var/fire = M.getFireLoss()
+	var/oxy = M.getOxyLoss()
+	var/tox = M.getToxLoss()
+
+	var/total_loss = brute + fire + oxy + tox
+	var/death_threshold = 200
+
+	to_chat(M, span_warning("DEBUG: Damage -> Brute:[brute] Fire:[fire] Oxy:[oxy] Tox:[tox] Total:[total_loss]"))
+
+	// === DEATH CONDITION ===
+	if(total_loss < death_threshold)
+		to_chat(M, span_warning("DEBUG: Entered DEATH branch (damage present)"))
+
+		M.emote("agony")
+		M.visible_message(
+			span_danger("[M]'s body seizes as something unseen tears them apart!"),
+			span_userdanger("IT COMES DUE, I KNEW IT, IT COMES DU--!")
+		)
+
+		playsound(get_turf(M), 'sound/vo/mobs/ghost/death.ogg', 50, TRUE)
+
+		to_chat(M, span_warning("DEBUG: Waiting before gib..."))
+		sleep(15)
+
+		to_chat(M, span_warning("DEBUG: Gibbing now."))
+		M.gib(TRUE, TRUE, FALSE)
+
+	// === SURVIVAL CONDITION ===
+	else
+		to_chat(M, span_warning("DEBUG: Entered SURVIVE branch (no damage)"))
+
+		to_chat(M, span_warning("The weight of death recedes... for now."))
+		to_chat(M, span_green("Such bliss... In Paradise or Psydonia, I, was the one who dared dance with death."))
+
+		var/list/wCount = M.get_wounds()
+		to_chat(M, span_warning("DEBUG: Wound count BEFORE = [wCount.len]"))
+
+		if(wCount.len > 0)
+			for(var/datum/wound/W in wCount)
+				to_chat(M, span_warning("DEBUG: BEFORE wound -> [W.type] | severity=[W.severity]"))
+
+		if(!M.construct)
+			to_chat(M, span_warning("DEBUG: Target is not a construct."))
+
+			if(wCount.len > 0)
+				to_chat(M, span_warning("DEBUG: Calling heal_wounds()."))
+
+				M.heal_wounds(999, list(/datum/wound/slash, /datum/wound/puncture, /datum/wound/bite, /datum/wound/bruise, /datum/wound/dynamic))
+
+				to_chat(M, span_warning("DEBUG: heal_wounds() finished."))
+
+				var/list/wCount_after = M.get_wounds()
+				to_chat(M, span_warning("DEBUG: Wound count AFTER = [wCount_after.len]"))
+
+				if(wCount_after.len > 0)
+					for(var/datum/wound/W2 in wCount_after)
+						to_chat(M, span_warning("DEBUG: AFTER wound -> [W2.type] | severity=[W2.severity]"))
+				else
+					to_chat(M, span_warning("DEBUG: All wounds healed."))
+
+				M.update_damage_overlays()
+				to_chat(M, span_warning("DEBUG: Damage overlays updated."))
+
+			if(M.blood_volume < BLOOD_VOLUME_BAD)
+				to_chat(M, span_warning("DEBUG: Restoring blood volume. Before = [M.blood_volume]"))
+				M.blood_volume = BLOOD_VOLUME_BAD
+				to_chat(M, span_warning("DEBUG: Blood volume after = [M.blood_volume]"))
 
 /obj/effect/proc_holder/spell/targeted/locate_dead
 	name = "Locate Corpse"
-	desc = "Call upon the Undermaiden to guide you to a lost soul."
+	desc = "Beseech the Undermaiden to guide you to the fallen and reveal what still clings to their remains."
 	overlay_state = "necraeye"
 	sound = 'sound/magic/whiteflame.ogg'
 	releasedrain = 30
@@ -198,85 +362,934 @@
 	miracle = TRUE
 	associated_skill = /datum/skill/magic/holy
 	req_items = list(/obj/item/clothing/neck/roguetown/psicross)
-	invocations = list("Undermaiden, guide my hand to those who have lost their way.")
-	invocation_type = "whisper"
-	recharge_time = 15 SECONDS
-	devotion_cost = 35
+	recharge_time = 7 SECONDS
+	devotion_cost = 15
+
+/mob/living
+	var/mob/living/necra_tracked_corpse = null
+	var/last_necra_ping = 0
 
 /obj/effect/proc_holder/spell/targeted/locate_dead/cast(list/targets, mob/living/user = usr)
 	. = ..()
-	var/list/mob/corpses = list()
-	for(var/mob/living/C in GLOB.dead_mob_list)
-		if(!C.mind)
+
+	// =========================
+	// TOGGLE OFF
+	// =========================
+	if(user.necra_tracked_corpse)
+		to_chat(user, span_notice("The Undermaiden releases your hand."))
+		user.necra_tracked_corpse = null
+		STOP_PROCESSING(SSprocessing, user)
+		revert_cast()
+		return
+
+	user.whisper("Undermaiden, guide my hand to those who have lost their way.")
+
+	var/list/player_bodies = list()
+	var/list/npc_bodies = list()
+
+	var/mob/living/nearest_player = null
+	var/mob/living/nearest_npc = null
+
+	var/nearest_player_dist = INFINITY
+	var/nearest_npc_dist = INFINITY
+
+	var/turf/user_turf = get_turf(user)
+
+	// =========================
+	// SCAN (dead OR downed)
+	// =========================
+	for(var/mob/living/C in GLOB.mob_list)
+		if(!C || QDELETED(C))
 			continue
+
 		if(istype(C, /mob/living/carbon/human))
-			var/mob/living/carbon/human/B = C
-			if(B.buried)
+			var/mob/living/carbon/human/H = C
+			if(H.buried)
 				continue
-		var/time_dead = 0
-		if(C.timeofdeath)
-			time_dead = world.time - C.timeofdeath
-		var/corpse_name
 
-		if(time_dead < 5 MINUTES)
-			corpse_name = "Fresh corpse "
-		else if(time_dead < 10 MINUTES)
-			corpse_name = "Recently deceased "
-		else if(time_dead < 30 MINUTES)
-			corpse_name = "Long dead "
+		var/is_dead = (C.stat == DEAD)
+		var/is_downed = (!(C.mobility_flags & MOBILITY_STAND) && !C.buckled)
+
+		if(!is_dead && !is_downed)
+			continue
+
+		var/turf/T = get_turf(C)
+		if(!T || !user_turf)
+			continue
+
+		var/dist = get_dist(user_turf, T)
+		var/is_player = (C.mind != null)
+
+		if(is_player)
+			var/name = C.real_name ? C.real_name : "Unknown"
+
+			var/has_soul = (C.key || C.get_ghost(FALSE, TRUE))
+			var/tag = has_soul ? "Earthbound" : "Departed"
+
+			player_bodies["[name] ([tag])"] = C
+
+			if(dist < nearest_player_dist)
+				nearest_player_dist = dist
+				nearest_player = C
 		else
-			corpse_name = "Forgotten remains of "
-		var/list/d_list = C.get_mob_descriptors()
-		var/trait_desc = "[capitalize(build_coalesce_description_nofluff(d_list, C, list(MOB_DESCRIPTOR_SLOT_TRAIT), "%DESC1%"))]"
-		var/stature_desc = "[capitalize(build_coalesce_description_nofluff(d_list, C, list(MOB_DESCRIPTOR_SLOT_STATURE), "%DESC1%"))]"
-		var/descriptor_name = "[trait_desc] [stature_desc]"
-		if(descriptor_name == " ")
-			descriptor_name = "Unknown"
+			var/name = C.name ? C.name : "Unknown"
 
-		corpse_name += " of \a [descriptor_name]..."
-		corpses[corpse_name] = C
+			npc_bodies["[name]"] = C
 
-	if(!length(corpses))
-		to_chat(user, span_warning("The Undermaiden's grasp lets slip."))
-		return .
+			if(dist < nearest_npc_dist)
+				nearest_npc_dist = dist
+				nearest_npc = C
 
-	var/mob/selected = tgui_input_list(user, "Which body shall I seek?", "Available Bodies", corpses)
+	// =========================
+	// NOTHING FOUND
+	// =========================
+	if(!length(player_bodies) && !length(npc_bodies))
+		to_chat(user, span_userdanger("You reach out. Nothing answers. The Undermaiden is silent..."))
+		return
 
-	if(QDELETED(src) || QDELETED(user) || QDELETED(corpses[selected]))
-		to_chat(user, span_warning("The Undermaiden's grasp lets slip."))
-		return .
+	// =========================
+	// STEP 1 — TYPE
+	// =========================
+	var/type_choice = tgui_input_list(user, "What does the Undermaiden seek?", "Corpse Type", list(
+		"Strong-lux (Players)",
+		"Weak-lux (NPCs)"
+	))
 
-	var/corpse = corpses[selected]
+	if(!type_choice || QDELETED(user))
+		return
 
-	var/turf/turf_user = get_turf(user)
-	var/turf/turf_corpse = get_turf(corpse)
-	var/direction_name = "unknown"
-	if(turf_user.z != turf_corpse.z)
-		if(turf_corpse.z > turf_user.z)
-			direction_name = "above"
-		else
-			direction_name = "below"
+	var/list/selected_list
+	var/mob/living/nearest_target
+
+	if(type_choice == "Strong-lux (Players)")
+		selected_list = player_bodies
+		nearest_target = nearest_player
 	else
-		var/direction = get_dir(user, corpse)
-		switch(direction)
-			if(NORTH)
-				direction_name = "north"
-			if(SOUTH)
-				direction_name = "south"
-			if(EAST)
-				direction_name = "east"
-			if(WEST)
-				direction_name = "west"
-			if(NORTHEAST)
-				direction_name = "northeast"
-			if(NORTHWEST)
-				direction_name = "northwest"
-			if(SOUTHEAST)
-				direction_name = "southeast"
-			if(SOUTHWEST)
-				direction_name = "southwest"
+		selected_list = npc_bodies
+		nearest_target = nearest_npc
 
-	to_chat(user, span_notice("The Undermaiden pulls on your hand, guiding you [direction_name]."))
+	if(!length(selected_list))
+		to_chat(user, span_warning("The Undermaiden finds none of that kind."))
+		return
+
+	// =========================
+	// STEP 2 — MODE
+	// =========================
+	var/mode_choice = tgui_input_list(user, "How shall she guide you?", "Tracking Mode", list(
+		"Nearest",
+		"Choose specific"
+	))
+
+	if(!mode_choice || QDELETED(user))
+		return
+
+	var/mob/living/target = null
+
+	if(mode_choice == "Nearest")
+		target = nearest_target
+	else
+		var/choice = tgui_input_list(user, "Which body shall I seek?", "Available Bodies", selected_list)
+
+		if(!choice || QDELETED(user))
+			return
+
+		target = selected_list[choice]
+
+	// =========================
+	// FINAL VALIDATION
+	// =========================
+	if(!target || QDELETED(target))
+		to_chat(user, span_warning("The Undermaiden's grasp lets slip."))
+		return
+
+	user.necra_tracked_corpse = target
+	user.last_necra_ping = 0
+
+	if(target.key || target.get_ghost(FALSE, TRUE))
+		to_chat(user, span_userdanger("A soul still lingers. The Undermaiden guides your hand."))
+	else
+		to_chat(user, span_warning("Only a hollow remains. The pull is faint."))
+
+	START_PROCESSING(SSprocessing, user)
+
+/mob/living/process()
+	..()
+
+	if(!necra_tracked_corpse)
+		to_chat(src, span_warning("The Undermaiden's grasp lets slip."))
+		STOP_PROCESSING(SSprocessing, src)
+		return
+
+	if(world.time < last_necra_ping + 20)
+		return
+
+	last_necra_ping = world.time
+
+	if(QDELETED(necra_tracked_corpse))
+		to_chat(src, span_warning("The Undermaiden's attention snaps away."))
+		necra_tracked_corpse = null
+		STOP_PROCESSING(SSprocessing, src)
+		return
+
+	var/turf/user_turf = get_turf(src)
+	var/turf/target_turf = get_turf(necra_tracked_corpse)
+
+	if(!user_turf || !target_turf)
+		return
+
+	var/direction_name = "here"
+	var/z_hint = ""
+
+	if(target_turf.z != user_turf.z)
+		var/z_diff = abs(target_turf.z - user_turf.z)
+		z_hint = target_turf.z > user_turf.z ? "[z_diff] level\s above" : "[z_diff] level\s below"
+	else
+		var/dir = get_dir(src, necra_tracked_corpse)
+		switch(dir)
+			if(NORTH) direction_name = "north"
+			if(SOUTH) direction_name = "south"
+			if(EAST) direction_name = "east"
+			if(WEST) direction_name = "west"
+			if(NORTHEAST) direction_name = "northeast"
+			if(NORTHWEST) direction_name = "northwest"
+			if(SOUTHEAST) direction_name = "southeast"
+			if(SOUTHWEST) direction_name = "southwest"
+
+	var/state = "still"
+	var/sovl = "departed"
+
+	// Detect skeleton or zombie
+	var/datum/antagonist/skeleton/skel = necra_tracked_corpse.mind?.has_antag_datum(/datum/antagonist/skeleton)
+	var/datum/antagonist/zombie/zomb = necra_tracked_corpse.mind?.has_antag_datum(/datum/antagonist/zombie)
+
+	// Determine physical state
+	if(skel)
+		state = "fleshless"                  // Skeletons always override
+	else if(zomb)
+		if(necra_tracked_corpse.stat != DEAD)
+			state = "walking"                // Active zombie
+		else if(!(necra_tracked_corpse.mobility_flags & MOBILITY_STAND) && !necra_tracked_corpse.buckled)
+			state = "collapsed"            // Collapsed zombie
+		else
+			state = "rotting"                // Dead zombie
+	else if(necra_tracked_corpse.stat != DEAD)
+		state = "awake"                     // Probably deadite
+	else
+		state = "peaceful"                       // Normal corpse
+
+	// Determine soul status
+	if(necra_tracked_corpse.key || necra_tracked_corpse.get_ghost(FALSE, TRUE))
+		sovl = "earthbound"                   // corpse still has lingering soul
+
+	var/msg = "The Undermaiden guides you <b>[direction_name]</b>"
+	if(z_hint)
+		msg += " <b>([z_hint])</b>"
+	msg += ". They might be [state] and [sovl]."
+
+	to_chat(src, span_warning(msg))
+
+/obj/effect/proc_holder/spell/invoked/blink/shadowstep/miracle // throwing another thing on the wall in hope it sticks
+	name = "Veil Passage"
+	desc = "A brief step through the veil, carrying the faithful a distance along the threshold of death. This is unorthodoxically exhausting to perform, but can travel farther than most teleportation techniques."
+	action_icon = 'icons/mob/actions/classuniquespells/spellfist.dmi'
+	overlay_state = "shadowstep"
+	invocations = list(
+		"Lady of the Veil, I walk in your shadow...",
+		"Necra, grant me passage...",
+		"In death's grace, I take this step...",
+		"O' Undermaiden, let the veil part by your will...",
+		"Errand spirits, guide my path...",
+		"O' Necra, let the threshold open...",
+		"In silence, I shall pass unhindered..."
+	)
+	invocation_type = "whisper"
+	phase = /obj/effect/temp_visual/blink/shadowstep/miracle
+	miracle = TRUE
+	devotion_cost = 75
+	releasedrain = 100
+	max_range = 6
+	recharge_time = 20 SECONDS
+	xp_gain = FALSE
+
+/obj/effect/temp_visual/blink/shadowstep/miracle
+	icon_state = "bluestream_fade"
+	light_color = COLOR_PALE_PURPLE_GRAY
+
+/obj/effect/proc_holder/spell/invoked/abrogation
+	name = "Abrogation"
+	desc = "Call upon the Undermaiden's mercy to unravel abandoned flesh, granting it absolution in the hands of Aeon."
+	overlay_state = "necra"
+	releasedrain = 50
+	chargedrain = 0
+	chargetime = 1 SECONDS
+	range = 5
+	no_early_release = TRUE
+	movement_interrupt = TRUE
+	chargedloop = /datum/looping_sound/invokeholy
+	sound = 'sound/magic/churn.ogg'
+	associated_skill = /datum/skill/magic/holy
+	antimagic_allowed = FALSE
+	invocations = list("In Necra's name, I return you to Aeon.")
+	invocation_type = "none"
+	recharge_time = 5 SECONDS
+	devotion_cost = 50
+	miracle = TRUE
+	var/splash_area = 2 // efficient corpse disposal, just as our forefathers demanded!
+	var/underway = FALSE // no spam allowed
+
+/obj/effect/proc_holder/spell/invoked/abrogation/cast(list/targets, mob/living/user)
+	. = ..()
+
+	if(underway)
+		to_chat(user, span_warning("The rite is already underway. Patience."))
+		return FALSE
+
+	if(!targets?.len || !isliving(targets[1]))
+		to_chat(user, span_warning("The Undermaiden finds nothing to claim."))
+		revert_cast()
+		return FALSE
+
+	var/mob/living/target = targets[1]
+	var/list/processed = list()
+	var/list/to_abrogate = list()
+	var/success = FALSE
+	var/failure_reason = "The Undermaiden finds no abandoned dead to claim."
+
+	underway = TRUE
+
+	for(var/mob/living/L in range(splash_area, target))
+
+		if(L in processed)
+			continue
+
+		if(QDELETED(L))
+			continue
+
+		var/is_valid = FALSE
+		var/is_corpse = (L.stat == DEAD)
+		var/is_undead = (L.mob_biotypes & MOB_UNDEAD)
+
+		// Flat undead execution
+		if(!is_corpse && is_undead && iscarbon(L))
+			var/mob/living/carbon/carbon = L
+
+			if(!(carbon.mobility_flags & MOBILITY_STAND) && !carbon.buckled)
+				is_valid = TRUE
+			else
+				failure_reason = "[L] is still animated by foul forces."
+
+		// Corpse cleanup
+		if(is_corpse)
+			is_valid = TRUE
+
+		if(!is_valid)
+			continue
+
+		// Block players
+		if(L.client)
+			failure_reason = "The Undermaiden does not claim the strong of will."
+			continue
+
+		// Block ghost-occupied corpses
+		if(istype(L, /mob/living/carbon))
+			var/mob/living/carbon/C = L
+
+			if(C.key || C.get_ghost(FALSE, TRUE))
+				failure_reason = "[L]'s soul still lingers."
+				continue
+
+		processed += L
+		to_abrogate += L
+		success = TRUE
+
+	if(!success)
+		underway = FALSE
+		to_chat(user, span_warning("[failure_reason]"))
+		revert_cast()
+		return FALSE
+
+	user.visible_message(
+		span_warning("[user]'s eyes glow with cold blue light."),
+		span_notice("I invoke Abrogation.")
+	)
+
+	playsound(get_turf(target), 'sound/magic/churn.ogg', 80, TRUE)
+
+	// Process with delay
+	for(var/mob/living/L in to_abrogate)
+
+		if(QDELETED(L))
+			continue
+
+		L.visible_message(
+			span_danger("<i>[L]'s body unravels rapidly to the passage of time...</i>"),
+		)
+
+		var/turf/T = get_turf(L)
+		if(T)
+			playsound(T, 'sound/misc/deadbell.ogg', 60, TRUE)
+			playsound(T, 'sound/misc/clockloop.ogg', 60, TRUE)
+
+		// Carbon corpses drop soulthread
+		if(istype(L, /mob/living/carbon))
+			var/mob/living/carbon/C = L
+			if(T)
+				new /obj/item/soulthread(T)
+
+			C.dust(FALSE, FALSE, TRUE)
+		else
+			L.gib(TRUE, TRUE, TRUE)
+
+		sleep(5) // Small delay to prevent sound burst
+
+
+	underway = FALSE
+	return TRUE
+
+#define DEATH_HARVEST_FILTER "death_harvest_outline"
+
+/obj/effect/proc_holder/spell/self/death_harvest
+	name = "Death Harvest"
+	desc = "Requires a weapon capable of cutting or chopping. Consecrate your weapon and surrender your mind to the harvest. On hit, you embody the will of the Grim Reaper, dashing between the dead and the damned, carving them apart in a relentless, reaping frenzy. Corpses will also be affected, and instantly converted into Lux String."
+	overlay_state = "deathharvest"
+	associated_skill = /datum/skill/magic/holy
+	recharge_time = 15 SECONDS
+	devotion_cost = 250
+	invocation_type = "shout"
+	invocations = list("Necra! Guide them to their final rest!")
+	miracle = TRUE
+
+/obj/effect/proc_holder/spell/self/death_harvest/cast(mob/living/user)
+	if(!isliving(user))
+		return FALSE
+
+	var/obj/item/I = user.get_active_held_item()
+	if(!I)
+		to_chat(user, span_warning("I must hold a weapon to enact the rite."))
+		revert_cast()
+		return FALSE
+
+	var/list/intents = I.gripped_intents
+	if(!intents || !intents.len)
+		to_chat(user, span_warning("This weapon cannot channel the rite."))
+		revert_cast()
+		return FALSE
+
+	var/valid = FALSE
+	for(var/path in intents)
+		if(findtext("[path]", "/cut") || findtext("[path]", "/chop"))
+			valid = TRUE
+			break
+
+	if(!valid)
+		to_chat(user, span_warning("The rite recoils. This weapon cannot be used."))
+		revert_cast()
+		return FALSE
+
+	if(user.has_status_effect(/datum/status_effect/buff/death_harvest))
+		to_chat(user, span_warning("The rite is already upon my weapon."))
+		revert_cast()
+		return FALSE
+
+	user.apply_status_effect(/datum/status_effect/buff/death_harvest)
+	playsound(get_turf(user), 'sound/magic/antimagic.ogg', 60, TRUE)
+
+	user.visible_message(
+		span_danger("[user]'s weapon and eyes gain a horrifying, pallid glow!"),
+		span_notice("You hear the whispers of the Ferryman... It tells you to act quickly."))
+
+	return TRUE
+
+/atom/movable/screen/alert/status_effect/buff/death_harvest
+	name = "Death Harvest"
+	desc = "My next strike will unleash a deadly harvest in Her name."
+	icon_state = "buff"
+
+/datum/status_effect/buff/death_harvest
+	id = "death_harvest"
+	alert_type = /atom/movable/screen/alert/status_effect/buff/death_harvest
+	duration = 10 SECONDS
+	status_type = STATUS_EFFECT_UNIQUE
+
+/datum/status_effect/buff/death_harvest/on_apply()
+	. = ..()
+	RegisterSignal(owner, COMSIG_MOB_ITEM_ATTACK, PROC_REF(on_attack))
+	owner.add_filter(DEATH_HARVEST_FILTER, 2, list("type" = "outline", "color" = "#7a2ca3", "alpha" = 220, "size" = 3))
+
+/datum/status_effect/buff/death_harvest/on_remove()
+	UnregisterSignal(owner, COMSIG_MOB_ITEM_ATTACK)
+	owner.remove_filter(DEATH_HARVEST_FILTER)
+	. = ..()
+
+/datum/status_effect/buff/death_harvest/proc/on_attack(mob/living/source, mob/living/target, mob/living/user, obj/item/weapon)
+	SIGNAL_HANDLER
+
+	if(!target || target == owner || !isliving(target))
+		return
+
+	var/list/intents = weapon?.gripped_intents
+	var/valid = FALSE
+	if(intents)
+		for(var/path in intents)
+			if(findtext("[path]", "/cut") || findtext("[path]", "/chop"))
+				valid = TRUE
+				break
+	if(!valid)
+		return
+
+	INVOKE_ASYNC(src, PROC_REF(reap_chain), user, target)
+
+	consume_reap()
+	return COMPONENT_ITEM_NO_DEFENSE
+
+/datum/status_effect/buff/death_harvest/proc/reap_chain(mob/living/user, mob/living/initial_target)
+	set waitfor = FALSE
+
+	var/turf/origin = get_turf(user)
+	var/turf/center = get_turf(initial_target)
+	if(!origin || !center)
+		return
+
+	user.emote("cackle", forced = TRUE)
+
+	var/list/targets = list()
+
+	for(var/mob/living/M in view(8, center))
+		if(M == user)
+			continue
+
+		var/datum/antagonist/skeleton/skel = M.mind?.has_antag_datum(/datum/antagonist/skeleton)
+		var/datum/antagonist/zombie/zomb = M.mind?.has_antag_datum(/datum/antagonist/zombie)
+
+		if(skel || zomb || M.stat == DEAD || istype(M, /mob/living/carbon/human/species/npc/deadite) || istype(M, /mob/living/carbon/human/species/skeleton/npc))
+			targets += M
+
+	for(var/mob/living/T in targets)
+		if(QDELETED(T))
+			continue
+
+		var/turf/center_turf = get_turf(T)
+		if(!center_turf || center_turf.z != origin.z)
+			continue
+
+		var/dir_to_target = get_dir(user, T)
+		var/dir_left = turn(dir_to_target, 90)
+		var/dir_right = turn(dir_to_target, -90)
+
+		var/turf/pos1 = get_step(center_turf, dir_left)
+		var/turf/pos2 = get_step(center_turf, dir_right)
+		var/turf/pos3 = get_step(center_turf, turn(dir_left, 180))
+		var/turf/pos4 = get_step(center_turf, turn(dir_right, 180))
+
+		if(pos1)
+			do_teleport(user, pos1, channel = TELEPORT_CHANNEL_MAGIC)
+
+		sleep(2)
+
+		var/list/cross_positions = list(pos2, pos3, pos4, pos1)
+
+		for(var/turf/P in cross_positions)
+			if(!P)
+				continue
+
+			var/list/path = getline(get_turf(user), P)
+			INVOKE_ASYNC(src, PROC_REF(create_afterimage_trail), user, path)
+
+			do_teleport(user, P, channel = TELEPORT_CHANNEL_MAGIC)
+			playsound(P, 'sound/magic/blink.ogg', 25, TRUE)
+
+			var/obj/effect/temp_visual/blade_cut/V = new(get_turf(T))
+			V.dir = get_dir(user, T)
+
+			sleep(2)
+
+		T.Stun(70)
+		T.Knockdown(70)
+		T.adjustFireLoss(100)
+		T.emote("scream")
+
+		var/dir = get_dir(user, T)
+		var/turf/throw_target = get_step(T, dir)
+		if(throw_target)
+			T.throw_at(throw_target, 3, 1, user)
+
+		handle_reap(user, T)
+
+	var/turf/current = get_turf(user)
+	if(current && origin && current != origin)
+		var/list/return_path = getline(current, origin)
+		INVOKE_ASYNC(src, PROC_REF(create_afterimage_trail), user, return_path)
+
+		do_teleport(user, origin, channel = TELEPORT_CHANNEL_MAGIC)
+		playsound(origin, 'sound/magic/blink.ogg', 30, TRUE)
+
+/datum/status_effect/buff/death_harvest/proc/handle_reap(mob/living/user, mob/living/target)
+	var/is_corpse = (target.stat == DEAD)
+	var/is_npc = !target.key
+
+	if(is_corpse)
+		if(istype(target, /mob/living/carbon))
+			var/mob/living/carbon/C = target
+			var/has_ghost = (C.key || C.get_ghost(FALSE, TRUE))
+			if(!has_ghost && is_npc && !QDELETED(C))
+				var/turf/T = get_turf(C)
+				if(T)
+					C.dust(TRUE, FALSE, TRUE)
+					new /obj/item/soulthread(T)
+					if(C)
+						C.gib(TRUE, TRUE, TRUE)
+
+	user.apply_status_effect(/datum/status_effect/buff/healing/soul_drain)
+
+/datum/status_effect/buff/death_harvest/proc/create_afterimage_trail(mob/living/user, list/path_turfs)
+	set waitfor = FALSE
+
+	var/list/images = list()
+	var/path_len = length(path_turfs)
+	if(path_len < 2)
+		return
+
+	var/travel_dir = get_dir(path_turfs[1], path_turfs[path_len])
+
+	for(var/i in 1 to path_len)
+		var/turf/T = path_turfs[i]
+		var/obj/effect/after_image/img = new(T, 0, 0, 0, 0, 0.5 SECONDS, 2 SECONDS, 0)
+		images += img
+		img.appearance = user.appearance
+		img.mouse_opacity = MOUSE_OPACITY_TRANSPARENT
+		img.dir = travel_dir
+		img.alpha = 120
+
+	QDEL_LIST_IN(images, 2 SECONDS)
+
+/datum/status_effect/buff/death_harvest/proc/consume_reap()
+	playsound(get_turf(owner), 'sound/magic/antimagic.ogg', 50, TRUE)
+
+	owner.visible_message(
+		span_danger("[owner]'s strike rends both flesh and soul!"),
+		span_notice("The harvest is bountiful!"))
+
+	owner.remove_status_effect(/datum/status_effect/buff/death_harvest)
+
+#undef DEATH_HARVEST_FILTER
+
+/datum/status_effect/buff/healing/soul_drain
+	id = "healing"
+	alert_type = /atom/movable/screen/alert/status_effect/buff/healing
+	duration = 8 SECONDS
+	healing_on_tick = 10
+	outline_colour = "#bbbbbb"
+
+/datum/status_effect/buff/healing/soul_drain/on_apply()
+	healing_on_tick = 5
+	return TRUE
+
+/datum/status_effect/buff/healing/soul_drain/tick()
+	var/obj/effect/temp_visual/heal/H = new /obj/effect/temp_visual/heal_rogue(get_turf(owner))
+	H.color = "#a5a5a5"
+
+	var/list/wCount = owner.get_wounds()
+
+	if(!owner.construct)
+		if(owner.blood_volume < BLOOD_VOLUME_NORMAL)
+			owner.blood_volume = min(owner.blood_volume + (healing_on_tick + 10), BLOOD_VOLUME_NORMAL)
+
+		if(wCount.len > 0)
+			owner.heal_wounds(healing_on_tick, list(/datum/wound/slash, /datum/wound/puncture, /datum/wound/bite, /datum/wound/bruise, /datum/wound/dynamic))
+			owner.update_damage_overlays()
+
+		owner.adjustBruteLoss(-healing_on_tick, 0)
+		owner.adjustFireLoss(-healing_on_tick, 0)
+		owner.adjustOxyLoss(-healing_on_tick, 0)
+		owner.adjustToxLoss(-healing_on_tick, 0)
+		owner.adjustOrganLoss(ORGAN_SLOT_BRAIN, -healing_on_tick)
+		owner.adjustCloneLoss(-healing_on_tick, 0)
+
+#define GRAVE_EMBRACE_FILTER "grave_embrace_outline"
+#define GRAVE_EMBRACE_DARK "grave_dark"
+#define GRAVE_EMBRACE_HIT "grave_hit"
+
+/obj/effect/proc_holder/spell/self/grave_embrace
+	name = "Grave Embrace"
+	desc = "Consecrate a two-handed cutting weapon with a mark of death. For the duration, you cannot die. Your next swing will never miss, and upon striking, you imprint your closeness to death onto your target."	
+	overlay_state = "graveembrace"
+	associated_skill = /datum/skill/magic/holy
+	recharge_time = 20 SECONDS
+	devotion_cost = 100
+	invocation_type = "shout"
+	invocations = list("Necra... embrace us both!", "An invitation to the underworld!", "The bell tolls!", "You cannot escape Her embrace!", "Death comes for all!")
+	miracle = TRUE
+
+/obj/effect/proc_holder/spell/self/grave_embrace/cast(mob/living/user)
+	if(!isliving(user))
+		return FALSE
+
+	var/obj/item/I = user.get_active_held_item()
+	if(!I)
+		to_chat(user, span_warning("I must hold a weapon to invoke Her embrace."))
+		revert_cast()
+		return FALSE
+
+	var/list/intents = I.gripped_intents
+	if(!intents || !intents.len)
+		to_chat(user, span_warning("This weapon cannot bear Her will."))
+		revert_cast()
+		return FALSE
+
+	var/valid = FALSE
+	for(var/path in intents)
+		if(findtext("[path]", "/cut") || findtext("[path]", "/chop") || findtext("[path]", "/stab"))
+			valid = TRUE
+			break
+
+	if(!valid)
+		to_chat(user, span_warning("The rite recoils. This weapon is unworthy."))
+		revert_cast()
+		return FALSE
+
+	if(user.has_status_effect(/datum/status_effect/buff/grave_embrace))
+		to_chat(user, span_warning("Necra's embrace is already upon me."))
+		revert_cast()
+		return FALSE
+
+	user.apply_status_effect(/datum/status_effect/buff/grave_embrace)
+
+	playsound(get_turf(user), 'sound/magic/antimagic.ogg', 60, TRUE)
+
+	user.visible_message(
+		span_danger("[user]'s weapon glows dim with a deathly cold."),
+		span_notice("Necra's whisper coils around your suffering..."))
+
+	return TRUE
+
+/atom/movable/screen/alert/status_effect/buff/grave_embrace
+	name = "Grave Embrace"
+	desc = "My suffering will be shared."
+	icon_state = "buff"
+
+/datum/status_effect/buff/grave_embrace
+	id = "grave_embrace"
+	alert_type = /atom/movable/screen/alert/status_effect/buff/grave_embrace
+	duration = 10 SECONDS
+	status_type = STATUS_EFFECT_UNIQUE
+
+/datum/status_effect/buff/grave_embrace/on_apply()
+	. = ..()
+
+	RegisterSignal(owner, COMSIG_MOB_ITEM_ATTACK, PROC_REF(on_attack))
+
+	owner.add_filter(GRAVE_EMBRACE_FILTER, 2, list(
+		"type" = "outline",
+		"color" = "#5b3c7a",
+		"alpha" = 220,
+		"size" = 3
+	))
+
+/datum/status_effect/buff/grave_embrace/on_remove()
+	UnregisterSignal(owner, COMSIG_MOB_ITEM_ATTACK)
+	owner.remove_filter(GRAVE_EMBRACE_FILTER)
+	owner.remove_filter(GRAVE_EMBRACE_DARK)
+	owner.remove_filter(GRAVE_EMBRACE_HIT)
+	. = ..()
+
+/datum/status_effect/buff/grave_embrace/proc/on_attack(mob/living/user, mob/living/target, obj/item/weapon)
+	SIGNAL_HANDLER
+
+	if(!target || target == owner || !isliving(target))
+		return
+
+	var/obj/item/I = user.get_active_held_item()
+	if(!I)
+		return
+
+	var/list/intents = I.gripped_intents
+	if(!intents || !intents.len)
+		return
+
+	var/valid = FALSE
+	for(var/path in intents)
+		if(findtext("[path]", "/cut") || findtext("[path]", "/chop") || findtext("[path]", "/stab"))
+			valid = TRUE
+			break
+
+	if(!valid)
+		return
+
+	INVOKE_ASYNC(src, PROC_REF(grave_transfer), user, target)
+
+	consume_grave()
+
+/datum/status_effect/buff/grave_embrace/proc/grave_transfer(mob/living/user, mob/living/target)
+	set waitfor = FALSE
+
+	if(QDELETED(user) || QDELETED(target))
+		return
+
+	grave_animation(user, target)
+
+	sleep(4)
+
+	var/static/list/spooky_sounds = list(
+		'sound/vo/mobs/ghost/aggro (1).ogg',
+		'sound/vo/mobs/ghost/aggro (2).ogg',
+		'sound/vo/mobs/ghost/aggro (3).ogg',
+		'sound/vo/mobs/ghost/aggro (4).ogg',
+		'sound/vo/mobs/ghost/aggro (5).ogg',
+		'sound/vo/mobs/ghost/aggro (6).ogg'
+	)
+
+	var/spookyscary = pick(spooky_sounds)
+	playsound(get_turf(target), spookyscary, 50, TRUE)
+
+	// Calculate missing health
+	var/missing_health = 0
+	missing_health += user.getBruteLoss()
+	missing_health += user.getFireLoss()
+	missing_health += user.getOxyLoss()
+	missing_health += user.getToxLoss()
+	missing_health += user.getCloneLoss()
+
+	var/wounds_transferred = FALSE
+
+	// Wound transfer (Humans only)
+	var/list/wounds = user.get_wounds()
+
+	if(wounds && wounds.len && ishuman(target))
+		for(var/datum/wound/W in wounds)
+
+			var/datum/wound/new_wound = new W.type()
+
+			var/mob/living/carbon/human/H = target
+			var/static/list/body_zones = list(
+				BODY_ZONE_CHEST,
+				BODY_ZONE_HEAD,
+				BODY_ZONE_L_ARM,
+				BODY_ZONE_R_ARM,
+				BODY_ZONE_L_LEG,
+				BODY_ZONE_R_LEG
+			)
+
+			var/obj/item/bodypart/target_part = H.get_bodypart(pick(body_zones))
+
+			if(target_part && new_wound.can_apply_to_bodypart(target_part))
+				new_wound.apply_to_bodypart(target_part)
+				wounds_transferred = TRUE
+
+	// Bonus damage logic
+	if(missing_health > 0)
+		if(HAS_TRAIT(target, TRAIT_SIMPLE_WOUNDS) && !ishuman(target))
+			// Simplemobs take 100%
+			target.adjustBruteLoss(missing_health)
+		else
+			// Humans take 50%
+			target.adjustBruteLoss(missing_health * 0.5)
+
+	// Brain transfer
+	var/brain = user.getOrganLoss(ORGAN_SLOT_BRAIN)
+	if(brain > 0)
+		target.adjustOrganLoss(ORGAN_SLOT_BRAIN, brain)
+
+	// Briefly wears them out if wounds transferred
+	if(wounds_transferred)
+		target.Slowdown(4)
+		target.emote("painscream", forced = TRUE)
+		target.visible_message(span_warning("[target] seizes, ghastly wounds being imprinted on them!"))
+		target.apply_status_effect(/datum/status_effect/debuff/clickcd, 4 SECONDS)
+	
+	var/miracleLV = user.get_skill_level(/datum/skill/magic/holy) // the luck(miracle skill?)-based combo of purge corpse and embrace
+	if(target.mob_biotypes & MOB_UNDEAD)
+		if(prob((8 * miracleLV)))
+			target.Knockdown(6 SECONDS, ignore_canstun = TRUE)
+
+	//will wear you out regardless if you transferred or not, so be careful!
+	user.visible_message(span_warning("[owner] wavers, exposing themselves."))
+	user.apply_status_effect(/datum/status_effect/debuff/clickcd, 4 SECONDS)
+	user.OffBalance(4 SECONDS)
+	user.emote("breathgasp", forced = TRUE)
+	user.Slowdown(4)
+
+/datum/status_effect/buff/grave_embrace/proc/grave_animation(mob/living/user, mob/living/target)
+	set waitfor = FALSE
+
+	var/turf/origin = get_turf(user)
+	var/turf/impact = get_turf(target)
+
+	if(!origin || !impact)
+		return
+
+	user.add_filter(GRAVE_EMBRACE_DARK, 3, list(
+		"type" = "outline",
+		"color" = "#3b2a4a",
+		"alpha" = 255,
+		"size" = 4
+	))
+
+	animate(user, alpha = 200, time = 2)
+	animate(user, alpha = 255, time = 2)
+
+	var/list/path = getline(origin, impact)
+
+	INVOKE_ASYNC(src, PROC_REF(grave_shadow_trail), user, path)
+
+	sleep(2)
+
+	user.Shake(3,3)
+	target.Shake(4,4)
+
+	target.add_filter(GRAVE_EMBRACE_HIT, 2, list(
+		"type" = "outline",
+		"color" = "#6d4b8f",
+		"alpha" = 255,
+		"size" = 3
+	))
+
+	playsound(impact, 'sound/combat/fracture/fracturewet (1).ogg', 60, TRUE)
+
+	for(var/i in 1 to 3)
+		target.pixel_x = rand(-3,3)
+		target.pixel_y = rand(-3,3)
+		sleep(1)
+
+	target.pixel_x = 0
+	target.pixel_y = 0
+
+	sleep(4)
+
+	target.remove_filter(GRAVE_EMBRACE_HIT)
+	user.remove_filter(GRAVE_EMBRACE_DARK)
+
+/datum/status_effect/buff/grave_embrace/proc/grave_shadow_trail(mob/living/user, list/path_turfs)
+	set waitfor = FALSE
+
+	if(!path_turfs || path_turfs.len < 2)
+		return
+
+	var/list/images = list()
+
+	for(var/turf/T in path_turfs)
+		var/obj/effect/after_image/A = new(T)
+
+		A.appearance = user.appearance
+		A.alpha = 100
+		A.color = "#4b3a63"
+		A.mouse_opacity = MOUSE_OPACITY_TRANSPARENT
+
+		animate(A, alpha = 0, time = 5)
+
+		images += A
+
+	sleep(4)
+
+	QDEL_LIST(images)
+
+/datum/status_effect/buff/grave_embrace/proc/consume_grave()
+	playsound(get_turf(owner), 'sound/misc/deadbell.ogg', 50, TRUE)
+
+	owner.remove_status_effect(/datum/status_effect/buff/grave_embrace)
+
+#undef GRAVE_EMBRACE_FILTER
+#undef GRAVE_EMBRACE_DARK
+#undef GRAVE_EMBRACE_HIT
 
 /obj/effect/proc_holder/spell/invoked/necra_vow
 	name = "Vow to Necra"
@@ -520,4 +1533,3 @@
 		return TRUE
 	revert_cast()
 	return FALSE
-
