@@ -37,6 +37,33 @@ GLOBAL_LIST_EMPTY(last_words)
 /mob/living/proc/spread_bodyparts()
 	return
 
+/// Basically a gib that leaves torso behind
+/mob/living/proc/softgib()
+	var/prev_lying = lying
+	var/turf/drop_loc = drop_location()
+
+	// Kill like a gib would
+	if(stat != DEAD)
+		death(TRUE)
+
+	if(client)
+		SSdroning.kill_droning(client)
+
+	// Sound + animation
+	playsound(src.loc, pick('sound/combat/gib (1).ogg','sound/combat/gib (2).ogg'), 200, FALSE, 3)
+
+	if(!prev_lying)
+		gib_animation()
+
+	//pop goes da weasel
+	spread_bodyparts()
+
+	// Remove embedded stuff (clean)
+	spill_embedded_objects()
+
+	// Spawn gore visuals ONLY (no organs/bodyparts)
+	spawn_gibs()
+
 /// Length of the animation in dust_animation.dmi
 #define DUST_ANIMATION_TIME 1.3 SECONDS
 

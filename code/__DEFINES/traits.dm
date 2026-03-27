@@ -518,6 +518,8 @@ GLOBAL_LIST_INIT(roguetraits, list(
 	TRAIT_FOOD_STIPEND = span_notice("The creachers of the vomitorium know my touch, and will pull costs for their products directly from the treasury for me."),
 	TRAIT_STANDARD_BEARER = span_info("The banner is my lifeline. Just as I am to it. The retinue know to rally around me, so long as I keep it safe."),
 	TRAIT_FOG_WARDED = span_info("I am protected from Necra's deadly fog. The revenants won't find me... for now."),
+	TRAIT_DETERMINATION = span_info("I WILL <b>NOT</b> LET THESE PUNY FRACTURES STOP ME!"),
+	TRAIT_LIVING_DEAD = span_info("Strings of Lux-Threads enwrap my soul into this mortal coil, tightly. Cruelly.")
 ))
 
 // trait accessor defines
@@ -705,6 +707,8 @@ Remember to update _globalvars/traits.dm if you're adding/removing/renaming trai
 #define TRAIT_PARALYSIS	"paralysis" //Used for limb-based paralysis and full body paralysis
 #define TRAIT_BRITTLE "brittle" //The limb is more susceptible to fractures
 #define TRAIT_FINGERLESS "fingerless" //The limb has no fingies
+#define TRAIT_DETERMINATION "determination" //Can move regardless of how fucked up they are
+#define TRAIT_LIVING_DEAD "livingdead" //You literally cannot die
 
 //item traits
 #define TRAIT_NODROP            "nodrop"

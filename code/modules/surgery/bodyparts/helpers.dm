@@ -84,9 +84,11 @@
 
 /mob/living/carbon/get_num_arms(check_disabled = TRUE)
 	. = 0
+	var/ignore_disabled = HAS_TRAIT(src, TRAIT_DETERMINATION) || HAS_TRAIT(src, TRAIT_LIVING_DEAD)
+
 	for(var/obj/item/bodypart/affecting as anything in bodyparts)
 		if(affecting.body_part == ARM_RIGHT || affecting.body_part == ARM_LEFT)
-			if(!check_disabled || !affecting.disabled)
+			if(!check_disabled || !affecting.disabled || ignore_disabled)
 				.++
 
 //sometimes we want to ignore that we don't have the required amount of arms.
@@ -98,9 +100,11 @@
 
 /mob/living/carbon/get_num_legs(check_disabled = TRUE)
 	. = 0
+	var/ignore_disabled = HAS_TRAIT(src, TRAIT_DETERMINATION) || HAS_TRAIT(src, TRAIT_LIVING_DEAD)
+
 	for(var/obj/item/bodypart/affecting as anything in bodyparts)
 		if(affecting.body_part & (LEG_RIGHT | LEG_LEFT))
-			if(!check_disabled || !affecting.disabled)
+			if(!check_disabled || !affecting.disabled || ignore_disabled)
 				if((affecting.body_part & LEGS) == LEGS)
 					. += 2
 				else
@@ -109,7 +113,6 @@
 //sometimes we want to ignore that we don't have the required amount of legs.
 /mob/proc/get_leg_ignore()
 	return FALSE
-
 
 /mob/living/carbon/human/get_leg_ignore()
 	if(movement_type & (FLYING | FLOATING))

@@ -772,7 +772,7 @@
 	update_stat()
 	update_mobility()
 
-	if(stat == SOFT_CRIT)
+	if(stat == SOFT_CRIT && !HAS_TRAIT(src, TRAIT_LIVING_DEAD))
 		add_movespeed_modifier(MOVESPEED_ID_CARBON_SOFTCRIT, TRUE, multiplicative_slowdown = SOFTCRIT_ADD_SLOWDOWN)
 	else
 		remove_movespeed_modifier(MOVESPEED_ID_CARBON_SOFTCRIT, TRUE)
@@ -902,7 +902,7 @@
 	else
 		clear_fullscreen("CMODE")
 
-	if(health <= crit_threshold || ((blood_volume in -INFINITY to BLOOD_VOLUME_SURVIVE) && !HAS_TRAIT(src, TRAIT_BLOODLOSS_IMMUNE)))
+	if(!HAS_TRAIT(src, TRAIT_LIVING_DEAD) && (health <= crit_threshold || ((blood_volume in -INFINITY to BLOOD_VOLUME_SURVIVE) && !HAS_TRAIT(src, TRAIT_BLOODLOSS_IMMUNE))))	
 		var/severity = 0
 		switch(health)
 			if(-20 to -10)
@@ -1060,12 +1060,13 @@
 		if(health <= HEALTH_THRESHOLD_NEARDEATH && HAS_TRAIT(src, TRAIT_DEATHBARGAIN))
 			src.apply_status_effect(/datum/status_effect/buff/undermaidenbargainheal)
 			return
-		if(health <= HEALTH_THRESHOLD_DEAD && !HAS_TRAIT(src, TRAIT_NODEATH))
+		if(health <= HEALTH_THRESHOLD_DEAD && !(HAS_TRAIT(src, TRAIT_NODEATH)||HAS_TRAIT(src, TRAIT_LIVING_DEAD)))
 			INVOKE_ASYNC(src, PROC_REF(emote), "deathgurgle")
 			death()
 			cure_blind(UNCONSCIOUS_BLIND)
 			return
-		if(((blood_volume in -INFINITY to BLOOD_VOLUME_SURVIVE) && !HAS_TRAIT(src, TRAIT_BLOODLOSS_IMMUNE)) || IsUnconscious() || IsSleeping() || getOxyLoss() > 75 || (HAS_TRAIT(src, TRAIT_DEATHCOMA)) || (health <= HEALTH_THRESHOLD_FULLCRIT && !HAS_TRAIT(src, TRAIT_NOHARDCRIT)))
+			
+		if(!HAS_TRAIT(src, TRAIT_LIVING_DEAD) && (((blood_volume in -INFINITY to BLOOD_VOLUME_SURVIVE) && !HAS_TRAIT(src, TRAIT_BLOODLOSS_IMMUNE)) || IsUnconscious() || IsSleeping() || getOxyLoss() > 75 || (HAS_TRAIT(src, TRAIT_DEATHCOMA)) || (health <= HEALTH_THRESHOLD_FULLCRIT && !HAS_TRAIT(src, TRAIT_NOHARDCRIT))))
 			if(stat != UNCONSCIOUS) // Transition into hardcrit — announce once
 				if((blood_volume in -INFINITY to BLOOD_VOLUME_SURVIVE) && !HAS_TRAIT(src, TRAIT_BLOODLOSS_IMMUNE))
 					visible_message(span_danger("<b>[src] collapses, [src.p_their()] skin pale as parchment!</b>"), \
@@ -1090,7 +1091,7 @@
 			else
 				REMOVE_TRAIT(src, TRAIT_SIXTHSENSE, "near-death")
 		else
-			if(health <= crit_threshold && !HAS_TRAIT(src, TRAIT_NOSOFTCRIT))
+			if(health <= crit_threshold && !HAS_TRAIT(src, TRAIT_NOSOFTCRIT) && !HAS_TRAIT(src, TRAIT_LIVING_DEAD))
 				stat = SOFT_CRIT
 			else
 				stat = CONSCIOUS

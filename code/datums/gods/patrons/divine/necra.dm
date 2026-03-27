@@ -43,6 +43,11 @@
 	to_chat(follower, span_danger("For Necra to hear my prayer I must either pray within the church, near a psycross, or near a grave where we all go to be given our final embrace.."))
 	return FALSE
 
+/datum/status_effect/churned //cause I don't wanna have my hands on 30 files for something like this
+	id = "churned"
+	duration = 0
+	status_type = STATUS_EFFECT_UNIQUE
+
 /datum/patron/divine/necra/on_lesser_heal(
     mob/living/user,
     mob/living/target,

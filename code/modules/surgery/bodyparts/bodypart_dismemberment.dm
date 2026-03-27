@@ -27,6 +27,15 @@
 	if(!dismemberable)
 		return FALSE
 
+	if(HAS_TRAIT(C, TRAIT_LIVING_DEAD)) // These traits are temporary pLEASE DO -NOT- MAKE THEM INTO VIRTUES NOR GIVE THEM TO ANTAGS. P L E A S E .
+		if(body_zone in list(BODY_ZONE_R_LEG, BODY_ZONE_L_LEG))
+			return FALSE
+	
+	if(HAS_TRAIT(C, TRAIT_DETERMINATION))
+		if(body_zone in list(BODY_ZONE_R_LEG, BODY_ZONE_L_LEG))
+			if(prob(50))
+				return FALSE	
+
 	if(!skip_checks)
 		if(user && (body_zone == BODY_ZONE_HEAD))
 			if(zone_precise != BODY_ZONE_PRECISE_NECK)
@@ -87,6 +96,14 @@
 		// if they're already spinal-severed, THEN the head is removed.
 		// extra note: we only do this for mobs with a mind, aka not NPCS. npcs always get insta-decapped as before
 		if (owner?.client && !vorpal && !guillotine_execution && two_stage_death && !grievously_wounded)
+    // Check if living dead and hasn't been fragged yet
+			if(HAS_TRAIT(C, TRAIT_LIVING_DEAD))
+				if(!C.has_wound(/datum/wound/grievous/pre_decapitation_sharp))
+					C.visible_message(span_danger("<B>[C] is <span class='crit'>[pick("ENDED", "SLAIN", "SLAUGHTERED","MURDERED","SNUFFED","BUTCHERED","FELLED","FINISHED","FRAGGED")]</span> as [C.p_their()] ravaged neck <span class='crit'>BLOSSOMS</span> into petals of <span class='crit'>GORE and BONE!</span></B>"))
+					add_wound(/datum/wound/grievous/pre_decapitation_sharp)
+					C.visible_message(span_danger("<B>--BUT THEY REFUSE TO STOP?!</B>"))
+				return
+
 			if (owner?.construct)
 				C.visible_message(span_danger("<b>[C]'s wrought skull is <span class='crit'>CLEFT NIGH IN TWAIN</span> by a fearsome blow, crumbling into a <span class='crit'>CLOUD of DUST!</span></b>"))
 				C.death()

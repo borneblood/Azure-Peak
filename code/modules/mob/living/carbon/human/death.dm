@@ -28,11 +28,14 @@
 				. -= L
 
 /mob/living/carbon/human/death(gibbed, nocutscene = FALSE)
+	if(HAS_TRAIT(src, TRAIT_LIVING_DEAD))
+		stat = CONSCIOUS
+		return
 	if(stat == DEAD)
 		return
 	if(QDELETED(src) || !loc)
 		return
-		
+
 	var/area/A = get_area(src)
 	dna?.species?.stop_wagging_tail(src)
 
