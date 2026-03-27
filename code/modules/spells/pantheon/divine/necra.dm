@@ -999,7 +999,7 @@
 
 /obj/effect/proc_holder/spell/self/grave_embrace
 	name = "Grave Embrace"
-	desc = "Consecrate a two-handed cutting weapon with the burden of your dying flesh. Your suffering feeds the blade, its strength swelling with every wound you carry. On your next strike, you invite another to share in your ruin, forcing your injuries upon them. Should you falter, Necra's gaze turns away, and the rite collapses."
+	desc = "A grim rite that leaves you exposed, yet momentarily unstoppable as it gathers; once complete, you have but moments to deliver a devastating, death-empowered two-handed strike with a cutting weapon. If it lands against unarmored flesh, your wounds are forced into the target.<br><br>The more wounded you are, and the more grievous it is, the tighter you will grip on your weapon.<br><br>Naturally, the mindless undead suffer even greater scorn under the Undermaiden's grace."
 	overlay_state = "graveembrace"
 	associated_skill = /datum/skill/magic/holy
 	recharge_time = 20 SECONDS
@@ -1014,25 +1014,18 @@
 	)
 	miracle = TRUE
 
-
 /obj/effect/proc_holder/spell/self/grave_embrace/cast(mob/living/user)
 	if(!isliving(user))
 		return FALSE
 
 	var/obj/item/I = user.get_active_held_item()
-	if(!I)
-		to_chat(user, span_warning("I must hold a weapon to invoke Her embrace."))
-		revert_cast()
-		return FALSE
-
-	var/list/intents = I.gripped_intents
-	if(!intents || !intents.len)
+	if(!I || !I.gripped_intents || !I.gripped_intents.len)
 		to_chat(user, span_warning("This weapon cannot bear Her will."))
 		revert_cast()
 		return FALSE
 
 	var/valid = FALSE
-	for(var/path in intents)
+	for(var/path in I.gripped_intents)
 		if(findtext("[path]", "/cut") || findtext("[path]", "/chop") || findtext("[path]", "/stab"))
 			valid = TRUE
 			break
@@ -1047,22 +1040,26 @@
 		revert_cast()
 		return FALSE
 
+	// jakk goes here! After 5 seconds of "preparation", your next attack within 5 seconds will be N A S T Y. 
+	user.apply_status_effect(/datum/status_effect/debuff/vulnerable)
 	user.apply_status_effect(/datum/status_effect/buff/grave_embrace)
+	user.apply_status_effect(/datum/status_effect/debuff/clickcd, 5 SECONDS)
 
-	playsound(get_turf(user), 'sound/magic/antimagic.ogg', 60, TRUE)
+	playsound(get_turf(user), 'sound/misc/deadbell.ogg', 60, TRUE)
 
 	user.visible_message(
-		span_danger("[user]'s weapon glows dim with a deathly cold."),
-		span_notice("Necra's whisper coils around your suffering...")
+		span_danger("[user]'s stance stills with grave intent. They seem to be vulnerable!"),
+		span_notice("My next strike will carry my suffering, but I need to concentrate.")
 	)
 
 	return TRUE
 
+
 /atom/movable/screen/alert/status_effect/buff/grave_embrace
-	name = "Essence of Death"
-	desc = "I am overflowing with the chilling essence of death."
+	name = "Grave Embrace"
+	desc = "I am exposed, but my next strike will deliver them closer to my own to Necra."
 	icon_state = "buff"
-	alert_group = ALERT_BUFF
+
 
 /datum/status_effect/buff/grave_embrace
 	id = "grave_embrace"
@@ -1070,112 +1067,113 @@
 	duration = 10 SECONDS
 	status_type = STATUS_EFFECT_UNIQUE
 
-	var/tmp/obj/item/cached_weapon = null
-	var/tmp/original_force = 0
-	var/tmp/original_force_wielded = 0
-	var/tmp/locked = FALSE
+	var/damage_per_wound = 0.12
+	var/damage_per_loss = 0.002
+	var/max_multiplier = 3
 
-	var/damage_per_wound = 0.12 // each wound you got, plus severity
-	var/damage_per_loss = 0.002 //brute loss, burn loss
-	var/max_multiplier = 3 // cap for sanity's sake
-
-/datum/status_effect/buff/grave_embrace/proc/get_damage_multiplier(mob/living/user)
-	var/list/wounds = user.get_wounds()
-	var/miracleLV = user.get_skill_level(/datum/skill/magic/holy)
-
+/datum/status_effect/buff/grave_embrace/proc/get_multiplier(mob/living/user)
 	var/wound_score = 0
 
-	if(wounds)
-		for(var/datum/wound/W in wounds)
-			if(!W) continue
-			switch(W.severity)
-				if(WOUND_SEVERITY_LIGHT)      wound_score += 0.25
-				if(WOUND_SEVERITY_MODERATE)   wound_score += 1
-				if(WOUND_SEVERITY_CRITICAL)   wound_score += 2
-				if(WOUND_SEVERITY_FATAL)      wound_score += 3
-			if(W.bleed_rate > 0)
-				wound_score += 0.5
-	// Add raw damage scaling
-	var/damage_score = user.getBruteLoss() + user.getFireLoss()
-	var/mult = 1 + (wound_score * damage_per_wound) + (damage_score * damage_per_loss) + (miracleLV * 0.05)
+	for(var/datum/wound/W in user.get_wounds())
+		if(!W) continue
 
-	to_chat(user, span_warning("DEBUG: damage calc → woundscore=[wound_score], dmg=[damage_score], miracle=[miracleLV], mult=[mult]"))
+		switch(W.severity)
+			if(WOUND_SEVERITY_LIGHT)      wound_score += 0.25
+			if(WOUND_SEVERITY_MODERATE)   wound_score += 1
+			if(WOUND_SEVERITY_CRITICAL)   wound_score += 2
+			if(WOUND_SEVERITY_FATAL)      wound_score += 3
+
+		if(W.bleed_rate > 0)
+			wound_score += 0.5
+
+	var/damage_score = user.getBruteLoss() + user.getFireLoss()
+
+	var/mult = 1 + (wound_score * damage_per_wound) + (damage_score * damage_per_loss)
 
 	return min(mult, max_multiplier)
 
 /datum/status_effect/buff/grave_embrace/on_apply()
 	. = ..()
+
+	RegisterSignal(owner, COMSIG_MOB_ITEM_ATTACK, PROC_REF(on_attack))
 	RegisterSignal(owner, COMSIG_LIVING_STATUS_STUN, PROC_REF(on_disabled))
 	RegisterSignal(owner, COMSIG_LIVING_STATUS_KNOCKDOWN, PROC_REF(on_disabled))
-	to_chat(owner, span_warning("DEBUG: === GRAVE EMBRACE APPLY START ==="))
-	RegisterSignal(owner, COMSIG_MOB_ITEM_ATTACK, PROC_REF(on_attack))
-	var/obj/item/I = owner.get_active_held_item()
-	if(!I)
-		to_chat(owner, span_warning("DEBUG: FAILED → no weapon in hand"))
-		return
-	cached_weapon = I
-	original_force = I.force
-	if("force_wielded" in I.vars)
-		original_force_wielded = I.force_wielded
-	to_chat(owner, span_warning("DEBUG: cached weapon = [I], base force = [original_force]"))
-	// === APPLY DAMAGE MULTIPLIER HERE ===
-	var/mult = get_damage_multiplier(owner)
-	I.force = round(original_force * mult)
-	if("force_wielded" in I.vars)
-		I.force_wielded = round(original_force_wielded * mult)
-	to_chat(owner, span_warning("DEBUG: multiplier applied → [mult], new force = [I.force]"))
-	// === LOCK IN ===
-	ADD_TRAIT(I, TRAIT_NODROP, "grave_embrace")
-	locked = TRUE
-	to_chat(owner, span_warning("DEBUG: weapon locked"))
-	owner.add_filter(GRAVE_EMBRACE_FILTER, 2, list(
+
+	ADD_TRAIT(owner, TRAIT_NOPAIN, "grave_embrace")
+	ADD_TRAIT(owner, TRAIT_IGNORESLOWDOWN, "grave_embrace")
+
+	owner.add_filter("grave_embrace", 2, list(
 		"type" = "outline",
 		"color" = "#5b3c7a",
 		"alpha" = 220,
-		"size" = 3
+		"size" = 2
 	))
-	to_chat(owner, span_warning("DEBUG: === APPLY END ==="))
 
 /datum/status_effect/buff/grave_embrace/on_remove()
-	to_chat(owner, span_warning("DEBUG: === GRAVE EMBRACE REMOVE START ==="))
 	UnregisterSignal(owner, COMSIG_MOB_ITEM_ATTACK)
-	if(cached_weapon && !QDELETED(cached_weapon))
-		to_chat(owner, span_warning("DEBUG: restoring weapon"))
-		cached_weapon.force = original_force
-		if("force_wielded" in cached_weapon.vars)
-			cached_weapon.force_wielded = original_force_wielded
+	UnregisterSignal(owner, list(COMSIG_LIVING_STATUS_STUN, COMSIG_LIVING_STATUS_KNOCKDOWN))
 
-		if(locked)
-			REMOVE_TRAIT(cached_weapon, TRAIT_NODROP, "grave_embrace")
-			to_chat(owner, span_warning("DEBUG: weapon unlocked"))
-	to_chat(owner, span_warning("DEBUG: weapon stats restored"))
-	owner.remove_filter(GRAVE_EMBRACE_FILTER)
-	to_chat(owner, span_warning("DEBUG: === REMOVE END ==="))
-	UnregisterSignal(owner, COMSIG_LIVING_STATUS_STUN)
-	UnregisterSignal(owner, COMSIG_LIVING_STATUS_KNOCKDOWN)
-	. = ..()
+	REMOVE_TRAIT(owner, TRAIT_NOPAIN, "grave_embrace")
+	REMOVE_TRAIT(owner, TRAIT_IGNORESLOWDOWN, "grave_embrace")
 
-/datum/status_effect/buff/grave_embrace/proc/on_attack(mob/living/user, mob/living/target, obj/item/weapon)
+	owner.remove_filter("grave_embrace")
+
+	. = ..()	
+
+/datum/status_effect/buff/grave_embrace/proc/on_attack(mob/living/source, mob/living/target, mob/living/user, obj/item/weapon)
 	SIGNAL_HANDLER
-	to_chat(user, span_warning("DEBUG: on_attack triggered"))
-	if(!target || target == owner || !isliving(target))
-		return
-	var/obj/item/I = user.get_active_held_item()
-	if(!I || I != cached_weapon)
+
+	if(target == owner || !isliving(target) || target.stat == DEAD)
 		return
 
-	var/damage = weapon.force * mult(user)
-	var/armor_pen = 5 * mult(user)
-	var/def_zone = user.zone_selected
-	arcyne_strike(user, L, weapon, damage, def_zone, BCLASS_CUT, armor_penetration = 0, spell_name = null, FALSE, TRUE, BRUTE, npc_simple_damage_mult = 1)
+	if(!weapon || !weapon.gripped_intents)
+		return
 
-	user.visible_message(
-		span_danger("[user]'s strike carries the weight of the grave!"),
+	// -------------------------
+	// MULTIPLIER
+	// -------------------------
+	var/mult = get_multiplier(owner)
+
+	// -------------------------
+	// DAMAGE + PEN
+	// -------------------------
+	var/damage = round(weapon.force * mult)
+	var/armor_pen = round(8 * mult)
+	var/zone = owner.zone_selected
+
+	// Based Ansari thing goes here
+	var/damage_done = arcyne_strike(
+		owner,
+		target,
+		weapon,
+		damage,
+		zone,
+		BCLASS_CUT,
+		armor_pen,
+		"Grave Embrace",
+		FALSE,
+		FALSE,
+		TRUE,
+		BRUTE,
+		1
 	)
 
-	to_chat(user, span_warning("DEBUG: valid hit → triggering transfer"))
-	INVOKE_ASYNC(src, PROC_REF(grave_transfer), user, target)
+	if(damage_done <= 0)
+		return
+
+	// -------------------------
+	// EFFECT
+	// -------------------------
+	owner.visible_message(
+		span_danger("[owner]'s strike carries the weight of the underworld!")
+	)
+	INVOKE_ASYNC(src, PROC_REF(grave_animation), owner, target)
+	INVOKE_ASYNC(src, PROC_REF(grave_transfer), owner, target)
+
 	consume_grave()
+
+	return COMPONENT_ITEM_NO_DEFENSE // ← THIS is your bypass	
+
 
 /datum/status_effect/buff/grave_embrace/proc/on_disabled()
 	SIGNAL_HANDLER
@@ -1183,14 +1181,20 @@
 	if(!owner)
 		return
 
-	to_chat(owner, span_warning("DEBUG: Disabled state detected → ending Grave Embrace"))
-
 	owner.visible_message(
-		span_warning("[owner]'s stance falters, the grip on death slipping away!"),
-		span_warning("I collapse — Necra's embrace abandons me!")
+		span_warning("[owner]'s stance breaks, the grave slipping away!"),
+		span_warning("I falter — the embrace is lost!")
 	)
 
 	qdel(src)
+
+/datum/status_effect/buff/grave_embrace/proc/consume_grave()
+	if(!owner)
+		return
+
+	playsound(get_turf(owner), 'sound/magic/antimagic.ogg', 40, TRUE)
+
+	owner.remove_status_effect(/datum/status_effect/buff/grave_embrace)
 
 /datum/status_effect/buff/grave_embrace/proc/grave_transfer(mob/living/user, mob/living/target)
 	set waitfor = FALSE
@@ -1232,7 +1236,7 @@
 			if(C.armor_class > ARMOR_CLASS_LIGHT)
 				var/can_penetrate = FALSE
 
-				switch(miracleLV) // This is not armor penetration, this is just to see if you can cheat through their armor to transfer wounds!
+				switch(miracleLV) // Depending on your skill level, you can force this through some armors
 					if(0 to 1)
 						can_penetrate = FALSE
 					if(2 to 3)
@@ -1303,14 +1307,16 @@
 		span_danger("[target] staggers as spectral force ravages their body!"),
 		span_danger("Your body staggers as something spectral begins tearing you down!")
 	)
-
-	target.Knockdown(4)
+	if(target.mob_biotypes == MOB_UNDEAD && !target.mind)
+		target.Knockdown(10)
+		target.Paralyze(10)
+		target.adjustFireLoss(5)
+		target.adjust_fire_stacks(3, /datum/status_effect/fire_handler/fire_stacks/sunder)
 	target.apply_status_effect(/datum/status_effect/debuff/clickcd, 4 SECONDS)
 
 	// === USER KICKBACK (ALWAYS) ===
-	user.apply_status_effect(/datum/status_effect/debuff/clickcd, 4 SECONDS)
-	user.Slowdown(4)
-	user.OffBalance(4)
+	user.Slowdown(5)
+	user.OffBalance(5)
 	user.emote("breathgasp", forced = TRUE)
 
 /datum/status_effect/buff/grave_embrace/proc/grave_animation(mob/living/user, mob/living/target)
@@ -1386,11 +1392,6 @@
 	sleep(4)
 
 	QDEL_LIST(images)
-
-/datum/status_effect/buff/grave_embrace/proc/consume_grave()
-	playsound(get_turf(owner), 'sound/misc/deadbell.ogg', 50, TRUE)
-
-	owner.remove_status_effect(/datum/status_effect/buff/grave_embrace)
 
 #undef GRAVE_EMBRACE_FILTER
 #undef GRAVE_EMBRACE_DARK

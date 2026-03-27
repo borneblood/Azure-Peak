@@ -40,7 +40,6 @@ GLOBAL_LIST_EMPTY(last_words)
 /// Basically a gib that leaves torso behind
 /mob/living/proc/softgib()
 	var/prev_lying = lying
-	var/turf/drop_loc = drop_location()
 
 	// Kill like a gib would
 	if(stat != DEAD)
