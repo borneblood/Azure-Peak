@@ -213,6 +213,7 @@ GLOBAL_LIST_INIT(stone_personality_descs, list(
 		/datum/crafting_recipe/roguetown/survival/peasantry/warpick_steel,
 		/datum/crafting_recipe/roguetown/survival/peasantry/maciejowski_knife,
 		/datum/crafting_recipe/roguetown/survival/peasantry/maciejowski_messer,
+		/datum/crafting_recipe/roguetown/survival/peasantry/warscythe,
 		)
 
 	AddElement(

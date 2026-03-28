@@ -118,6 +118,13 @@
 	reach = 3
 	damfactor = 1
 
+/datum/intent/spear/cut/scythe/sweep
+	name = "sweeping cut"
+	icon_state = "insweep"
+	attack_verb = list("sweeps through", "cuts across")
+	cleave = /datum/cleave_pattern/horizontal_sweep
+	desc = "A sweep that cuts through targets to the front."
+
 /datum/intent/spear/cut/bardiche/cleave
 	name = "cleaving cut"
 	icon_state = "incleave"

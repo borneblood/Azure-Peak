@@ -207,6 +207,17 @@
 		)
 	craftdiff = 2
 
+/datum/crafting_recipe/roguetown/survival/peasantry/warscythe
+	name = "militia scythe"
+	result = /obj/item/rogueweapon/scythe/militia
+	reqs = list(
+		/obj/item/rogueweapon/scythe = 1,
+		/obj/item/natural/whetstone = 1,
+		/obj/item/natural/hide/cured = 1,
+		/obj/item/natural/fibers = 1,
+		)
+	craftdiff = 2
+
 /datum/crafting_recipe/roguetown/survival/stoneaxe
 	name = "stone axe"
 	category = "Tools"
