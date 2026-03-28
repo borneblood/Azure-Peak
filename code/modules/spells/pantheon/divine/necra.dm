@@ -869,7 +869,7 @@
 
 /obj/effect/proc_holder/spell/self/grave_embrace
 	name = "Grave Embrace"
-	desc = "A grim rite that leaves you exposed, yet momentarily unstoppable as it gathers; once complete, you have but moments to deliver a devastating, death-empowered two-handed strike with a cutting weapon. If it lands against unarmored flesh, your wounds are forced into the target.<br><br>The more wounded you are, and the more grievous it is, the tighter you will grip on your weapon.<br><br>Naturally, the mindless undead suffer even greater scorn under the Undermaiden's grace."
+	desc = "A grim rite that leaves you exposed, yet momentarily unstoppable as it gathers; once complete, you have but moments to deliver a devastating, death-empowered two-handed strike with a cutting weapon.<br><br>The more wounded you are, and the more grievous it is, the tighter you will grip on your weapon.<br><br>Naturally, the mindless undead suffer even greater scorn under the Undermaiden's grace."
 	overlay_state = "graveembrace"
 	associated_skill = /datum/skill/magic/holy
 	recharge_time = 20 SECONDS
@@ -898,7 +898,7 @@
 		return FALSE
 
 	// preparation phase
-	to_chat(user, span_small("I am exposed... but the rites shall be ready soon!"))
+	to_chat(user, span_warning("I am exposed... but the rites shall be ready soon!"))
 	user.apply_status_effect(/datum/status_effect/debuff/exposed)
 	user.apply_status_effect(/datum/status_effect/buff/grave_embrace)
 	user.apply_status_effect(/datum/status_effect/debuff/clickcd, 5 SECONDS)
@@ -907,7 +907,7 @@
 
 	user.visible_message(
 		span_danger("[user] stills and staggers, their stance opening dangerously."),
-		span_notice("I steady myself. My suffering will not be mine alone.")
+		span_notice("I steady myself. My suffering won't be mine alone to bear!")
 	)
 
 	return TRUE
@@ -926,7 +926,6 @@
 	id = "grave_embrace"
 	duration = 10 SECONDS
 	status_type = STATUS_EFFECT_UNIQUE
-	var/max_multiplier = 2.5
 
 /datum/status_effect/buff/grave_embrace/on_apply()
 	. = ..()
@@ -968,37 +967,34 @@
 		return
 
 	INVOKE_ASYNC(src, PROC_REF(resolve_attack), target, weapon)
+
 	return COMPONENT_ITEM_NO_ATTACK
 
 /datum/status_effect/buff/grave_embrace/proc/resolve_attack(mob/living/target, obj/item/weapon)
 	if(QDELETED(src) || QDELETED(owner) || QDELETED(target))
 		return
-
 	var/damage = calculate_damage(owner)
-
-	var/damage_done = arcyne_strike(
-		owner,
-		target,
-		weapon,
-		damage,
-		owner.zone_selected,
-		BCLASS_CUT,
-		0,
-		"Grave Embrace",
-		FALSE, FALSE, TRUE,
-		BRUTE,
-		1
-	)
-
-	if(damage_done <= 0)
-		return
-
-	owner.visible_message(
-		span_danger("[owner]'s strike drags something unseen with it.")
-	)
-
-	INVOKE_ASYNC(src, PROC_REF(apply_transfer), target)
-	INVOKE_ASYNC(src, PROC_REF(play_effects), target)
+	var/armor_pen = 0
+	if(damage <= 100)
+		armor_pen = 25
+	if(damage <= (weapon.force * 3))
+		owner.visible_message(span_purple("<i>[owner]'s death-wrought attack seems to be lacking 'death' to it...</i>"))
+	else
+		arcyne_strike(
+			owner,
+			target,
+			weapon,
+			damage,
+			owner.zone_selected,
+			BCLASS_CUT,
+			armor_pen,
+			"Grave Embrace",
+			FALSE, FALSE, FALSE,
+			BRUTE,
+			1
+		)
+		owner.visible_message(span_purple("<i>[owner]'s attack reaps through [target] with the weight of death itself!</i>"))
+		INVOKE_ASYNC(src, PROC_REF(play_effects), target)
 
 	consume()
 
@@ -1006,61 +1002,50 @@
 	if(!user)
 		return 0
 
-	var/base = (user.getBruteLoss() + user.getFireLoss() + user.getToxLoss()) / 3
-
+	var/base = 5 + ((user.getBruteLoss() + user.getFireLoss() + user.getToxLoss()) / 6)
 	var/wound_damage = 0
-	var/mult = 1
+	var/mult = round(1)
 
 	for(var/datum/wound/W in (user.get_wounds() || list()))
 		if(!W) continue
 
 		switch(W.severity)
+			if(WOUND_SEVERITY_LIGHT)
+				wound_damage += 2
+				mult += 0.05
+			if(WOUND_SEVERITY_LIGHT)
+				wound_damage += 4
+				mult += 0.1		
+			if(WOUND_SEVERITY_MODERATE)
+				wound_damage += 8
+				mult += 0.15		
+			if(WOUND_SEVERITY_SEVERE)
+				wound_damage += 16
+				mult += 0.2		
 			if(WOUND_SEVERITY_CRITICAL)
-				wound_damage += 15
+				wound_damage += 32
 				mult += 0.25
 			if(WOUND_SEVERITY_FATAL)
-				wound_damage += 25
-				mult += 0.5
+				wound_damage += 64
+				mult += 0.3
 
 		if(W.bleed_rate)
-			mult += min(W.bleed_rate * 0.1, 0.5)
+			mult += 0.01
 
-	mult = min(mult, max_multiplier)
+	var/total_dmg = round((base + wound_damage) * mult)
 
-	return max(1, (base + wound_damage) * mult)
+	to_chat(user, span_warning("DEBUG: [base] damage accumulated."))
+	to_chat(user, span_warning("DEBUG: [wound_damage] damage from wounds accumulated."))
+	to_chat(user, span_warning("DEBUG: [mult] multiplier from wounds."))
+	to_chat(user, span_warning("DEBUG: [total_dmg] damage accumulated going right into the juicy hot pipeline."))
 
-/datum/status_effect/buff/grave_embrace/proc/apply_transfer(mob/living/target)
-	if(!owner || !target)
-		return
+	return total_dmg
 
-	var/list/wounds = owner.get_wounds()
-	if(!wounds || !wounds.len)
-		return
-
-	for(var/datum/wound/W in wounds)
-		if(!W) continue
-
-		if(ishuman(target))
-			var/mob/living/carbon/human/H = target
-			var/obj/item/bodypart/part = H.get_bodypart(owner.zone_selected)
-
-			if(part)
-				var/datum/wound/newW = new W.type()
-				if(newW.can_apply_to_bodypart(part))
-					newW.apply_to_bodypart(part)
-					continue
-
-		target.adjustFireLoss(10 + (W.severity * 5))
-	
 /datum/status_effect/buff/grave_embrace/proc/play_effects(mob/living/target)
 	if(!owner || !target)
 		return
 
 	playsound(get_turf(target), 'sound/combat/fracture/fracturewet (1).ogg', 60, TRUE)
-
-	target.visible_message(
-		span_danger("[target] convulses as something unseen tears through them!")
-	)
 
 	target.Shake(4,4)
 
@@ -1068,7 +1053,7 @@
 	SIGNAL_HANDLER
 	if(owner)
 		owner.visible_message(
-			span_warning("[owner]'s focus shatters.")
+			span_redtext("[owner]'s focus shatters as their attention is bound to earth!")
 		)
 	qdel(src)
 
