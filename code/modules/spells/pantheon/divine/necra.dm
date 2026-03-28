@@ -2,7 +2,7 @@
 // Tweaked it to be able to target Tolls, in so to use a more powerful (and risky) version of it that can be used in combat.
 /obj/effect/proc_holder/spell/invoked/avert
 	name = "Borrowed Time"
-	desc = "Shield your fellow man from the Undermaiden's gaze, preventing them from slipping into death for as long as your faith and fatigue may muster. A Toll can be offered to this Miracle, empowering it..."
+	desc = "Shield your fellow man from the Undermaiden's gaze, preventing them from slipping into death for as long as your faith and fatigue may muster.<br><br>A Toll can be offered to this Miracle, empowering it significantly: It will last for 40 seconds, but once the time is up, your immortality is revoked."
 	overlay_state = "borrowtime"
 	req_items = list(/obj/item/clothing/neck/roguetown/psicross)
 	associated_skill = /datum/skill/magic/holy
@@ -64,8 +64,8 @@
 		var/obj/item/thetoll/T = target
 
 		user.visible_message(
-			span_danger("[user] crushes a Toll into dust, whispering a grave prayer..."),
-			span_danger("I offer the Toll to the Undermaiden. Let Her watch closely...")
+			span_danger("[user] crushes the Toll into a red dust, whispering a prayer..."),
+			span_danger("I offer a Toll for the undivided attention of the Undermaiden...")
 		)
 
 		qdel(T)
@@ -114,7 +114,7 @@
 	)
 
 	to_chat(user, span_purple("I must remain still and at [living_target]'s side..."))
-	to_chat(living_target, span_warning("An odd sensation blossoms in my chest, cold and unknown..."))
+	to_chat(living_target, span_warning("An odd sensation blossoms in my chest, cold yet caring..."))
 
 	ADD_TRAIT(living_target, TRAIT_NODEATH, "avert_spell")
 
@@ -315,7 +315,7 @@
 	// You're practically dead, took this for granted, so there's no second chances for that.
 	if(!survived)
 		M.emote("agony")
-
+		M.Knockdown(10)
 		M.visible_message(
 			span_danger("[M] writhes in raw agony as an unseen presence turns its gaze away, uncaring."),
 			span_userdanger("MEMENTO MORI. MEMENTO MORI. MEMENTO MORI.")
@@ -325,13 +325,13 @@
 		return
 
 	// === SUCCESS ===
-	// This will stabilize you completely, but not heal any of your wounds.
+	// This will stabilize you completely, but not heal any of your wounds. The skill's intention is for ambulancing dying people around, after all.
 	M.visible_message(
 		span_warning("[M] coughs violently, body trembling as their bleeding is staunched unnaturally."),
 		span_userdanger("I cough and sputter as something cold is done with me... Its interest no longer.")
 	)
 	M.emote("breathgasp", forced = TRUE)
-	// ENDVRE1!!11ONE!!shift+1one
+	// ENDVRE1 LIKE HE DOES!!11ONE!!shift+1one-- Oh wait, wrong god.
 	if(wCount.len > 0)
 		for(var/datum/wound/W in wCount)
 			if(W)
@@ -397,9 +397,7 @@
 				continue
 
 		var/is_dead = (C.stat == DEAD)
-		var/is_downed = (!(C.mobility_flags & MOBILITY_STAND) && !C.buckled)
-
-		if(!is_dead && !is_downed)
+		if(!is_dead)
 			continue
 
 		var/turf/T = get_turf(C)
@@ -435,7 +433,7 @@
 		return
 
 	// STEP 1 — TYPE
-	var/type_choice = tgui_input_list(user, "What does the Undermaiden seek?", "Corpse Type", list(
+	var/type_choice = tgui_input_list(user, "What do I ask of the Undermaiden's sight?", "Corpse Type", list(
 		"Strong-lux (Players)",
 		"Weak-lux (NPCs)"
 	))
@@ -454,7 +452,7 @@
 		nearest_target = nearest_npc
 
 	if(!length(selected_list))
-		to_chat(user, span_warning("The Undermaiden finds none of that kind."))
+		to_chat(user, span_warning("There seems to be none."))
 		return
 
 	// STEP 2 — MODE
@@ -471,14 +469,13 @@
 	if(mode_choice == "Nearest")
 		target = nearest_target
 	else
-		var/choice = tgui_input_list(user, "Which body shall I seek?", "Available Bodies", selected_list)
+		var/choice = tgui_input_list(user, "Which body shall we seek?", "Available Bodies", selected_list)
 
 		if(!choice || QDELETED(user))
 			return
 
 		target = selected_list[choice]
 
-	// FINAL VALIDATION
 	if(!target || QDELETED(target))
 		to_chat(user, span_warning("The Undermaiden's grasp lets slip."))
 		return
@@ -486,106 +483,26 @@
 	user.necra_tracked_corpse = target
 	user.last_necra_ping = 0
 
-	if(target.key || target.get_ghost(FALSE, TRUE))
-		to_chat(user, span_userdanger("A soul still lingers. The Undermaiden guides your hand."))
-	else
-		to_chat(user, span_warning("Only a hollow remains. The pull is faint."))
-
 	START_PROCESSING(SSprocessing, user)
-/*
-/mob/living/process()
-	..()
-
-	if(!necra_tracked_corpse)
-		to_chat(src, span_warning("The Undermaiden's grasp lets slip."))
-		STOP_PROCESSING(SSprocessing, src)
-		return
-
-	if(world.time < last_necra_ping + 20)
-		return
-
-	last_necra_ping = world.time
-
-	if(QDELETED(necra_tracked_corpse))
-		to_chat(src, span_warning("The Undermaiden's attention snaps away."))
-		necra_tracked_corpse = null
-		STOP_PROCESSING(SSprocessing, src)
-		return
-
-	var/turf/user_turf = get_turf(src)
-	var/turf/target_turf = get_turf(necra_tracked_corpse)
-
-	if(!user_turf || !target_turf)
-		return
-
-	var/direction_name = "here"
-	var/z_hint = ""
-
-	if(target_turf.z != user_turf.z)
-		var/z_diff = abs(target_turf.z - user_turf.z)
-		z_hint = target_turf.z > user_turf.z ? "[z_diff] level\s above" : "[z_diff] level\s below"
-	else
-		var/dir = get_dir(src, necra_tracked_corpse)
-		switch(dir)
-			if(NORTH) direction_name = "north"
-			if(SOUTH) direction_name = "south"
-			if(EAST) direction_name = "east"
-			if(WEST) direction_name = "west"
-			if(NORTHEAST) direction_name = "northeast"
-			if(NORTHWEST) direction_name = "northwest"
-			if(SOUTHEAST) direction_name = "southeast"
-			if(SOUTHWEST) direction_name = "southwest"
-
-	var/state = "still"
-	var/sovl = "departed"
-
-	// Detect skeleton or zombie
-	var/datum/antagonist/skeleton/skel = necra_tracked_corpse.mind?.has_antag_datum(/datum/antagonist/skeleton)
-	var/datum/antagonist/zombie/zomb = necra_tracked_corpse.mind?.has_antag_datum(/datum/antagonist/zombie)
-
-	// Determine physical state
-	if(skel)
-		state = "fleshless"                  // Skeletons always override
-	else if(zomb)
-		if(necra_tracked_corpse.stat != DEAD)
-			state = "walking"                // Active zombie
-		else if(!(necra_tracked_corpse.mobility_flags & MOBILITY_STAND) && !necra_tracked_corpse.buckled)
-			state = "collapsed"            // Collapsed zombie
-		else
-			state = "rotting"                // Dead zombie
-	else if(necra_tracked_corpse.stat != DEAD)
-		state = "awake"                     // Probably deadite
-	else
-		state = "peaceful"                       // Normal corpse
-
-	// Determine soul status
-	if(necra_tracked_corpse.key || necra_tracked_corpse.get_ghost(FALSE, TRUE))
-		sovl = "earthbound"                   // corpse still has lingering soul
-
-	var/msg = "The Undermaiden guides you <b>[direction_name]</b>"
-	if(z_hint)
-		msg += " <b>([z_hint])</b>"
-	msg += ". They might be [state] and [sovl]."
-
-	to_chat(src, span_warning(msg)) */
 
 /mob/living/process()
 	..()
+	if(src.stat == DEAD)
+		to_chat(src, span_purple("<i>The Undermaiden's hand holds directly your ethereal one, she mourns your fall.</i>"))
+		STOP_PROCESSING(SSprocessing, src)
+		return
 
-	// No target >> stop
 	if(!necra_tracked_corpse)
 		to_chat(src, span_warning("The Undermaiden's grasp slips away."))
 		STOP_PROCESSING(SSprocessing, src)
 		return
-
-	// Throttle updates or else free will slay me
+	// Throttle updates or else Free will slay me
 	if(world.time < last_necra_ping + 20)
 		return
 	last_necra_ping = world.time
 
-	// Target deleted >> stop
 	if(QDELETED(necra_tracked_corpse))
-		to_chat(src, span_warning("The Undermaiden seems briefly confused for a mote. The corpse is no more."))
+		to_chat(src, span_purple("<i>The Undermaiden seems briefly confused for a mote. The corpse is no more?</i>"))
 		necra_tracked_corpse = null
 		STOP_PROCESSING(SSprocessing, src)
 		return
@@ -615,25 +532,35 @@
 		var/z_diff = abs(target_turf.z - user_turf.z)
 		z_hint = target_turf.z > user_turf.z ? "[z_diff] level\s above" : "[z_diff] level\s below"
 
-	// State detection
-	var/state = "still"
-
-	var/datum/antagonist/skeleton/skel = necra_tracked_corpse.mind?.has_antag_datum(/datum/antagonist/skeleton)
-	var/datum/antagonist/zombie/zomb = necra_tracked_corpse.mind?.has_antag_datum(/datum/antagonist/zombie)
-
-	if(skel)
-		state = "fleshless"
-	else if(zomb)
-		if(necra_tracked_corpse.stat != DEAD)
-			state = "standing?"
-		else if(!(necra_tracked_corpse.mobility_flags & MOBILITY_STAND) && !necra_tracked_corpse.buckled)
-			state = "collapsed"
-		else
-			state = "rotting"
-	else if(necra_tracked_corpse.stat != DEAD)
-		state = "awake"
+	var/list/states = list()
+	var/obj/item/bodypart/head = necra_tracked_corpse.get_bodypart(BODY_ZONE_HEAD)
+	if(!head)
+		states += "headless"
 	else
-		state = "peaceful"
+		var/fleshless = FALSE
+		var/rotting = FALSE
+		var/mob/living/carbon/human/H = necra_tracked_corpse
+		for(var/obj/item/bodypart/BP in H.bodyparts)
+			if(BP && BP.rotted)
+				rotting = TRUE
+				break
+		for(var/obj/item/bodypart/BP in H.bodyparts)
+			if(BP && BP.skeletonized)
+				fleshless = TRUE
+				break
+		if(fleshless)
+			states += "fleshless"
+		if(rotting)
+			states += "rotting"
+		if(!(necra_tracked_corpse.mobility_flags & MOBILITY_STAND) || necra_tracked_corpse.buckled)
+			states += "still"
+		else
+			states += "standing"
+		if(necra_tracked_corpse.stat != DEAD)
+			states += "walking"
+		else
+			states += "resting"
+	var/text_output = english_list(states)
 
 	// Soul state
 	var/soul = "departed"
@@ -649,7 +576,7 @@
 	if(z_hint)
 		msg += " <b>([z_hint])</b>"
 
-	msg += ". Seem [state], and soul [soul]."
+	msg += ". Seem [text_output], their soul [soul]."
 
 	if(distance == 0)
 		msg += " (Here)"
@@ -677,8 +604,10 @@
 	invocation_type = "whisper"
 	phase = /obj/effect/temp_visual/blink/shadowstep/miracle
 	miracle = TRUE
-	devotion_cost = 90
-	releasedrain = 100
+	devotion_cost = 75
+	releasedrain = 50
+	chargedrain = 15
+	chargetime = 3
 	max_range = 6
 	xp_gain = FALSE
 
@@ -710,7 +639,7 @@
 
 	user.visible_message(
 		span_warning("<b>[user]'s form begins to waver, a pale, ghostly shimmer passing through [user.p_them()] as [user.p_they()] prepare[user.p_s()] to slip beyond the veil...</b>"),
-		span_notice("<b>I let my form grow thin and distant, preparing to drift beyond sight...</b>")
+		span_purple("<b>I let my form grow thin and distant, preparing to drift beyond sight...</b>")
 	)
 
 	var/obj/spot_one = new phase(start, user.dir)
@@ -726,8 +655,8 @@
 	do_teleport(user, T, channel = TELEPORT_CHANNEL_FREE)
 		
 	user.visible_message(
-		span_danger("<b>[user] fades from sight like a restless spirit, slipping beyond the veil!</b>"),
-		span_notice("<b>I let go of my form and drift unseen...</b>")
+		span_warning("<b>[user] fades from sight like a restless spirit, slipping beyond the veil!</b>"),
+		span_purple("<b>I let go of my form and drift unseen...</b>")
 	)
 	return TRUE
 
@@ -762,7 +691,7 @@
 		return FALSE
 
 	if(!targets?.len || !isliving(targets[1]))
-		to_chat(user, span_warning("The Undermaiden finds nothing to claim."))
+		to_chat(user, span_warning("The Undermaiden finds nothing to offer for Aeon."))
 		revert_cast()
 		return FALSE
 
@@ -770,7 +699,7 @@
 	var/list/processed = list()
 	var/list/to_abrogate = list()
 	var/success = FALSE
-	var/failure_reason = "The Undermaiden finds no abandoned dead to claim."
+	var/failure_reason = "The Undermaiden finds no abandoned dead to offer for Aeon."
 
 	underway = TRUE
 

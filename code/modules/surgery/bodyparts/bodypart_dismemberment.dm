@@ -27,7 +27,7 @@
 	if(!dismemberable)
 		return FALSE
 
-	if(HAS_TRAIT(C, TRAIT_LIVING_DEAD)) // These traits are temporary pLEASE DO -NOT- MAKE THEM INTO VIRTUES NOR GIVE THEM TO ANTAGS. P L E A S E .
+	if(HAS_TRAIT(C, TRAIT_LIVING_DEAD)) 
 		if(body_zone in list(BODY_ZONE_R_LEG, BODY_ZONE_L_LEG))
 			return FALSE
 	

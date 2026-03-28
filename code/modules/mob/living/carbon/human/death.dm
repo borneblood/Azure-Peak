@@ -30,6 +30,7 @@
 /mob/living/carbon/human/death(gibbed, nocutscene = FALSE)
 	if(HAS_TRAIT(src, TRAIT_LIVING_DEAD))
 		stat = CONSCIOUS
+		blood_volume = BLOOD_VOLUME_SURVIVE
 		return
 	if(stat == DEAD)
 		return

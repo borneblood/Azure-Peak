@@ -1,7 +1,7 @@
 /mob/living/carbon/human/get_movespeed_modifiers()
 	var/list/considering = ..()
 	. = considering
-	if(HAS_TRAIT(src, TRAIT_IGNORESLOWDOWN))
+	if(HAS_TRAIT(src, TRAIT_IGNORESLOWDOWN)|| HAS_TRAIT(src, TRAIT_LIVING_DEAD)|| HAS_TRAIT(src, TRAIT_DETERMINATION))
 		for(var/id in .)
 			var/list/data = .[id]
 			if(data[MOVESPEED_DATA_INDEX_FLAGS] & IGNORE_NOSLOW)
