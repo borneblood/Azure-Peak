@@ -589,7 +589,7 @@
 
 /obj/effect/proc_holder/spell/invoked/blink/shadowstep/miracle // throwing another thing on the wall in hope it sticks
 	name = "Veil Passage"
-	desc = "A brief step through the veil, carrying the faithful a distance along the threshold of death. This is unorthodoxically exhausting to perform, but can travel farther than most teleportation techniques."
+	desc = "A brief step through the veil, carrying the faithful a distance along the threshold of death.<br><br>This is unorthodoxically exhausting to perform, but can travel farther than most teleportation techniques."
 	action_icon = 'icons/mob/actions/classuniquespells/spellfist.dmi'
 	overlay_state = "shadowstep"
 	invocations = list(
@@ -604,10 +604,10 @@
 	invocation_type = "whisper"
 	phase = /obj/effect/temp_visual/blink/shadowstep/miracle
 	miracle = TRUE
+	no_early_release = TRUE
 	devotion_cost = 75
-	releasedrain = 50
-	chargedrain = 15
-	chargetime = 3
+	releasedrain = 200
+	chargetime = 1 SECONDS
 	max_range = 6
 	xp_gain = FALSE
 
@@ -663,7 +663,7 @@
 
 /obj/effect/proc_holder/spell/invoked/abrogation
 	name = "Abrogation"
-	desc = "Call upon the Undermaiden's mercy to unravel abandoned flesh, granting it absolution in the hands of Aeon."
+	desc = "Call upon the Undermaiden's mercy to unravel abandoned flesh, granting it absolution in the hands of Aeon. This also affects the mindless undead who are knocked prone."
 	overlay_state = "necra"
 	releasedrain = 50
 	chargedrain = 0
@@ -798,10 +798,10 @@
 
 /obj/effect/proc_holder/spell/self/grave_embrace
 	name = "Grave Embrace"
-	desc = "A grim rite that leaves you exposed, yet momentarily unstoppable as it gathers; once complete, you have but moments to deliver a devastating, death-empowered two-handed strike with a cutting weapon.<br><br>The more wounded you are, and the more grievous it is, the tighter you will grip on your weapon.<br><br>Naturally, the mindless undead suffer even greater scorn under the Undermaiden's grace."
+	desc = "A grim rite requiring a two-handed cutting weapon. You stand exposed (and steady) for five seconds as it gathers; once complete, unleash a devastating strike, empowered by how close you are to death.<br><br>Mindless undead will suffer this weight a little harsher."
 	overlay_state = "graveembrace"
 	associated_skill = /datum/skill/magic/holy
-	recharge_time = 20 SECONDS
+	recharge_time = 40 SECONDS
 	devotion_cost = 100
 	invocation_type = "shout"
 	invocations = list(
@@ -819,14 +819,14 @@
 
 	var/obj/item/I = user.get_active_held_item()
 	if(!is_valid_weapon(I))
-		to_chat(user, span_warning("This weapon won't do the cut. It needs to be long and hard."))
+		to_chat(user, span_warning("This weapon won't do the cut. Quite literally."))
+		revert_cast()
 		return FALSE
 
 	if(user.has_status_effect(/datum/status_effect/buff/grave_embrace))
 		to_chat(user, span_warning("Necra's loving grasp is already upon my weapon."))
 		return FALSE
 
-	// preparation phase
 	to_chat(user, span_warning("I am exposed... but the rites shall be ready soon!"))
 	user.apply_status_effect(/datum/status_effect/debuff/exposed)
 	user.apply_status_effect(/datum/status_effect/buff/grave_embrace)
@@ -836,7 +836,7 @@
 
 	user.visible_message(
 		span_danger("[user] stills and staggers, their stance opening dangerously."),
-		span_notice("I steady myself. My suffering won't be mine alone to bear!")
+		span_purple("I steady myself. Soon, my suffering won't be mine alone to bear!")
 	)
 
 	return TRUE
@@ -923,6 +923,9 @@
 			1
 		)
 		owner.visible_message(span_purple("<i>[owner]'s attack reaps through [target] with the weight of death itself!</i>"))
+		if(target.mob_biotypes == MOB_UNDEAD && !target.mind)
+			target.Knockdown(4)
+			target.Jitter(6)
 		INVOKE_ASYNC(src, PROC_REF(play_effects), target)
 
 	consume()
