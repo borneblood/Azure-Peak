@@ -1,3 +1,158 @@
+/*///////////////////
+// TO: Macabre Arts 
+A cantrip miracle that lets you delve towards Engineering, Sorcery and (evil) Medicine by using your Holy skill level.
+
+Main ingredients are going to be blood, organs, bones for catalysts, and normal run-up-the-mill ingredients. 
+
+This miracle will interact with Artificer tools, enhancing them, but clearly showing that you're not doing this 
+'naturally' anymore. It will be conspicuous when you "improve" something (or someone). */
+
+/datum/action/cooldown/spell/zizo_artificery
+	name = "Macabre Arts"
+	desc = "Offer a prayer for Zizo, who shall guide your hand through the insides of primordial Artificery."
+	action_icon = 'icons/mob/actions/zizomiracles.dmi'
+	overlay_icon = 'icons/mob/actions/zizomiracles.dmi'
+	overlay_state = "churn_living"
+	releasedrain = 10
+	chargedrain = 0
+	chargetime = 0
+	chargedloop = /datum/looping_sound/invokeholy
+	invocation_type = "emote"
+	sound = 'sound/magic/zizo_snuff.ogg'
+	associated_skill = /datum/skill/magic/holy
+	antimagic_allowed = FALSE
+	recharge_time = 20 SECONDS
+	miracle = TRUE
+	devotion_cost = 30
+	range = 2
+
+/datum/action/cooldown/spell/zizo_artificery
+	button_icon = 'icons/mob/actions/matthiosmiracles.dmi'
+	button_icon_state = "lockpick"
+	name = "Freeman's Tools"
+	desc = "A simple prayer to the Free-God Matthios, for tools of liberation or transaction.<br><br>His will manifests in three forms: gutter-born tricks of want, gilded tools of blessed liberation, or by granting the bases of Malchem, a form of primordial alchemy so impossible it is oft mistaken for sorcery."
+	associated_skill = /datum/skill/magic/holy
+	click_to_activate = FALSE
+	self_cast_possible = TRUE
+	primary_resource_type = SPELL_COST_STAMINA
+	primary_resource_cost = SPELLCOST_CANTRIP
+	charge_required = FALSE
+	cooldown_time = 10 SECONDS
+	spell_requirements = SPELL_REQUIRES_NO_ANTIMAGIC | SPELL_REQUIRES_HUMAN | SPELL_REQUIRES_SAME_Z
+	var/devotion_cost = 20
+	var/list/options = list(
+		// A one-use chalk that lets you make a ritual circle, used as a base for creating some things.
+		"Profane Chalk" = list(
+			path = /obj/item/profane_chalk,
+			m_cooldown = 60 SECONDS,
+			m_rank = SKILL_LEVEL_NOVICE,
+			category = "Profane Arts",
+			lines = list("Zizo! Let your name aid my preparations!", "Lady of Progress! My hands are ready for work!", "O' Archenemy! I ask for thee, the method to bend reality!")
+		),
+	)
+
+	var/list/item_cooldowns = list()
+
+/datum/action/cooldown/spell/freemans_tools/cast(atom/cast_on)
+	. = ..()
+	var/mob/living/carbon/human/H = owner
+	if(!istype(H))
+		return FALSE
+
+	var/skill = H.get_skill_level(associated_skill)
+
+	// FILTER VALID OPTIONS
+	var/list/valid = list()
+	for(var/name in options)
+		var/list/entry = options[name]
+		if(!islist(entry))
+			continue
+		if(skill >= entry["m_rank"])
+			valid[name] = entry
+
+	if(!valid.len)
+		return FALSE
+
+	// CATEGORY SELECTION
+	var/list/categories = list(
+		"Rogue Arts",
+		"Gilded Tools",
+		"Malchem Vials"
+	)
+
+	var/category = tgui_input_list(H, "Choose your path", "Freeman's Tools", categories)
+	if(!category)
+		return FALSE
+
+	// BUILD DISPLAY LIST
+	var/list/display = list()
+
+	for(var/name in valid)
+		var/list/entry = valid[name]
+
+		if(entry["category"] != category)
+			continue
+
+		var/cd = item_cooldowns[name]
+		var/display_name
+
+		if(cd == -1)
+			display_name = "[name] (UNAVAILABLE)"
+		else
+			var/time_left = cd ? max(0, cd - world.time) : 0
+			display_name = time_left > 0 ? "[name] ([round(time_left/10, 1)]s)" : name
+
+		display[display_name] = name
+
+	if(!display.len)
+		to_chat(H, span_warning("Nothing available in this category."))
+		return FALSE
+
+	// CHOICE
+	var/choice_display = tgui_input_list(H, "Choose your tool", "Freeman's Tools", display)
+	if(!choice_display)
+		return FALSE
+
+	var/choice = display[choice_display]
+	if(!choice)
+		return FALSE
+
+	var/list/entry = valid[choice]
+	var/item_path = entry["path"]
+	var/m_cd = entry["m_cooldown"]
+	var/list/lines = entry["lines"]
+
+	if(!item_path)
+		return FALSE
+
+	// COOLDOWN CHECK
+	if(item_cooldowns[choice] == -1)
+		to_chat(H, span_warning("[choice] cannot be used again."))
+		return FALSE
+
+	if(item_cooldowns[choice] && world.time < item_cooldowns[choice])
+		to_chat(H, span_warning("[choice] is on cooldown for [round((item_cooldowns[choice] - world.time)/10, 1)] seconds."))
+		return FALSE
+
+	// SPAWN ITEM
+	var/obj/item/I = new item_path(H.drop_location())
+	if(!I)
+		return FALSE
+
+	H.put_in_hands(I)
+
+	if(lines && lines.len)
+		H.say(pick(lines))
+
+	// APPLY COOLDOWN
+	if(m_cd == -1)
+		item_cooldowns[choice] = -1
+	else
+		item_cooldowns[choice] = world.time + m_cd
+
+	StartCooldown()
+	return TRUE
+
 // T0: Snuffs out fires/lights around area of the caster, greater range with higher HOLY skill
 /obj/effect/proc_holder/spell/self/zizo_snuff
 	name = "Snuff Lights"
