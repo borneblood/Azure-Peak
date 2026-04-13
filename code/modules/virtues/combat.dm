@@ -169,10 +169,12 @@
 
 /datum/virtue/combat/pallid
 	name = "Hemophilia"
-	desc = "I was once bitten by a vampire, yet the curse never fully took hold. Something foul still lingers in my blood, causing silver to burn my flesh and the sun above to fill me with unease. I still draw breath, but my eyes pierce the darkness. A half-formed curse coils within me."
-	custom_text = "Grants better vision in the night, and your bites cause you to instinctively latch onto your foe. Silver burns my flesh and the sunlight makes me very uncomfortable. <font color=red>Your CON is reduced by 1.</font>"
+	desc = "I was once bitten by a Vampyre, yet the curse never fully took hold. Something foul still lingers in my blood, unable to be purged nor manifest, yet still causing silver to burn my flesh and the sun above to feel punishing. At nite is when I feel the most calm, and the taste of blood is... exquisite at best."
+	custom_text = "- Grants a lesser form of silver weakness.<br>- Grants a lesser sunlight exposure weakness.<br>- Grants a minor resistance against Lycan conversion.<br>- You can consume blood, although it doesn't anything special unless you are low on blood.<br><br><font color=red>(THIS VIRTUE WILL REDUCE YOUR CON by 1.)<br><font size=0.5><font color='#ff7b00'><i>Keep in mind that you are 'not' undead, nor a vampire in any shape or form, you are merely afflicted with a disease borne from a failed siring attempt. This virtue should not be an excuse to break any rules of escalation.<br></font>"
 	added_traits = list(TRAIT_PALLID, TRAIT_SAVAGEBITE, TRAIT_NITEVISION)
-	adjust_sta
+	added_stats = list(STATKEY_CON = -1)
+	restricted = TRUE
+	races = list(/datum/species/dullahan, /datum/species/construct/metal, /datum/species/gnoll)
 
 /datum/virtue/combat/dualwielder
 	name = "Dual Wielder"

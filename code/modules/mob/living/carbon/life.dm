@@ -551,15 +551,22 @@ GLOBAL_LIST_INIT(ballmer_windows_me_msg, list("Yo man, what if, we like, uh, put
 			energy_add(sleepy_mod * 4)
 		if(buckled?.sleepy)
 			sleepy_mod = buckled.sleepy
-		else if(isturf(loc)) //No illegal tech.
-			var/obj/structure/bed/rogue/bed = locate() in loc
+		else if(isturf(loc) && !(mobility_flags & MOBILITY_STAND)) // we add tech now
+			var/turf/T = loc
+
+			var/obj/structure/bed/rogue/bed = locate() in T
 			if(bed)
 				sleepy_mod = bed.sleepy
 			else
-				if(HAS_TRAIT(src, TRAIT_OUTDOORSMAN))
-					var/obj/structure/flora/newbranch/branch = locate() in loc
-					if(branch)
-						sleepy_mod = 2 // just equivalent to a bedroll
+				if(istype(T, /turf/open/water) && (src.has_flaw(/datum/charflaw/lowenergy)||HAS_TRAIT(src, TRAIT_SEAFARER)||HAS_TRAIT(src, TRAIT_WATERBREATHING)))
+					sleepy_mod = 1.5
+
+				else
+					sleepy_mod = 1
+					if((HAS_TRAIT(src, TRAIT_OUTDOORSMAN)||src.has_flaw(/datum/charflaw/lowenergy)))
+						var/obj/structure/flora/newbranch/branch = locate() in T
+						if(branch)
+							sleepy_mod = 2
 		if(nutrition > 0 || doesnt_hunger)
 			energy_add(sleepy_mod * 15)
 		if(hydration > 0 || doesnt_hunger)
@@ -589,7 +596,7 @@ GLOBAL_LIST_INIT(ballmer_windows_me_msg, list("Yo man, what if, we like, uh, put
 				sleepy_mod = bed.sleepy
 			else
 				sleepy_mod = 1
-				if(HAS_TRAIT(src, TRAIT_OUTDOORSMAN))
+				if((HAS_TRAIT(src, TRAIT_OUTDOORSMAN)||src.has_flaw(/datum/charflaw/lowenergy)))
 					var/obj/structure/flora/newbranch/branch = locate() in loc
 					if(branch)
 						sleepy_mod = 2 //Worse than a bedroll, better than nothing.

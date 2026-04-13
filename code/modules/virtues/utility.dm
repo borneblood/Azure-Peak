@@ -372,15 +372,34 @@
 			to_chat(hag_mind.current, span_boldnotice("A familiar rhythm pulse in the roots... [recipient.real_name] is walking the lands this week."))
 	to_chat(recipient, span_boldnotice("The Mossmother's gaze lingers upon you. You are recognized by her daughters."))
 
-/datum/virtue/utility/wildsman
-	name = "Wildsman (-3 TRI)"
+/datum/virtue/utility/primal
+	name = "Primal (-3 TRI)"
 	desc = "Due to my upbringing, I was either born, or lived among beasts and bramble. The wilds have shaped my body into something harsher, more primal, at the cost of some intellectual growth.<br><br>Grants Survival Expert, but no bonuses.<br><br><font color=red>(THIS VIRTUE WILL REDUCE YOUR INT BY 2.)<font color=purple><br>"
 	max_choices = 3
 	choice_costs = list(0, 0, 3)
 	triumph_cost = 3
 	restricted = TRUE
-	races = list(/datum/species/aasimar, /datum/species/construct, /datum/species/dullahan, /datum/species/human, /datum/species/elf, /datum/species/dwarf)
-	added_stats = list(STATKEY_INT = -2)
+	races = list(
+		/datum/species/human/,
+		/datum/species/human/northern,
+		/datum/species/dwarf,
+		/datum/species/dwarf/mountain,
+		/datum/species/elf,
+		/datum/species/elf/dark,
+		/datum/species/elf/wood,
+		/datum/species/elf/sun,
+		/datum/species/human/halfelf,
+		/datum/species/tieberian,
+		/datum/species/dullahan,
+		/datum/species/halforc,
+		/datum/species/goblinp,
+		/datum/species/aasimar,
+		/datum/species/construct/metal,
+		/datum/species/moth,
+		/datum/species/gnoll
+	)
+
+	added_stats = list(STATKEY_INT = -2, STATKEY_STR = 1) // unga bunga
 	added_traits = list(TRAIT_SURVIVAL_EXPERT)
 	choice_tooltips = list(
 		"Beastly Digestion" = "I can eat raw food and drink dirty water, due to my superior digestive system.",
@@ -406,7 +425,7 @@
 		"Nite Vision",
 	)
 
-/datum/virtue/utility/wildsman/apply_to_human(mob/living/carbon/human/recipient)
+/datum/virtue/utility/primal/apply_to_human(mob/living/carbon/human/recipient)
 	. = ..()
 
 	if(triumph_check(recipient))
@@ -433,6 +452,81 @@
 				ADD_TRAIT(recipient, TRAIT_LONGSTRIDER, TRAIT_VIRTUE)
 
 			else if(choice == "Nite Vision")
+				if(recipient.has_flaw(/datum/charflaw/colorblind))
+					to_chat(recipient, "Your eyes have become permanently colorblind!")
+					ADD_TRAIT(recipient, TRAIT_WILD_NITEVISION, TRAIT_VIRTUE)
+				else if(recipient.charflaws.len)
+					recipient.verbs += /mob/living/carbon/human/proc/togglenitevision
+
+/datum/virtue/utility/wildsman
+	name = "Wildsman (-3 TRI)"
+	desc = "Due to my upbringing, I was either born, or lived among beasts and bramble. The wilds have shaped my body into something harsher, more primal, at the cost of some intellectual growth.<br><br>Grants Survival Expert, but no bonuses.<br><br><font color=red>(THIS VIRTUE WILL REDUCE YOUR INT BY 2.)<font color=purple><br>"
+	max_choices = 3
+	choice_costs = list(0, 0, 3)
+	triumph_cost = 3
+	restricted = TRUE
+	races = list(
+		/datum/species/dwarf,
+		/datum/species/dwarf/mountain,
+		/datum/species/tieberian,
+		/datum/species/dullahan,
+		/datum/species/halforc,
+		/datum/species/lizardfolk,
+		/datum/species/goblinp,
+		/datum/species/kobold,
+		/datum/species/aasimar,
+		/datum/species/demihuman,
+		/datum/species/anthromorph,
+		/datum/species/construct/metal,
+		/datum/species/anthromorphsmall,
+		/datum/species/akula,
+		/datum/species/dracon,
+		/datum/species/lupian,
+		/datum/species/moth,
+		/datum/species/tabaxi,
+		/datum/species/vulpkanin,
+		/datum/species/gnoll
+	)
+
+	added_stats = list(STATKEY_INT = -2, STATKEY_STR = 1) // unga bunga
+	added_traits = list(TRAIT_SURVIVAL_EXPERT)
+	choice_tooltips = list(
+		"Beastly Digestion" = "I can eat raw food and drink dirty water, due to my superior digestive system.",
+		"Outdoorsman" = "My experience in the wilds allows me to fall asleep on surfaces like treebranches as if they were beds.",
+		"Lesser Seafarer" = "I have adapted to aquatic environments, allowing me to swim faster, and eat raw fish.",
+		"Survivalist" = "I am naturally skilled in trapping, tracking, butchering, and crafting, gaining bonuses to it.",
+		"Thick Blood" = "My blood is thick and slow to spill, reducing the rate of bleeding.",
+		"Wild Bite" = "I can bite enemies strongly, and latch onto them.",
+		"Lesser Nite Vision" = "I see way better in darkness, but colors dull and fade to gray when I do so.",
+	)
+
+	extra_choices = list(
+		"Beastly Digestion" = TRAIT_WILD_EATER,
+		"Outdoorsman" = TRAIT_OUTDOORSMAN,
+		"Lesser Seafarer" = TRAIT_SEAFARER,
+		"Survivalist",
+		"Thick Blood" = TRAIT_BLOOD_RESISTANCE,
+		"Wild Bite" = TRAIT_WILDBITE,
+		"Lesser Nite Vision",
+	)
+
+/datum/virtue/utility/wildsman/apply_to_human(mob/living/carbon/human/recipient)
+	. = ..()
+
+	if(triumph_check(recipient))
+		for(var/choice in picked_choices)
+
+			if(extra_choices[choice] in GLOB.roguetraits)
+				ADD_TRAIT(recipient, extra_choices[choice], TRAIT_VIRTUE)
+
+			else if(choice == "Survivalist")
+				recipient.adjust_skillrank(/datum/skill/craft/traps, 2, TRUE)
+				recipient.adjust_skillrank(/datum/skill/misc/tracking, 2, TRUE)
+				recipient.adjust_skillrank(/datum/skill/labor/butchering, 2, TRUE)
+				recipient.adjust_skillrank(/datum/skill/craft/sewing, 2, TRUE)
+				recipient.adjust_skillrank(/datum/skill/craft/tanning, 2, TRUE)
+
+			else if(choice == "Lesser Nite Vision")
 				if(recipient.has_flaw(/datum/charflaw/colorblind))
 					to_chat(recipient, "Your eyes have become permanently colorblind!")
 					ADD_TRAIT(recipient, TRAIT_WILD_NITEVISION, TRAIT_VIRTUE)

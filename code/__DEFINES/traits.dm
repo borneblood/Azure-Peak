@@ -14,7 +14,6 @@
 #define TRAIT_SEEPRICES_SHITTY "Appraiser"
 #define TRAIT_VAMPBITE "Vampire Bite"
 #define TRAIT_STRONGBITE "Strong Bite"
-#define TRAIT_SAVAGEBITE "Savage Bite"
 #define TRAIT_STRONGKICK "Strong Kick"
 #define TRAIT_NOBLE "Noble Blooded"
 #define TRAIT_DEFILED_NOBLE "Drained Noble Blood"
@@ -120,6 +119,7 @@
 #define TRAIT_CURSE_SCAR "Curse Scar"
 #define TRAIT_SEAFARER "Seafarer"
 #define TRAIT_SAVAGEBITE "Savage Bite"
+#define TRAIT_WILDBITE "Wild Bite"
 #define TRAIT_ACTIVECLAWS "Sharp Claws"
 #define TRAIT_WILD_NITEVISION "Wild Nitevision"
 
@@ -328,9 +328,10 @@ GLOBAL_LIST_INIT(roguetraits, list(
 	TRAIT_NUTCRACKER = "I love kicking idiots on the nuts!",
 	TRAIT_SEEPRICES = "I can tell the prices of things down to the zenny.",
 	TRAIT_SEEPRICES_SHITTY = "I can tell the prices of things... <i>Kind of</i>.",
-	TRAIT_STRONGBITE = span_info("Stronger bites, critical bite attacks."),
-	TRAIT_SAVAGEBITE = span_info("My bites are slightly stronger, and I'll cling to foes I bite."),
-	TRAIT_VAMPBITE = span_info("Victims of your bite will feel immense pleasure."),
+	TRAIT_STRONGBITE = span_info("My bites are devastating, and will often cause critical damage."), 
+	TRAIT_SAVAGEBITE = span_info("My bites are stronger, and I'll cling to foes I bite."), // weaker sidegrade of the above, for wildkin species
+	TRAIT_WILDBITE = span_info("My bites are a little stronger, and I'll cling to foes I bite."), // even weaker than above, for gorilla humens
+	TRAIT_VAMPBITE = span_info("My fangs carry an ecstatic quality to them, giving my victims immense pleasure."),
 	TRAIT_ACTIVECLAWS = span_info("My claws are poised to strike. I can slash and cut at foes in unarmed combat."),
 	TRAIT_STRONGKICK = span_info("My kicks knock people down and back a step, consistently. There's no need for obstacles."),
 	TRAIT_IGNORESLOWDOWN = span_info("Nothing stops this carriage!"),

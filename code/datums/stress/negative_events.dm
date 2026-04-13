@@ -513,3 +513,28 @@
 	timer = 2 MINUTES
 	stressadd = 3
 	desc = span_red("The sun above is too hot and annoying! This brightness is very upsetting to my skin and eyes.")
+
+/datum/stressevent/pallid_drinkblood
+	timer = 5 MINUTES
+	stressadd = 3
+	desc = span_red("What I did was abhorrent and immoral! I'm no filthy bloodsucker! I can drink this, but I don't like the feeling of it at all!")
+
+/datum/stressevent/stinky
+	timer = 2 MINUTES
+	stressadd = 3
+	desc = span_red("EWGH! What a vile, foul smell of grime and stink! Someone absurdly REEKS!")
+
+/datum/stressevent/lowenergy
+	timer = 10 MINUTES
+	stressadd = 2
+	desc = span_red("I am <b><i><u>very</b></i></u> TIRED!")
+
+/datum/stressevent/ravenous
+	timer = 10 MINUTES
+	stressadd = 2
+	desc = span_red("I am <b><i><u>very</b></i></u> HONGRY!")
+
+/datum/stressevent/drymouth
+	timer = 10 MINUTES
+	stressadd = 2
+	desc = span_red("I am <b><i><u>very</b></i></u> THIRSTY!")

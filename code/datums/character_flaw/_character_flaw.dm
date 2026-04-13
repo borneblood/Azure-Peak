@@ -56,7 +56,9 @@ GLOBAL_LIST_INIT(averse_factions, list(
 	var/needs_extra_vice = FALSE
 	/// For voyeur vice examines only. Format is "[name] is " + this + "...", leave blank to use the flaw's name.
 	/// Intended for addiction types only.
-	var/voyeur_descriptor	
+	var/voyeur_descriptor
+	/// This is for a smarter rerolling of vices, so it excludes what was already attempted, and any vices that are mutually exclusive with it.
+	var/anticheese_blacklist = list()	
 
 /datum/charflaw/proc/on_mob_creation(mob/user)
 	return
@@ -800,7 +802,6 @@ GLOBAL_LIST_INIT(averse_factions, list(
 					set_jobflag(new_aversion)
 					break
 
-
 /datum/charflaw/averse/apply_post_equipment(mob/user)
 	if(user.mind)
 		if(user.client.prefs?.averse_chosen_faction)
@@ -810,5 +811,165 @@ GLOBAL_LIST_INIT(averse_factions, list(
 	if(is_active && user && !QDELETED(user))
 		addtimer(CALLBACK(src, PROC_REF(check_for_candidates), user), 5 SECONDS)
 
+/datum/charflaw/lowenergy
+	name = "Low Energy"
+	desc = "I struggle to function while exhausted. There's no way I can go on without catching a wink. On a good note, I can sleep about anywhere, and brews can ward off the worse..."
+	var/next_check = 0
+	var/interval = 10 SECONDS
+
+/datum/charflaw/lowenergy/flaw_on_life(mob/user)
+	var/mob/living/carbon/human/H = user
+	if(!ishuman(user))
+		return
+	if(world.time < next_check)
+		return
+
+	if(H.has_status_effect((/datum/status_effect/buff/vigorized)))
+		H.remove_stress(/datum/stressevent/lowenergy)
+		H.remove_status_effect(/datum/status_effect/debuff/lowenergy)
+		next_check = world.time + interval
+	else
+		next_check = world.time + interval
+
+	if(H.has_status_effect(/datum/status_effect/debuff/sleepytime))
+		H.add_stress(/datum/stressevent/lowenergy)
+		H.apply_status_effect(/datum/status_effect/debuff/lowenergy)
+	else
+		H.remove_stress(/datum/stressevent/lowenergy)
+		H.remove_status_effect(/datum/status_effect/debuff/lowenergy)
+		
+/datum/status_effect/debuff/lowenergy
+	id = "lowenergy"
+	alert_type = /atom/movable/screen/alert/status_effect/lowenergy
+	effectedstats = list(STATKEY_PER = -3, STATKEY_SPD = -2, STATKEY_WIL = -3)
+	duration = 60 MINUTES
+	tick_interval = 10 SECONDS
+
+/datum/status_effect/debuff/lowenergy/tick()
+	var/mob/living/carbon/human/O = owner
+	if(prob(15))
+		O.emote("yawn")
+		O.Immobilize(15)
+
+/atom/movable/screen/alert/status_effect/lowenergy
+	name = "Low Energy"
+	desc = "I am so unspeakably, ungodly, inhumanly, soul-crushingly tired right now..."
+	
+/datum/charflaw/drymouth
+	name = "Dry Mouth"
+	desc = "My throat is ever-parched. I must drink often, or discomfort quickly sets in. My voice carries better when quenched."
+	var/next_check = 0
+	var/interval = 10 SECONDS
+
+/datum/charflaw/drymouth/flaw_on_life(mob/user)
+	var/mob/living/carbon/human/H = user
+	if(!ishuman(user))
+		return
+	if(world.time < next_check)
+		return
+
+	next_check = world.time + interval
+
+	switch(H.hydration)
+		if(HYDRATION_LEVEL_HYDRATED to INFINITY)
+			H.remove_stress(/datum/stressevent/drymouth)
+			H.remove_status_effect(/datum/status_effect/debuff/drymouth)
+
+		if(HYDRATION_LEVEL_SMALLTHIRST to HYDRATION_LEVEL_HYDRATED)
+			H.remove_stress(/datum/stressevent/drymouth)
+			H.remove_status_effect(/datum/status_effect/debuff/drymouth)
+
+		if(HYDRATION_LEVEL_THIRSTY to HYDRATION_LEVEL_SMALLTHIRST)
+			H.add_stress(/datum/stressevent/drymouth)
+			H.apply_status_effect(/datum/status_effect/debuff/drymouth)
+
+		if(HYDRATION_LEVEL_DEHYDRATED to HYDRATION_LEVEL_THIRSTY)
+			H.add_stress(/datum/stressevent/drymouth)
+			H.apply_status_effect(/datum/status_effect/debuff/drymouth)
+
+		if(0 to HYDRATION_LEVEL_DEHYDRATED)
+			H.add_stress(/datum/stressevent/drymouth)
+			H.apply_status_effect(/datum/status_effect/debuff/drymouth)
 
 
+/datum/status_effect/debuff/drymouth
+	id = "drymouth"
+	alert_type = /atom/movable/screen/alert/status_effect/drymouth
+	effectedstats = list(STATKEY_PER = -2, STATKEY_WIL = -2)
+	duration = 60 MINUTES
+	tick_interval = 10 SECONDS
+
+/datum/status_effect/debuff/drymouth/tick()
+	var/mob/living/carbon/human/O = owner
+	if(prob(20))
+		O.emote("cough")
+		to_chat(O, span_warning("My throat is unbearably dry..."))
+
+/atom/movable/screen/alert/status_effect/drymouth
+	name = "Dry Mouth"
+	desc = "My throat is so unbearably parched..."
+
+/datum/charflaw/ravenous
+	name = "Ravenous"
+	desc = "Hunger gnaws at me constantly. I must eat more often, or it begins to consume me."
+	var/next_check = 0
+	var/interval = 10 SECONDS
+
+/datum/charflaw/ravenous/flaw_on_life(mob/user)
+	var/mob/living/carbon/human/H = user
+	if(!ishuman(user))
+		return
+	if(world.time < next_check)
+		return
+
+	next_check = world.time + interval
+
+	switch(H.nutrition)
+		if(NUTRITION_LEVEL_FED to INFINITY)
+			H.remove_stress(/datum/stressevent/ravenous)
+			H.remove_status_effect(/datum/status_effect/debuff/ravenous)
+
+		if(NUTRITION_LEVEL_HUNGRY to NUTRITION_LEVEL_FED)
+			H.add_stress(/datum/stressevent/ravenous)
+			H.apply_status_effect(/datum/status_effect/debuff/ravenous)
+
+		if(NUTRITION_LEVEL_STARVING to NUTRITION_LEVEL_HUNGRY)
+			H.add_stress(/datum/stressevent/ravenous)
+			H.apply_status_effect(/datum/status_effect/debuff/ravenous)
+
+		if(0 to NUTRITION_LEVEL_STARVING)
+			H.add_stress(/datum/stressevent/ravenous)
+			H.apply_status_effect(/datum/status_effect/debuff/ravenous)
+
+/datum/status_effect/debuff/ravenous
+	id = "ravenous"
+	alert_type = /atom/movable/screen/alert/status_effect/ravenous
+	effectedstats = list(STATKEY_STR = -2, STATKEY_WIL = -3)
+	duration = 60 MINUTES
+	tick_interval = 10 SECONDS
+
+/datum/status_effect/debuff/ravenous/tick()
+	var/mob/living/carbon/human/O = owner
+	if(prob(20))
+		O.emote("groan")
+		to_chat(O, span_warning("The hunger gnaws at me..."))
+
+/atom/movable/screen/alert/status_effect/ravenous
+	name = "Ravenous"
+	desc = "I am so unbearably, violently, soul-devouring hungry..."
+
+/datum/charflaw/orderinclined
+	name = "Orderly Nature"
+	desc = "Your moral compass slams towards Order, making you hate these loud, chaotic people and branded knaves by default. You can't stand being around them."
+
+/datum/charflaw/chaosinclined
+	name = "Chaotic Nature"
+	desc = "Your moral compass slams towards Chaos, making you hate these boring, orderly people and law-enforcers by default. You can't stand being around them."
+
+/datum/charflaw/stinky
+	name = "Stinky"
+	desc = "An unpleasant odor clings to me, often souring the reactions of those nearby. My nose has adapted to it."
+
+/datum/charflaw/snob
+	name = "Snob"
+	desc = "I crave finery and wealth, believing myself deserving of only the best life has to offer. I need to be dressed as posh as humenly possible!"

@@ -64,15 +64,23 @@
 		addtimer(CALLBACK(src, TYPE_PROC_REF(/mob/living/carbon, vomit), 0, TRUE), rand(8 SECONDS, 15 SECONDS))
 		return
 
-	if(HAS_TRAIT(src, TRAIT_PALLID) || HAS_TRAIT(src, TRAIT_HORDE)) // blood for the blood god?!
-		var/is_fucked = (src.blood_volume < BLOOD_VOLUME_BAD)
+	if(HAS_TRAIT(src, TRAIT_PALLID))
+		var/low_blood = (src.blood_volume < BLOOD_VOLUME_BAD)
+		var/is_fine = (HAS_TRAIT(src, TRAIT_HORDE)||HAS_TRAIT(src, TRAIT_CABAL)||HAS_TRAIT(src, TRAIT_DEPRAVED)||HAS_TRAIT(src, TRAIT_KNEESTINGER_IMMUNITY)||HAS_TRAIT(src, TRAIT_ABYSSOR_SWIM)) // well not exactly "evil" in a sense, but more like, graggar LOVES it, zizo only cares about efficiency, and baotha could see this immorality as an agreeable sin, matthios would likely find it not so elegant, neither dendor nor abyssor would probably care either, the rest of the tennites and psydon are a given
 		var/noble_blood = HAS_TRAIT(victim, TRAIT_NOBLE)
 		var/is_NPC = !victim.mind
-		if(is_fucked || noble_blood || is_NPC)
-			src.adjustBruteLoss(-15)
-			src.adjustFireLoss(-15)
+
 		src.blood_volume += 15
 		src.adjust_hydration(15)
+
+		src.add_stress(/datum/stressevent/pallid_drinkblood)
+		if(low_blood || noble_blood || is_NPC)
+			src.adjustBruteLoss(-15)
+			src.adjustFireLoss(-15)
+
+		if(!is_fine) // moral compass is a go
+			src.add_stress(/datum/stressevent/pallid_drinkblood)
+
 		return
 
 	if(VVictim)

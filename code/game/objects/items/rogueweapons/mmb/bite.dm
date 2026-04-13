@@ -88,9 +88,11 @@
 	var/dam2do = 10*(user.STASTR/20)
 	if(HAS_TRAIT(user, TRAIT_STRONGBITE))
 		dam2do *= 2
-	else if(HAS_TRAIT(user, TRAIT_SAVAGEBITE))
+	else if(HAS_TRAIT(user, TRAIT_SAVAGEBITE)) //bite jakk goes here
 		dam2do *= 1.5
-	if(!(HAS_TRAIT(user, TRAIT_STRONGBITE)||HAS_TRAIT(user, TRAIT_SAVAGEBITE)))
+	else if(HAS_TRAIT(user, TRAIT_WILDBITE)) 
+		dam2do *= 1.25
+	if(!(HAS_TRAIT(user, TRAIT_STRONGBITE)||HAS_TRAIT(user, TRAIT_SAVAGEBITE)||HAS_TRAIT(user, TRAIT_WILDBITE)))
 		if(!affecting.has_wound(/datum/wound/bite))
 			nodmg = TRUE
 	if(!nodmg)
@@ -157,10 +159,10 @@
 			mind.attackedme[user.real_name] = world.time
 		log_combat(user, src, "bit")
 
-	if(HAS_TRAIT(user, TRAIT_SAVAGEBITE))
+	if((HAS_TRAIT(user, TRAIT_SAVAGEBITE)||HAS_TRAIT(user, TRAIT_WILDBITE)))
 		user.start_pulling(src)
 		user.setDir(get_dir(user, src))
-		user.balloon_alert_to_viewers("Savage Bite!", "Savage Bite!", 10)
+		user.balloon_alert_to_viewers("Bite & Cling!", "Bite & Cling!", 10)
 
 	return TRUE
 
@@ -256,6 +258,8 @@
 		damage = damage*2
 	else if(HAS_TRAIT(user, TRAIT_SAVAGEBITE))
 		damage = damage*1.5
+	else if(HAS_TRAIT(user, TRAIT_WILDBITE))
+		damage = damage*1.25
 	var/armor_block = C.run_armor_check(sublimb_grabbed, d_type, armor_penetration = PEN_NONE, damage = damage)
 	C.next_attack_msg.Cut()
 	user.do_attack_animation(C, "bite")

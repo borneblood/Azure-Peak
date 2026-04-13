@@ -32,3 +32,25 @@
 // 	descriptor = "smell"
 // 	scent = "a steamy scent"
 // 	color = "#ffffff"
+
+/datum/pollutant/stink
+	name = "Stinky Scent"
+	pollutant_flags = POLLUTANT_APPEARANCE|POLLUTANT_SMELL|POLLUTANT_BREATHE_ACT
+	smell_intensity = 1
+	descriptor = "smell"
+	scent = "a stinky scent"
+	color = "#3a6600"
+
+/datum/pollutant/stinky/breathe_act(mob/living/carbon/victim, amount, total_amount)
+	. = ..()
+	if(HAS_TRAIT (victim, TRAIT_NOSTINK))
+		return
+		
+	if(victim.wear_mask)
+		var/obj/item/mask = victim.wear_mask
+		if(!mask.gas_transfer_coefficient)
+			return
+		if((3 / victim.wear_mask.gas_transfer_coefficient) >= amount)
+			return
+	if(amount > 3 && (amount / total_amount >= 0.25))
+		victim.add_stress(/datum/stressevent/stinky)
