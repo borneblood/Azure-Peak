@@ -66,21 +66,31 @@
 
 	if(HAS_TRAIT(src, TRAIT_PALLID))
 		var/low_blood = (src.blood_volume < BLOOD_VOLUME_BAD)
-		var/is_fine = (HAS_TRAIT(src, TRAIT_HORDE)||HAS_TRAIT(src, TRAIT_CABAL)||HAS_TRAIT(src, TRAIT_DEPRAVED)||HAS_TRAIT(src, TRAIT_KNEESTINGER_IMMUNITY)||HAS_TRAIT(src, TRAIT_ABYSSOR_SWIM)) // well not exactly "evil" in a sense, but more like, graggar LOVES it, zizo only cares about efficiency, and baotha could see this immorality as an agreeable sin, matthios would likely find it not so elegant, neither dendor nor abyssor would probably care either, the rest of the tennites and psydon are a given
+		//the blood god approves (duh), the degenerate or primal gods don't care as much, everyone else will feel the weight of their sins
+		//I'd think matthios would not be fine either, since this is not very elegant, but I could be wrong!
+		var/is_fine = (HAS_TRAIT(src, TRAIT_CABAL)||HAS_TRAIT(src, TRAIT_DEPRAVED)||HAS_TRAIT(src, TRAIT_KNEESTINGER_IMMUNITY)||HAS_TRAIT(src, TRAIT_ABYSSOR_SWIM)) 
+		var/is_GRAGGAR_GRAGGAR_GRAGGAR = (HAS_TRAIT(src, TRAIT_HORDE))
 		var/noble_blood = HAS_TRAIT(victim, TRAIT_NOBLE)
 		var/is_NPC = !victim.mind
 
-		src.blood_volume += 15
+		src.blood_volume += (BLOOD_VOLUME_NORMAL * 0.05)
 		src.adjust_hydration(15)
 
 		src.add_stress(/datum/stressevent/pallid_drinkblood)
 		if(low_blood || noble_blood || is_NPC)
-			src.adjustBruteLoss(-15)
-			src.adjustFireLoss(-15)
+			src.adjustBruteLoss(-10)
+			src.adjustFireLoss(-10)
+			for(var/datum/wound/W as anything in src.get_wounds())
+				if(W && W.bleed_rate > 0)
+					W.set_bleed_rate(0)
 
-		if(!is_fine) // moral compass is a go
+		// moral compass for you, puny hooman
+		if(is_GRAGGAR_GRAGGAR_GRAGGAR)
+			src.add_stress(/datum/stressevent/pallid_drinkblood_graggar)
+		else if(is_fine)
+			src.add_stress(/datum/stressevent/pallid_drinkblood_fine)
+		else
 			src.add_stress(/datum/stressevent/pallid_drinkblood)
-
 		return
 
 	if(VVictim)

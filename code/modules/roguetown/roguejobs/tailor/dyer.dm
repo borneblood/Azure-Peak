@@ -31,7 +31,8 @@ var/list/used_colors
 			/obj/item/reagent_containers/glass/cup/claycup,
 			/obj/item/reagent_containers/glass/bottle/claybottle,
 			/obj/item/roguestatue/clay,
-			/obj/item/roguestatue/glass
+			/obj/item/roguestatue/glass,
+			/obj/item/rogueweapon/mace/parasol,
 			)
 
 /obj/machinery/gear_painter/Initialize()

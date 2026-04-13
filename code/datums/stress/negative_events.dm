@@ -510,14 +510,24 @@
 	desc = list(span_red("Eugh, this brew just doesn't sit right with me.."), span_red("Something about that brew tastes a little funky.."))
 
 /datum/stressevent/pallid_outdoors
-	timer = 2 MINUTES
+	timer = 1 MINUTES
 	stressadd = 3
-	desc = span_red("The sun above is too hot and annoying! This brightness is very upsetting to my skin and eyes.")
+	desc = span_red("The sunlight hurts my skin and eyes! This is very upsetting!")
 
 /datum/stressevent/pallid_drinkblood
 	timer = 5 MINUTES
 	stressadd = 3
-	desc = span_red("What I did was abhorrent and immoral! I'm no filthy bloodsucker! I can drink this, but I don't like the feeling of it at all!")
+	desc = span_red("What I did was abhorrent and immoral! I'm no filthy bloodsucker!")
+
+/datum/stressevent/pallid_drinkblood_fine
+	timer = 5 MINUTES
+	stressadd = -1
+	desc = span_green("What an exquisite flavor this is. It's like wine, but thicker... I'd not mind more.")
+
+/datum/stressevent/pallid_drinkblood_graggar
+	timer = 5 MINUTES
+	stressadd = -2
+	desc = span_green("<i><b>BY THE BLOOD GOD, THIS IS THE GOOD STUFF! THEIR BLOOD FOR YOUR SMILE, SINISTAR!!")
 
 /datum/stressevent/stinky
 	timer = 2 MINUTES
