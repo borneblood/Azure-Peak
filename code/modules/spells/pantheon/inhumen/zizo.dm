@@ -7,30 +7,11 @@ Main ingredients are going to be blood, organs, bones for catalysts, and normal 
 This miracle will interact with Artificer tools, enhancing them, but clearly showing that you're not doing this 
 'naturally' anymore. It will be conspicuous when you "improve" something (or someone). */
 
-/datum/action/cooldown/spell/zizo_artificery
-	name = "Macabre Arts"
-	desc = "Offer a prayer for Zizo, who shall guide your hand through the insides of primordial Artificery."
-	action_icon = 'icons/mob/actions/zizomiracles.dmi'
-	overlay_icon = 'icons/mob/actions/zizomiracles.dmi'
-	overlay_state = "churn_living"
-	releasedrain = 10
-	chargedrain = 0
-	chargetime = 0
-	chargedloop = /datum/looping_sound/invokeholy
-	invocation_type = "emote"
-	sound = 'sound/magic/zizo_snuff.ogg'
-	associated_skill = /datum/skill/magic/holy
-	antimagic_allowed = FALSE
-	recharge_time = 20 SECONDS
-	miracle = TRUE
-	devotion_cost = 30
-	range = 2
-
-/datum/action/cooldown/spell/zizo_artificery
+/datum/action/cooldown/spell/macabrenox_rite
 	button_icon = 'icons/mob/actions/matthiosmiracles.dmi'
 	button_icon_state = "lockpick"
-	name = "Freeman's Tools"
-	desc = "A simple prayer to the Free-God Matthios, for tools of liberation or transaction.<br><br>His will manifests in three forms: gutter-born tricks of want, gilded tools of blessed liberation, or by granting the bases of Malchem, a form of primordial alchemy so impossible it is oft mistaken for sorcery."
+	name = "Macabrenox Rite"
+	desc = "An ancient rite whispered through grave-soil and marrow. The caster beckons forth implements of deathly purpose—sepulchral relics, butcher's instruments, or vessels of blackened alchemy."
 	associated_skill = /datum/skill/magic/holy
 	click_to_activate = FALSE
 	self_cast_possible = TRUE
@@ -39,29 +20,60 @@ This miracle will interact with Artificer tools, enhancing them, but clearly sho
 	charge_required = FALSE
 	cooldown_time = 10 SECONDS
 	spell_requirements = SPELL_REQUIRES_NO_ANTIMAGIC | SPELL_REQUIRES_HUMAN | SPELL_REQUIRES_SAME_Z
+
 	var/devotion_cost = 20
+
 	var/list/options = list(
-		// A one-use chalk that lets you make a ritual circle, used as a base for creating some things.
-		"Profane Chalk" = list(
+
+		"Gravechalk Sigil" = list(
 			path = /obj/item/profane_chalk,
 			m_cooldown = 60 SECONDS,
 			m_rank = SKILL_LEVEL_NOVICE,
-			category = "Profane Arts",
-			lines = list("Zizo! Let your name aid my preparations!", "Lady of Progress! My hands are ready for work!", "O' Archenemy! I ask for thee, the method to bend reality!")
+			category = "Sepulchral Relics",
+			lines = list(
+				"From dust, the circle forms.",
+				"Grave remembers. I borrow.",
+				"Ash to ash—mark the boundary."
+			)
+		),
+
+		"Bonepicker Knife" = list(
+			path = /obj/item/kitchen/knife,
+			m_cooldown = 40 SECONDS,
+			m_rank = SKILL_LEVEL_NOVICE,
+			category = "Rite Instruments",
+			lines = list(
+				"Flesh yields. Bone remembers.",
+				"A clean cut is a kind mercy.",
+				"Let the marrow speak."
+			)
+		),
+
+		"Vial of Corrosion" = list(
+			path = /obj/item/reagent_containers/glass/bottle,
+			m_cooldown = 80 SECONDS,
+			m_rank = SKILL_LEVEL_APPRENTICE,
+			category = "Blackblood Vials",
+			lines = list(
+				"Distill the unseen.",
+				"Let shadow take form.",
+				"The unseen made wet."
+			)
 		),
 	)
 
 	var/list/item_cooldowns = list()
 
-/datum/action/cooldown/spell/freemans_tools/cast(atom/cast_on)
+
+/datum/action/cooldown/spell/macabrenox_rite/cast(atom/cast_on)
 	. = ..()
+
 	var/mob/living/carbon/human/H = owner
 	if(!istype(H))
 		return FALSE
 
 	var/skill = H.get_skill_level(associated_skill)
 
-	// FILTER VALID OPTIONS
 	var/list/valid = list()
 	for(var/name in options)
 		var/list/entry = options[name]
@@ -71,45 +83,43 @@ This miracle will interact with Artificer tools, enhancing them, but clearly sho
 			valid[name] = entry
 
 	if(!valid.len)
+		to_chat(H, span_warning("You lack the knowledge to invoke this rite."))
 		return FALSE
 
-	// CATEGORY SELECTION
 	var/list/categories = list(
-		"Rogue Arts",
-		"Gilded Tools",
-		"Malchem Vials"
+		"Sepulchral Relics",
+		"Butcher's Instruments",
+		"Black Vials"
 	)
 
-	var/category = tgui_input_list(H, "Choose your path", "Freeman's Tools", categories)
+	var/category = tgui_input_list(H, "Choose your rite", name, categories)
 	if(!category)
 		return FALSE
 
-	// BUILD DISPLAY LIST
 	var/list/display = list()
 
-	for(var/name in valid)
-		var/list/entry = valid[name]
+	for(var/entry_name in valid)
+		var/list/entry = valid[entry_name]
 
 		if(entry["category"] != category)
 			continue
 
-		var/cd = item_cooldowns[name]
+		var/cd = item_cooldowns[entry_name] || 0
 		var/display_name
 
 		if(cd == -1)
-			display_name = "[name] (UNAVAILABLE)"
+			display_name = "[entry_name] (UNAVAILABLE)"
 		else
-			var/time_left = cd ? max(0, cd - world.time) : 0
-			display_name = time_left > 0 ? "[name] ([round(time_left/10, 1)]s)" : name
+			var/time_left = max(0, cd - world.time)
+			display_name = time_left > 0 ? "[entry_name] ([round(time_left/10, 1)]s)" : entry_name
 
-		display[display_name] = name
+		display[display_name] = entry_name
 
 	if(!display.len)
-		to_chat(H, span_warning("Nothing available in this category."))
+		to_chat(H, span_warning("Nothing answers from this rite."))
 		return FALSE
 
-	// CHOICE
-	var/choice_display = tgui_input_list(H, "Choose your tool", "Freeman's Tools", display)
+	var/choice_display = tgui_input_list(H, "Choose your implement", name, display)
 	if(!choice_display)
 		return FALSE
 
@@ -125,16 +135,14 @@ This miracle will interact with Artificer tools, enhancing them, but clearly sho
 	if(!item_path)
 		return FALSE
 
-	// COOLDOWN CHECK
 	if(item_cooldowns[choice] == -1)
-		to_chat(H, span_warning("[choice] cannot be used again."))
+		to_chat(H, span_warning("[choice] will not answer you again."))
 		return FALSE
 
 	if(item_cooldowns[choice] && world.time < item_cooldowns[choice])
-		to_chat(H, span_warning("[choice] is on cooldown for [round((item_cooldowns[choice] - world.time)/10, 1)] seconds."))
+		to_chat(H, span_warning("[choice] is on cooldown for [round((item_cooldowns[choice] - world.time)/10, 1)]s."))
 		return FALSE
 
-	// SPAWN ITEM
 	var/obj/item/I = new item_path(H.drop_location())
 	if(!I)
 		return FALSE
@@ -144,7 +152,6 @@ This miracle will interact with Artificer tools, enhancing them, but clearly sho
 	if(lines && lines.len)
 		H.say(pick(lines))
 
-	// APPLY COOLDOWN
 	if(m_cd == -1)
 		item_cooldowns[choice] = -1
 	else

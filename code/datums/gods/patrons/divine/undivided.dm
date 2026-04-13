@@ -30,7 +30,7 @@
 	// Undivided - More restricted, needs to be within range of a pantheon cross or the church itself.
 	for(var/obj/structure/fluff/psycross/cross in view(4, get_turf(follower)))
 		if(cross.divine == FALSE)
-			to_chat(follower, span_danger("That defiled cross interupts my prayers!"))
+			to_chat(follower, span_danger("That defiled cross interrupts my prayers!"))
 			return FALSE
 		return TRUE
 	// Allows prayer in the church
