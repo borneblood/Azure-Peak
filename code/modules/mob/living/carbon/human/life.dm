@@ -170,7 +170,7 @@
 				coverhead = TRUE
 	if(locations & HEAD)
 		// An exception for Abyssorites, since otherwise they gain stress in rain when they shouldn't.
-		if(!coverhead && !HAS_TRAIT(src, TRAIT_ABYSSOR_SWIM))
+		if(!coverhead && (!HAS_TRAIT(src, TRAIT_ABYSSOR_SWIM)||!HAS_TRAIT(src, TRAIT_SEAFARER)))
 			add_stress(/datum/stressevent/coldhead)
 
 //END FIRE CODE

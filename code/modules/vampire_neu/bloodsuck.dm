@@ -26,7 +26,7 @@
 		to_chat(src, span_warning("Sigh. No blood."))
 		return
 
-	var/datum/antagonist/vampire/VDrinker = mind.has_antag_datum(/datum/antagonist/vampire)
+	var/datum/antagonist/vampire/VDrinker = (mind.has_antag_datum(/datum/antagonist/vampire) || HAS_TRAIT(src, TRAIT_PALLID))
 	var/datum/antagonist/vampire/VVictim = victim.mind?.has_antag_datum(/datum/antagonist/vampire)
 
 	if(ishuman(victim))
@@ -64,8 +64,19 @@
 		addtimer(CALLBACK(src, TYPE_PROC_REF(/mob/living/carbon, vomit), 0, TRUE), rand(8 SECONDS, 15 SECONDS))
 		return
 
+	if(HAS_TRAIT(src, TRAIT_PALLID) || HAS_TRAIT(src, TRAIT_HORDE)) // blood for the blood god?!
+		var/is_fucked = (src.blood_volume < BLOOD_VOLUME_BAD)
+		var/noble_blood = HAS_TRAIT(victim, TRAIT_NOBLE)
+		var/is_NPC = !victim.mind
+		if(is_fucked || noble_blood || is_NPC)
+			src.adjustBruteLoss(-15)
+			src.adjustFireLoss(-15)
+		src.blood_volume += 15
+		src.adjust_hydration(15)
+		return
+
 	if(VVictim)
-		to_chat(src, span_userdanger("<b>YOU TRY TO COMMIT DIABLERIE ON [victim].</b>"))
+		to_chat(src, span_userdanger("<b>YOU TRY TO COMMIT DIABLERIE ON [uppertext(victim)].</b>"))
 
 	var/blood_handle
 	if(victim.stat == DEAD)

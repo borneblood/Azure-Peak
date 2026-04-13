@@ -18,7 +18,7 @@
 	var/rarity_rank = 0
 	list_reagents = list(/datum/reagent/consumable/nutriment = 3)
 	slice_path = /obj/item/reagent_containers/food/snacks/rogue/meat/fish
-	eat_effect = /datum/status_effect/debuff/uncookedfood
+	eat_effect = /datum/status_effect/debuff/uncookedfish
 	cooked_smell = /datum/pollutant/food/cooked_fish
 
 /obj/item/reagent_containers/food/snacks/fish/dead

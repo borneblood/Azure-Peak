@@ -1281,7 +1281,14 @@ GLOBAL_LIST_EMPTY(roundstart_races)
 		if(!target.lying_attack_check(user))
 			return 0
 
-		var/armor_block = target.run_armor_check(selzone, "blunt", armor_penetration = PEN_NONE, blade_dulling = user.used_intent.blade_class, damage = damage, intdamfactor = user.used_intent?.intent_intdamage_factor)
+		var/damage_flag = "blunt"
+		var/blade_class = user.used_intent?.blade_class
+
+		if(HAS_TRAIT(user, TRAIT_ACTIVECLAWS))
+			damage_flag = "cut"
+			blade_class = BCLASS_CUT 
+
+		var/armor_block = target.run_armor_check(selzone, damage_flag, armor_penetration = PEN_NONE, blade_dulling = blade_class, damage = damage, intdamfactor = user.used_intent?.intent_intdamage_factor)
 
 		target.lastattacker = user.real_name
 		if(target.mind)
@@ -1298,7 +1305,7 @@ GLOBAL_LIST_EMPTY(roundstart_races)
 			nodmg = TRUE
 			target.next_attack_msg += VISMSG_ARMOR_BLOCKED
 		else
-			affecting.bodypart_attacked_by(user.used_intent.blade_class, damage, user, selzone, crit_message = TRUE)
+			affecting.bodypart_attacked_by(blade_class, damage, user, selzone, crit_message = TRUE)			
 			SEND_SIGNAL(target, COMSIG_ATOM_ATTACK_HAND, user)
 			if(affecting.body_zone == BODY_ZONE_HEAD)
 				SEND_SIGNAL(user, COMSIG_HEAD_PUNCHED, target)
@@ -1324,9 +1331,14 @@ GLOBAL_LIST_EMPTY(roundstart_races)
 							span_userdanger("I'm [atk_verb]ed by [user]![target.next_attack_msg.Join()]"), span_hear("I hear a sickening sound of flesh hitting flesh!"), COMBAT_MESSAGE_RANGE, user)
 			to_chat(user, span_danger("I [atk_verb] [target]![target.next_attack_msg.Join()]"))
 */
-		var/message_verb = "punched"
-		if(user.used_intent)
+		var/message_verb
+
+		if(HAS_TRAIT(user, TRAIT_ACTIVECLAWS))
+			message_verb = pick("slashed", "raked", "tore", "clawed")
+		else if(user.used_intent)
 			message_verb = "[pick(user.used_intent.attack_verb)]"
+		else
+			message_verb = "punched"
 		var/message_hit_area = ""
 		if(selzone)
 			message_hit_area = " in the [span_userdanger(parse_zone(selzone))]"
@@ -1349,7 +1361,11 @@ GLOBAL_LIST_EMPTY(roundstart_races)
 		if(!(target.mobility_flags & MOBILITY_STAND))
 			target.forcesay(GLOB.hit_appends)
 		if(!nodmg)
-			playsound(target.loc, user.used_intent.hitsound, 100, FALSE)
+			if(HAS_TRAIT(user, TRAIT_ACTIVECLAWS))
+				var/hitsound = list('sound/combat/hits/bladed/smallslash (1).ogg', 'sound/combat/hits/bladed/smallslash (2).ogg', 'sound/combat/hits/bladed/smallslash (3).ogg')
+				playsound(get_turf(target), hitsound, 50, TRUE)
+			else
+				playsound(target.loc, user.used_intent.hitsound, 100, FALSE)
 
 
 /datum/species/proc/spec_unarmedattacked(mob/living/carbon/human/user, mob/living/carbon/human/target)

@@ -220,14 +220,29 @@
 		to_chat(src, span_info("I've returned to my natural voice."))
 	return TRUE
 
-/mob/living/carbon/human/proc/toggleblindness()
-	set name = "Toggle Colorblindness"
+/mob/living/carbon/human/proc/togglenitevision()
+	set name = "Toggle Nite Vision"
 	set category = "Virtue"
 
-	if(!get_client_color(/datum/client_colour/monochrome))
-		add_client_colour(/datum/client_colour/monochrome)
+	if(HAS_TRAIT(src, TRAIT_WILD_NITEVISION))
+		REMOVE_TRAIT(src, TRAIT_WILD_NITEVISION, TRAIT_VIRTUE)
 	else
-		remove_client_colour(/datum/client_colour/monochrome)
+		ADD_TRAIT(src, TRAIT_WILD_NITEVISION, TRAIT_VIRTUE)
+
+	src.update_sight()
+
+	to_chat(src, span_notice("My pupils [HAS_TRAIT(src, TRAIT_WILD_NITEVISION) ? "dilate. I can see better in the dark now." : "shrink. I can see colors now."]"))
+
+/mob/living/carbon/human/proc/toggleclaws()
+	set name = "Toggle Claws"
+	set category = "Virtue"
+
+	if(HAS_TRAIT(src, TRAIT_ACTIVECLAWS))
+		REMOVE_TRAIT(src, TRAIT_ACTIVECLAWS, TRAIT_VIRTUE)
+	else
+		ADD_TRAIT(src, TRAIT_ACTIVECLAWS, TRAIT_VIRTUE)
+
+	to_chat(src, span_notice("I [HAS_TRAIT(src, TRAIT_ACTIVECLAWS) ? "extend" : "retract"] my claws."))
 
 /mob/living/carbon/human/proc/togglecombatawareness()
 	set name = "Toggle Combat Awareness"

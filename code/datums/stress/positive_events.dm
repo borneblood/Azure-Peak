@@ -394,6 +394,11 @@
 	stressadd = -3
 	desc = list(span_boldred("I SOAKED IN THE BLOOD OF THE THOUSANDS DEAD! GRAGGAR GRAGGAR GRAGGAR!"))
 
+/datum/stressevent/vamp_blood_rain
+	timer = 1 MINUTES
+	stressadd = -3
+	desc = list(span_boldred("What a pleasant rain! It feels great against my skin, and the scent of rich wine is sublime."))
+
 // Intended to proc upon exposure to gentle rain.
 /datum/stressevent/abyssor_rain
 	timer = 1 MINUTES

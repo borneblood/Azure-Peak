@@ -194,11 +194,11 @@
 		for(var/choice in picked_choices)
 			if(extra_choices[choice] in GLOB.roguetraits)
 				ADD_TRAIT(recipient, extra_choices[choice], TRAIT_VIRTUE)
-				if(choice == TRAIT_DARKVISION)
-					if(recipient.has_flaw(/datum/charflaw/colorblind))
-						to_chat(recipient, "Your eyes have become permanently colorblind.")
-					else if(recipient.charflaws.len)
-						recipient.verbs += /mob/living/carbon/human/proc/toggleblindness
+//				if(choice == TRAIT_DARKVISION)
+//					if(recipient.has_flaw(/datum/charflaw/colorblind))
+//						to_chat(recipient, "Your eyes have become permanently colorblind.")
+//					else if(recipient.charflaws.len)
+//						recipient.verbs += /mob/living/carbon/human/proc/toggleblindness
 			else if(ispath(extra_choices[choice], /datum/skill))
 				recipient.adjust_skillrank(extra_choices[choice], SKILL_LEVEL_APPRENTICE, silent = TRUE)
 			else if(ispath(extra_choices[choice], /obj/item))
@@ -371,3 +371,70 @@
 		if(hag_mind.current)
 			to_chat(hag_mind.current, span_boldnotice("A familiar rhythm pulse in the roots... [recipient.real_name] is walking the lands this week."))
 	to_chat(recipient, span_boldnotice("The Mossmother's gaze lingers upon you. You are recognized by her daughters."))
+
+/datum/virtue/utility/wildsman
+	name = "Wildsman (-3 TRI)"
+	desc = "Due to my upbringing, I was either born, or lived among beasts and bramble. The wilds have shaped my body into something harsher, more primal, at the cost of some intellectual growth.<br><br>Grants Survival Expert, but no bonuses.<br><br><font color=red>(THIS VIRTUE WILL REDUCE YOUR INT BY 2.)<font color=purple><br>"
+	max_choices = 3
+	choice_costs = list(0, 0, 3)
+	triumph_cost = 3
+	restricted = TRUE
+	races = list(/datum/species/aasimar, /datum/species/construct, /datum/species/dullahan, /datum/species/human, /datum/species/elf, /datum/species/dwarf)
+	added_stats = list(STATKEY_INT = -2)
+	added_traits = list(TRAIT_SURVIVAL_EXPERT)
+	choice_tooltips = list(
+		"Beastly Digestion" = "I can eat raw food and drink dirty water, due to my superior digestive system.",
+		"Outdoorsman" = "My experience in the wilds allows me to fall asleep on surfaces like treebranches as if they were beds.",
+		"Seafarer" = "I have adapted to aquatic environments, allowing me to breathe underwater, swim faster, and eat raw fish.",
+		"Survivalist" = "I am naturally skilled in trapping, tracking, butchering, and crafting, gaining bonuses to it.",
+		"Thick Blood" = "My blood is thick and slow to spill, reducing the rate of bleeding.",
+		"Sharp Claws" = "I can extend my claws at will, turning punches into slashing attacks.",
+		"Savage Bite" = "I can bite enemies viciously, and latch onto them.",
+		"Powerful Legs" = "I can march through difficult terrain with ease.",
+		"Nite Vision" = "I see clearly in darkness, but colors dull and fade to gray when I do so.",
+	)
+
+	extra_choices = list(
+		"Beastly Digestion" = TRAIT_WILD_EATER,
+		"Outdoorsman" = TRAIT_OUTDOORSMAN,
+		"Seafarer",
+		"Survivalist",
+		"Thick Blood" = TRAIT_BLOOD_RESISTANCE,
+		"Sharp Claws",
+		"Savage Bite" = TRAIT_SAVAGEBITE,
+		"Powerful Legs",
+		"Nite Vision",
+	)
+
+/datum/virtue/utility/wildsman/apply_to_human(mob/living/carbon/human/recipient)
+	. = ..()
+
+	if(triumph_check(recipient))
+		for(var/choice in picked_choices)
+
+			if(extra_choices[choice] in GLOB.roguetraits)
+				ADD_TRAIT(recipient, extra_choices[choice], TRAIT_VIRTUE)
+
+			else if(choice == "Seafarer")
+				ADD_TRAIT(recipient, TRAIT_SEAFARER, TRAIT_VIRTUE)
+				ADD_TRAIT(recipient, TRAIT_WATERBREATHING, TRAIT_VIRTUE)
+
+			else if(choice == "Survivalist")
+				recipient.adjust_skillrank(/datum/skill/craft/traps, 2, TRUE)
+				recipient.adjust_skillrank(/datum/skill/misc/tracking, 2, TRUE)
+				recipient.adjust_skillrank(/datum/skill/labor/butchering, 2, TRUE)
+				recipient.adjust_skillrank(/datum/skill/craft/sewing, 2, TRUE)
+				recipient.adjust_skillrank(/datum/skill/craft/tanning, 2, TRUE)
+
+			else if(choice == "Sharp Claws")
+				recipient.verbs += /mob/living/carbon/human/proc/toggleclaws
+		
+			else if(choice == "Powerful Legs")
+				ADD_TRAIT(recipient, TRAIT_LONGSTRIDER, TRAIT_VIRTUE)
+
+			else if(choice == "Nite Vision")
+				if(recipient.has_flaw(/datum/charflaw/colorblind))
+					to_chat(recipient, "Your eyes have become permanently colorblind!")
+					ADD_TRAIT(recipient, TRAIT_WILD_NITEVISION, TRAIT_VIRTUE)
+				else if(recipient.charflaws.len)
+					recipient.verbs += /mob/living/carbon/human/proc/togglenitevision

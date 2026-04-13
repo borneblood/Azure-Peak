@@ -14,6 +14,7 @@
 #define TRAIT_SEEPRICES_SHITTY "Appraiser"
 #define TRAIT_VAMPBITE "Vampire Bite"
 #define TRAIT_STRONGBITE "Strong Bite"
+#define TRAIT_SAVAGEBITE "Savage Bite"
 #define TRAIT_STRONGKICK "Strong Kick"
 #define TRAIT_NOBLE "Noble Blooded"
 #define TRAIT_DEFILED_NOBLE "Drained Noble Blood"
@@ -117,6 +118,10 @@
 #define TRAIT_ROOT_WALKER "Root Walker"
 #define TRAIT_WYRD_LABOURER "Wyrd Labourer" // Hag boon
 #define TRAIT_CURSE_SCAR "Curse Scar"
+#define TRAIT_SEAFARER "Seafarer"
+#define TRAIT_SAVAGEBITE "Savage Bite"
+#define TRAIT_ACTIVECLAWS "Sharp Claws"
+#define TRAIT_WILD_NITEVISION "Wild Nitevision"
 
 //Hearthstone port (Tracking)
 #define TRAIT_PERFECT_TRACKER "Huntmaster" //Will always find any tracks and analyzes them perfectly.
@@ -324,7 +329,9 @@ GLOBAL_LIST_INIT(roguetraits, list(
 	TRAIT_SEEPRICES = "I can tell the prices of things down to the zenny.",
 	TRAIT_SEEPRICES_SHITTY = "I can tell the prices of things... <i>Kind of</i>.",
 	TRAIT_STRONGBITE = span_info("Stronger bites, critical bite attacks."),
+	TRAIT_SAVAGEBITE = span_info("My bites are slightly stronger, and I'll cling to foes I bite."),
 	TRAIT_VAMPBITE = span_info("Victims of your bite will feel immense pleasure."),
+	TRAIT_ACTIVECLAWS = span_info("My claws are poised to strike. I can slash and cut at foes in unarmed combat."),
 	TRAIT_STRONGKICK = span_info("My kicks knock people down and back a step, consistently. There's no need for obstacles."),
 	TRAIT_IGNORESLOWDOWN = span_info("Nothing stops this carriage!"),
 	TRAIT_IGNOREDAMAGESLOWDOWN = span_info("Hits slow me down no longer."),
@@ -390,6 +397,7 @@ GLOBAL_LIST_INIT(roguetraits, list(
 	TRAIT_COMICSANS = span_sans("I am cursed with a odd voice."),
 	TRAIT_SQUIRE_REPAIR = span_info("Trained at my Master's side, I can restore any kind of gears with time and polish them until they gleam like new."),
 	TRAIT_WATERBREATHING = span_info("I do not drown in bodies of water."),
+	TRAIT_SEAFARER = span_info("I am well adapted to aquatic environments, and can swim faster."),
 	TRAIT_NUDE_SLEEPER = span_warning("I can't fall asleep unless I'm nude and in bed."),
 	TRAIT_ABYSSOR_SWIM = span_info("I get far less tired when swimming than my peers. I also find mirth in rain and in the midst of storms."),
 	TRAIT_LONGSTRIDER = span_info("Each of my steps finds its footing no matter how treacherous the terrain is."),
@@ -452,6 +460,7 @@ GLOBAL_LIST_INIT(roguetraits, list(
 	TRAIT_NOHUNGER = span_info("I do not hunger, or thirst."),
 	TRAIT_DARKVISION = span_info("I can see better in the dark."),
 	TRAIT_NITEVISION = span_info("I can see perfectly in the dark."),
+	TRAIT_WILD_NITEVISION = span_info("I can see clearly in the dark, although I can't differ colors at all."),
 	TRAIT_NOCSHADES = span_info("The lens I look through allows me to see in the dark clear as dae, at the cost of greater vision."),
 	TRAIT_RESIDENT = span_info("I've been granted a Meister account, and the ownership of a house in Azure Peak."),
 	TRAIT_LIGHT_STEP = span_info("My steps are light and swift. I make less noise while sneaking and wearing armor, and can sneak much quicker."),
@@ -500,7 +509,7 @@ GLOBAL_LIST_INIT(roguetraits, list(
 	TRAIT_HOMESTEAD_EXPERT = span_greentext("I'm experienced with the arts of homesteading. Farming, Mining, Cooking, Fishing, Butchering, Lumberjacking, Masonry and Pottery can progress to Legendary levels. Sewing and Skincrafting can progress to Journeyman levels."),
 	TRAIT_SELF_SUSTENANCE = span_greentext("Yils of experience running from the law and living off the land have made me a jack of all trades. All crafting and labor skills can progress to Journeyman levels."),
 	TRAIT_SILVER_WEAK = span_warning("Silver is the greatest threat to my lyfe. Blows from silver weapons will set me alight, inhibit my ability to regenerate, and - if blessed - can outright destroy my vessel."),
-	TRAIT_PALLID = span_warning("I was once a creature of the night. The open sky fills me with unease, but my eyes pierce the darkness and my lungs need no air."),
+	TRAIT_PALLID = span_warning("I survived a vampyre's embrace by divine luck or sheer grit, but not without consequence. The curse lingers in my blood, bringing both dark gifts and dire afflictions. I have a strong aversion to silver and the sun, but neither are fatal."),
 	TRAIT_COMBAT_AWARE = span_notice("My honed senses and intuition allow me to spot notable things in the midst of battle with ease."),
 	TRAIT_TEMPO	= span_greentext("I can keep up with multiple opponents at once."),
 	TRAIT_BLACKOAK = span_warning("The Black Oaks can spot <b>any</b> foreigners and outsiders, no matter how long they've lived in Azuria. I can spot an invader at a glance."),

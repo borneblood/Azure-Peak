@@ -89,7 +89,7 @@ GLOBAL_LIST_INIT(stress_messages, world.file2list("strings/rt/stress_messages.tx
 		remove_stress(/datum/stressevent/bleeding)
 
 	// pallid outdoor stress
-	if(HAS_TRAIT(src, TRAIT_PALLID))
+	if(HAS_TRAIT(src, TRAIT_PALLID) && GLOB.tod == "day")
 		var/area/A = get_area(src)
 		if(A?.outdoors)
 			add_stress(/datum/stressevent/pallid_outdoors)

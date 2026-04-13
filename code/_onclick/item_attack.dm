@@ -621,24 +621,39 @@
 	SEND_SIGNAL(victim, COMSIG_ITEM_ATTACK_EFFECT, user, affecting, intent, selzone, src)
 	SEND_SIGNAL(src, COMSIG_ITEM_ATTACK_EFFECT_SELF, user, affecting, intent, victim, selzone)
 
-	if(is_silver && HAS_TRAIT(victim, TRAIT_SILVER_WEAK))
-		if(is_lesser_silver)
-			// Lesser silver only flares meaningfully on a deliberate melee strike — thrown contact does nothing,
-			// and the hit never forces a disguise off. Stacks accumulate without ignition.
-			if(!thrown)
-				victim.adjust_fire_stacks(1, /datum/status_effect/fire_handler/fire_stacks/sunder/lesser)
-		else
-			SEND_SIGNAL(victim, COMSIG_FORCE_UNDISGUISE)
-			var/datum/component/silverbless/blesscomp = GetComponent(/datum/component/silverbless)
-			if(blesscomp?.is_blessed)
-				if(!victim.has_status_effect(/datum/status_effect/fire_handler/fire_stacks/sunder))
-					to_chat(victim, span_danger("Silver rebukes my presence! My vitae smolders, and my powers wane!"))
-				victim.adjust_fire_stacks(thrown ? 1 : 3, /datum/status_effect/fire_handler/fire_stacks/sunder/blessed)
+	if(is_silver)
+		if(HAS_TRAIT(victim, TRAIT_SILVER_WEAK))
+			if(is_lesser_silver)
+				if(!thrown)
+					victim.adjust_fire_stacks(1, /datum/status_effect/fire_handler/fire_stacks/sunder/lesser)
 			else
-				if(!victim.has_status_effect(/datum/status_effect/fire_handler/fire_stacks/sunder/blessed))
-					to_chat(victim, span_danger("Blessed silver rebukes my presence! These fires are lashing at my very soul!"))
-				victim.adjust_fire_stacks(thrown ? 1 : 3, /datum/status_effect/fire_handler/fire_stacks/sunder)
-			victim.ignite_mob()
+				SEND_SIGNAL(victim, COMSIG_FORCE_UNDISGUISE)
+
+				var/datum/component/silverbless/blesscomp = GetComponent(/datum/component/silverbless)
+
+				if(blesscomp?.is_blessed)
+					if(!victim.has_status_effect(/datum/status_effect/fire_handler/fire_stacks/sunder))
+						to_chat(victim, span_danger("Accursed, sanctified silver! It burns through my very essence-- unmaking me!"))
+					victim.adjust_fire_stacks(thrown ? 1 : 3, /datum/status_effect/fire_handler/fire_stacks/sunder/blessed)
+				else
+					if(!victim.has_status_effect(/datum/status_effect/fire_handler/fire_stacks/sunder/blessed))
+						to_chat(victim, span_danger("Silver painfully sears my flesh and saps my strength!"))
+					victim.adjust_fire_stacks(thrown ? 1 : 3, /datum/status_effect/fire_handler/fire_stacks/sunder)
+
+				victim.ignite_mob()
+
+		else if(HAS_TRAIT(victim, TRAIT_PALLID))
+			if(is_lesser_silver)
+				if(!thrown)
+					victim.adjust_fire_stacks(1, /datum/status_effect/fire_handler/fire_stacks/sunder/lesser)
+			else
+				if(!victim.has_status_effect(/datum/status_effect/fire_handler/fire_stacks/sunder))
+					to_chat(victim, span_warning("The silver burns my flesh in purifying flames!"))
+
+				victim.adjust_fire_stacks(thrown ? 1 : 2, /datum/status_effect/fire_handler/fire_stacks/sunder)
+
+				if(!thrown && prob(50))
+					victim.ignite_mob()
 
 /mob/living/attacked_by(obj/item/I, mob/living/user)
 	var/hitlim = simple_limb_hit(user.zone_selected)

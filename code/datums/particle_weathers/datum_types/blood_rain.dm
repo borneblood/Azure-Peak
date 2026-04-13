@@ -32,10 +32,13 @@
 	target_trait = PARTICLEWEATHER_BLOODRAIN
 
 /datum/particle_weather/blood_rain_gentle/weather_act(mob/living/L)
+
 	if(HAS_TRAIT(L, TRAIT_WEATHER_PROTECTED))
 		return
 	if(HAS_TRAIT(L, TRAIT_HORDE))
 		L.add_stress(/datum/stressevent/graggarite_blood_rain)
+	if((HAS_TRAIT(L, TRAIT_PALLID)||L.mind?.has_antag_datum(/datum/antagonist/vampire)))
+		L.add_stress(/datum/stressevent/vamp_blood_rain)
 	L.adjust_fire_stacks(-100)
 	L.SoakMob(FULL_BODY)
 
@@ -59,5 +62,7 @@
 /datum/particle_weather/blood_rain_storm/weather_act(mob/living/L)
 	if(HAS_TRAIT(L, TRAIT_HORDE))
 		L.add_stress(/datum/stressevent/graggarite_blood_rain)
+	if((HAS_TRAIT(L, TRAIT_PALLID)||L.mind?.has_antag_datum(/datum/antagonist/vampire)))
+		L.add_stress(/datum/stressevent/vamp_blood_rain)
 	L.adjust_fire_stacks(-100)
 	L.SoakMob(FULL_BODY)

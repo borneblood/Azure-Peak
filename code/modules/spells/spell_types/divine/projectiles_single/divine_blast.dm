@@ -67,10 +67,14 @@
 			damage += 20
 		if(istype(H.patron, /datum/patron/old_god))
 			damage += 20
-		if(HAS_TRAIT(H, TRAIT_SILVER_WEAK) && !H.has_status_effect(STATUS_EFFECT_ANTIMAGIC))
+		if((HAS_TRAIT(H, TRAIT_PALLID)||HAS_TRAIT(H, TRAIT_SILVER_WEAK)) && !H.has_status_effect(STATUS_EFFECT_ANTIMAGIC))
 			H.visible_message("<font color='white'>Divine power sunders [H]!</font>")
-			to_chat(H, span_userdanger("Silver rebukes my presence! My vitae smolders, and my powers wane!"))
-			H.adjust_fire_stacks(2, /datum/status_effect/fire_handler/fire_stacks/sunder)
+			if(HAS_TRAIT(H, TRAIT_SILVER_WEAK))
+				to_chat(H, span_userdanger("Divine power rebukes my presence! My vitae smolders, and my powers wane!"))
+				H.adjust_fire_stacks(2, /datum/status_effect/fire_handler/fire_stacks/sunder)			
+			else
+				to_chat(H, span_userdanger("Divine power rebukes my presence! It HURTS!"))
+				H.adjust_fire_stacks(1, /datum/status_effect/fire_handler/fire_stacks/sunder)
 		if(H.has_status_effect(/datum/status_effect/debuff/necran_cross))
 			// Undead weakened by a blessed necran cross are more fragile to divine magycks
 			damage += 20

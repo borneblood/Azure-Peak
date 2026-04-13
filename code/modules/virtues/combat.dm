@@ -168,10 +168,11 @@
 	added_traits = list(TRAIT_EASYDISMEMBER, TRAIT_NOPAIN, TRAIT_NOPAINSTUN, TRAIT_NOBREATH, TRAIT_DEATHLESS, TRAIT_TOXIMMUNE, TRAIT_ZOMBIE_IMMUNE, TRAIT_ROTMAN, TRAIT_SILVER_WEAK)
 
 /datum/virtue/combat/pallid
-	name = "Pallid"
-	desc = "I was once afflicted with vampirism, and was cured. It has left me changed: silver burns my flesh, and the open sky fills me with unease. Yet I draw no breath, and my eyes pierce the darkness. Lingering traces of the curse that once claimed me."
-	custom_text = "Grants darkvision, no need to breathe, and deadite immunity. Silver weapons will set you alight. Being outdoors causes stress."
-	added_traits = list(TRAIT_PALLID, TRAIT_DARKVISION, TRAIT_NOBREATH, TRAIT_ZOMBIE_IMMUNE, TRAIT_SILVER_WEAK)
+	name = "Hemophilia"
+	desc = "I was once bitten by a vampire, yet the curse never fully took hold. Something foul still lingers in my blood, causing silver to burn my flesh and the sun above to fill me with unease. I still draw breath, but my eyes pierce the darkness. A half-formed curse coils within me."
+	custom_text = "Grants better vision in the night, and your bites cause you to instinctively latch onto your foe. Silver burns my flesh and the sunlight makes me very uncomfortable. <font color=red>Your CON is reduced by 1.</font>"
+	added_traits = list(TRAIT_PALLID, TRAIT_SAVAGEBITE, TRAIT_NITEVISION)
+	adjust_sta
 
 /datum/virtue/combat/dualwielder
 	name = "Dual Wielder"

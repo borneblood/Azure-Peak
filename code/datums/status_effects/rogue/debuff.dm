@@ -77,6 +77,20 @@
 
 /////////
 
+/datum/status_effect/debuff/uncookedfish
+	id = "uncookedfish"
+	effectedstats = null
+	duration = 1
+
+/datum/status_effect/debuff/uncookedfish/on_apply()
+	if(HAS_TRAIT(owner, TRAIT_ABYSSOR_SWIM) || HAS_TRAIT(owner, TRAIT_SEAFARER) ||HAS_TRAIT(owner, TRAIT_NASTY_EATER) || HAS_TRAIT(owner, TRAIT_ORGAN_EATER) || HAS_TRAIT(owner, TRAIT_WILD_EATER))
+		return ..()
+		
+	if(iscarbon(owner))
+		var/mob/living/carbon/C = owner
+		C.add_nausea(100)
+	return ..()
+
 /datum/status_effect/debuff/uncookedfood
 	id = "uncookedfood"
 	effectedstats = null

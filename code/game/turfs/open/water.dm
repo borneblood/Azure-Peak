@@ -337,7 +337,11 @@
 				returned += 1
 		if(HAS_TRAIT(user, TRAIT_ABYSSOR_SWIM))
 			returned -= 1
-	return max(returned, 0.5)
+
+		if(HAS_TRAIT(user, TRAIT_SEAFARER))
+			returned = 0.25
+
+	return max(returned, 0.25)
 
 //turf/open/water/Initialize()
 //	dir = pick(NORTH,SOUTH,WEST,EAST)
