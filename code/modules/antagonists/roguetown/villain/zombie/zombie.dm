@@ -186,7 +186,8 @@
 		for(var/trait in traits_zombie)
 			REMOVE_TRAIT(zombie, trait, "[type]")
 		zombie.remove_client_colour(/datum/client_colour/monochrome)
-		zombie.remove_language(/datum/language/undead)
+		if(!HAS_TRAIT(zombie, TRAIT_CABAL)) // resurrecting causes zizoids to lose this, lmao
+			zombie.remove_language(/datum/language/undead)
 		var/datum/language_holder/language_holder = zombie.get_language_holder()
 		language_holder.selected_default_language = null
 

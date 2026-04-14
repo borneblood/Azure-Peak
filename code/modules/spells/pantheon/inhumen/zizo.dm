@@ -9,11 +9,9 @@ This miracle will interact with Artificer tools, enhancing them, but clearly sho
 
 /datum/action/cooldown/spell/enochian
 	name = "Enochian"
-	desc = "A very spooky thingy oOOoOoOoOO."
+	desc = "A primordial arcyne language used by the Cabal to shape and command the immaterial forces of Mana in ways that modern arcyne can't come close to replicate. When invoked as a profane miracle, even a simple utterance can weave ephemeral tools into existence, answering the speaker's need.<br><br>It is said that Zizo has oft made use of this before her Ascension."
 	button_icon = 'icons/mob/actions/zizomiracles.dmi'
 	button_icon_state = "churn_living"
-	name = "Enochian"
-	desc = "An ancient rite whispered through grave-soil and marrow. The caster beckons forth implements of deathly purpose—sepulchral relics, butcher's instruments, or vessels of blackened alchemy."
 	associated_skill = /datum/skill/magic/holy
 	click_to_activate = FALSE
 	self_cast_possible = TRUE
@@ -393,7 +391,29 @@ This miracle will interact with Artificer tools, enhancing them, but clearly sho
 		user.emote("huh")
 		user.Jitter(30)
 
-		to_chat(user, span_userdanger("You dare call to me without a proper presentation? How droll. Then... dance for me."))
+		var/lines = list(
+			"How quaint... You thought a circle was optional. I assure you, it is not. You'll know why.",
+			"You summon me like a parlor trick and expect dignity in return. How droll. Now dance for me.",
+			"I have seen better etiquette from a rotting Deadite. And they at least stay quiet. Just die, filth.",
+			"You reached for a queen of undeath with nothing but audacity. That will not suffice. But this, will.",
+			"No rite, no structure... Only you, standing there, being… insufficient. Let's amend that.",
+			"I was inclined to ignore this, but now I find myself offended. Congratulations.",
+			"Do you often present yourself so poorly, or is this a special occasion? Then... I shall make it special.",
+			"You have mistaken access for entitlement. An entertaining mistake. Now dance for me.",
+			"I felt that tug and thought, <i>surely this is a mistake.</i> Indeed, it was. You.",
+			"You've managed to waste my time and your life in a single gesture. Quite efficient.",
+			"I do admire the confidence. Not the execution, mind you, just the confidence. Here's your reward.",
+			"You call upon progress yet refuse even the basics. How predictably stagnant.",
+			"You stand before me uninvited, unprepared, and entirely unremarkable.",
+			"I could forgive ignorance. This, however, is effort.",
+			"You've reduced a sacred act to something crude and inelegant. I take that personally.",
+			"I am being addressed without ceremony. That alone decides your fate.",
+			"You wanted my attention. You should have considered the cost more carefully.",
+			"I have no interest in teaching you properly. This lesson will have to suffice.",
+			"...Next time, try a rite circle. Ah... No, there won't be one."
+		)
+
+		to_chat(user, span_userdanger((pick(lines))))
 		sleep(30)
 
 		var/list/panic_lines = list(
@@ -434,7 +454,7 @@ This miracle will interact with Artificer tools, enhancing them, but clearly sho
 			user.emote("agony")
 
 			var/loops = 0
-			var/max_loops = 14
+			var/max_loops = 16
 
 			while(user && !QDELETED(user) && loops < max_loops)
 				sleep(10)
@@ -446,7 +466,7 @@ This miracle will interact with Artificer tools, enhancing them, but clearly sho
 				user.Jitter(20)
 				if(prob(45))
 					if(user && !QDELETED(user))
-						playsound(user.loc, 'sound/combat/dismemberment/dismem (2).ogg', 25)
+						playsound(user.loc, 'sound/combat/dismemberment/dismem (2).ogg', 50)
 				if(prob(25))
 					if(user && !QDELETED(user))
 						user.vomit(blood = TRUE)
@@ -466,12 +486,11 @@ This miracle will interact with Artificer tools, enhancing them, but clearly sho
 		if(!length(valid_turfs))
 			valid_turfs += origin
 
-		sleep(90)
+		sleep(160)
 
 		explosion(user, 0, 0, 1, 0, FALSE, FALSE, 1, FALSE, FALSE)
 		user.visible_message(span_boldwarning("[user] is utterly UNDONE by UNHOLY MAGIC, the shockwave of their bones and leftovers reforming and giving shape to a horde of undead!"))
-
-		visible_message(span_userdanger("<b>ZIZO!! ZIZO!! ZIZO!!</b>"))
+		user.visible_message(span_userdanger("<b>ZIZO!! ZIZO!! ZIZO!!</b>"))
 
 		user.gib(no_brain = TRUE, no_organs = TRUE, no_bodyparts = FALSE, safe_gib = FALSE)
 
@@ -528,7 +547,7 @@ This miracle will interact with Artificer tools, enhancing them, but clearly sho
 	for(var/i in 1 to length(chant_lines))
 		user.say(chant_lines[i], forced = "spell")
 		user.adjustBruteLoss(15)
-		playsound(user, 'sound/vo/mobs/ghost/whisper (1).ogg', 100, FALSE, -1)
+		playsound(user, 'sound/vo/mobs/ghost/whisper (1).ogg', 25, FALSE, -1)
 		if(path_choice == "Progress")
 			user.emote(pick("whimper", "painscream", "scream", "breathgasp"))
 		else
@@ -536,7 +555,7 @@ This miracle will interact with Artificer tools, enhancing them, but clearly sho
 		if(i > 1)
 			shake_camera(user, i * 2, i)
 		if(!do_after(user, 3 SECONDS, target = user))
-			to_chat(user, span_warning("The ritual collapses. Zizo's gaze turns away."))
+			to_chat(user, span_warning("The ritual collapses...! I must do it all over."))
 			return FALSE
 
 	ADD_TRAIT(user, TRAIT_ARCYNE, "[type]")
@@ -559,6 +578,7 @@ This miracle will interact with Artificer tools, enhancing them, but clearly sho
 			ADD_TRAIT(user, TRAIT_TOXIMMUNE, "[type]") // most of your body is bones, bro
 			ADD_TRAIT(user, TRAIT_DEATHLESS, "[type]") // most of your body is bones, bro
 			ADD_TRAIT(user, TRAIT_NOPAINSTUN, "[type]") // most of your body is bones, bro -- PS: I might make a 'NOPAINSTUN_BODY' for this, so neck-up blows do slowdown.
+			ADD_TRAIT(user, TRAIT_LIMBATTACHMENT, "[type]") // might not be needed, given bonemend spell, we'll see
 			ADD_TRAIT(user, TRAIT_ZOMBIE_IMMUNE, "[type]") // just to make sure
 			ADD_TRAIT(user, TRAIT_UNLYCKERABLE, "[type]") // just to make sure
 			ADD_TRAIT(user, TRAIT_SILVER_WEAK, "[type]") // just to make sure
@@ -579,7 +599,7 @@ This miracle will interact with Artificer tools, enhancing them, but clearly sho
 
 			user.visible_message(
 				span_boldwarning("[user]'s body stiffens violently, fingers curling as something unseen takes hold."),
-				span_userdanger("My body...! It won't obey. Something is taking it.")
+				span_userdanger("My body...! It won't obey. Something is taking it. Molding it.")
 			)
 
 			sleep(20)
@@ -597,12 +617,12 @@ This miracle will interact with Artificer tools, enhancing them, but clearly sho
 				user.update_body_parts()
 				user.visible_message(
 					span_boldwarning("[user]'s [part.name] twists unnaturally--! Flesh splitting as bone forces through."),
-					span_userdanger("MY [uppertext(part.name)]—!! IT BURNS!!")
+					span_userdanger("MY [uppertext(part.name)]—!! IT BURNS!! IT'S BURNING DOWN TO THE BONE!!")
 				)
 				playsound(user.loc, 'sound/misc/smelter_sound.ogg', 50, FALSE)
 				user.emote("painscream")
 				user.Jitter(5)
-				var/msg = pick("MAKE IT STOP—!!", "NO— NO NO—!!", "I CAN'T—!!", "GET IT OFF—!!")
+				var/msg = pick("THE PAIN!!", "MAKE IT STOP--!!", "NO- NO NO--!!", "I CAN'T--!!", "GET IT OFF--!!", "ZIZO! ZIZO! ZIZO!--")
 				user.visible_message(
 					span_boldwarning("Rotting strands slough away from [user]'s [part.name], dissolving into a sickly haze."),
 					span_userdanger(msg)
@@ -619,7 +639,7 @@ This miracle will interact with Artificer tools, enhancing them, but clearly sho
 				torso?.skeletonize(FALSE)
 				user.update_body_parts()
 				user.visible_message(
-					span_boldwarning("[user]'s torso caves inward with a wet collapse— flesh peeling away in heavy sheets."),
+					span_boldwarning("[user]'s torso caves inward with a wet collapse-- flesh peeling away in heavy sheets, only to be burned away too."),
 					span_userdanger("...I can't feel it anymore.")
 				)
 				playsound(user.loc, 'sound/misc/smelter_sound.ogg', 50, FALSE)
@@ -641,11 +661,11 @@ This miracle will interact with Artificer tools, enhancing them, but clearly sho
 				user.mind.setup_mage_aspects(list("mastery" = FALSE,"major" = 1,"minor" = 1,"utilities" = 6,"ward" = TRUE))
 
 			user.visible_message(
-				span_boldwarning("[user] stands... stripped of flesh, yet not dead. A hollow creecher, wreathed in marrow and bone, yet incomplete from the neck up."),
-				span_notice("THE LESSER WORK IS COMPLETE. The flesh is gone, and what remains... is much better. Progress achieved.")
+				span_boldwarning("[user] stands... stripped of flesh, yet not dead. A hollow creecher, wreathed in marrow and bone, yet incomplete and mortal from the neck up."),
+				span_notice("THE LESSER WORK IS COMPLETE. The flesh is gone, and what remains... is better, faster, stronger. Another step toward Progress.")
 			)
 			sleep(10)
-			to_chat(user, span_small("...Still... Incomplete. A mere, lesser work.<br><br>I stand incomplete, yet, it only means that I should strive for completion."))
+			to_chat(user, span_small("...Still incomplete. A mere, LESSER work.<br><br>I stand incomplete, yet, it only means that I must strive for Her GREAT work."))
 
 	// The Lesser Work is done - remove the spell
 	user.mind?.RemoveSpell(src)
