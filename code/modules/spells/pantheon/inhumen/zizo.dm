@@ -7,10 +7,12 @@ Main ingredients are going to be blood, organs, bones for catalysts, and normal 
 This miracle will interact with Artificer tools, enhancing them, but clearly showing that you're not doing this 
 'naturally' anymore. It will be conspicuous when you "improve" something (or someone). */
 
-/datum/action/cooldown/spell/macabrenox_rite
-	button_icon = 'icons/mob/actions/matthiosmiracles.dmi'
-	button_icon_state = "lockpick"
-	name = "Macabrenox Rite"
+/datum/action/cooldown/spell/enochian
+	name = "Enochian"
+	desc = "A very spooky thingy oOOoOoOoOO."
+	button_icon = 'icons/mob/actions/zizomiracles.dmi'
+	button_icon_state = "churn_living"
+	name = "Enochian"
 	desc = "An ancient rite whispered through grave-soil and marrow. The caster beckons forth implements of deathly purpose—sepulchral relics, butcher's instruments, or vessels of blackened alchemy."
 	associated_skill = /datum/skill/magic/holy
 	click_to_activate = FALSE
@@ -20,7 +22,6 @@ This miracle will interact with Artificer tools, enhancing them, but clearly sho
 	charge_required = FALSE
 	cooldown_time = 10 SECONDS
 	spell_requirements = SPELL_REQUIRES_NO_ANTIMAGIC | SPELL_REQUIRES_HUMAN | SPELL_REQUIRES_SAME_Z
-
 	var/devotion_cost = 20
 
 	var/list/options = list(
@@ -31,21 +32,21 @@ This miracle will interact with Artificer tools, enhancing them, but clearly sho
 			m_rank = SKILL_LEVEL_NOVICE,
 			category = "Sepulchral Relics",
 			lines = list(
-				"From dust, the circle forms.",
-				"Grave remembers. I borrow.",
-				"Ash to ash—mark the boundary."
+				"#From dust, the circle forms.",
+				"#Grave remembers. I borrow.",
+				"#Ash to ash— mark the boundary."
 			)
 		),
 
-		"Bonepicker Knife" = list(
+		"Profane Riteblade" = list(
 			path = /obj/item/kitchen/knife,
 			m_cooldown = 40 SECONDS,
 			m_rank = SKILL_LEVEL_NOVICE,
 			category = "Rite Instruments",
 			lines = list(
-				"Flesh yields. Bone remembers.",
-				"A clean cut is a kind mercy.",
-				"Let the marrow speak."
+				"#Flesh yields. Bone remembers.",
+				"#A clean cut is a kind mercy.",
+				"#Let the marrow speak."
 			)
 		),
 
@@ -55,9 +56,9 @@ This miracle will interact with Artificer tools, enhancing them, but clearly sho
 			m_rank = SKILL_LEVEL_APPRENTICE,
 			category = "Blackblood Vials",
 			lines = list(
-				"Distill the unseen.",
-				"Let shadow take form.",
-				"The unseen made wet."
+				"#Distill the unseen.",
+				"#Let shadow take form.",
+				"#The unseen made wet."
 			)
 		),
 	)
@@ -65,7 +66,7 @@ This miracle will interact with Artificer tools, enhancing them, but clearly sho
 	var/list/item_cooldowns = list()
 
 
-/datum/action/cooldown/spell/macabrenox_rite/cast(atom/cast_on)
+/datum/action/cooldown/spell/enochian/cast(atom/cast_on)
 	. = ..()
 
 	var/mob/living/carbon/human/H = owner
@@ -257,12 +258,12 @@ This miracle will interact with Artificer tools, enhancing them, but clearly sho
 	damage = 20
 	damage_type = BRUTE
 	nodamage = FALSE
-	var/embed_prob = 10
+	var/embed_prob = 50
 
 /obj/projectile/magic/profane/major
 	name = "profaned bone lance"
 	damage = 35
-	embed_prob = 30
+	embed_prob = 75
 
 /obj/projectile/magic/profane/on_hit(atom/target, blocked)
 	. = ..()
@@ -277,7 +278,7 @@ This miracle will interact with Artificer tools, enhancing them, but clearly sho
 	embedding = list(
 		"embed_chance" = 100,
 		"embedded_pain_chance" = 25,
-		"embedded_fall_chance" = 5,
+		"embedded_fall_chance" = 1,
 	)
 
 /obj/item/bone/splinter/dropped(mob/user, silent)
@@ -319,7 +320,7 @@ This miracle will interact with Artificer tools, enhancing them, but clearly sho
 
 // T3: Rituos - Zizo's Lesser Work. A single painful ritual that grants the caster a choice:
 // Progress: Arcyne knowledge (2 minor aspects, 4 utilities). No skeletonization.
-// Unlife: Full skeletonization + MOB_UNDEAD, grants bonechill and raise_deadite directly.
+// Unlife: Full skeletonization + MOB_UNDEAD, grants bonechill and raise_deadite directly. -- Kunai: Gave them a few extra things to live the 'half-lich' fantasy. It is still by far the least usable, due to how conspicuous you end
 // Both paths grant undead language and TRAIT_ARCYNE. One-time use - cannot be cast again after completion.
 
 /obj/effect/proc_holder/spell/invoked/rituos
@@ -341,48 +342,205 @@ This miracle will interact with Artificer tools, enhancing them, but clearly sho
 
 /obj/effect/proc_holder/spell/invoked/rituos/miracle
 	miracle = TRUE
-	devotion_cost = 120
+	devotion_cost = 12 // 120
 	associated_skill = /datum/skill/magic/holy
 
 /obj/effect/proc_holder/spell/invoked/rituos/cast(list/targets, mob/living/carbon/human/user)
+	var/turf/T = get_turf(user)
+	var/obj/structure/ritualcircle/zizo/circle = locate(/obj/structure/ritualcircle/zizo) in T
+
+	if(!circle)
+		var/confirm1 = tgui_alert(user,
+			"Attempting a Rituos without a Rune of Progress is suicide.\nProceed anyway?",
+			"RITUOS WARNING",
+			list("Yes", "No"))
+
+		if(confirm1 != "Yes")
+			revert_cast()
+			return FALSE
+			
+		var/confirm2 = tgui_alert(user,
+			"This will end you. There will be no salvation.\nAre you absolutely certain?",
+			"FINAL WARNING",
+			list("I accept the risk! FOR ZIZO!", "Progress demands forethought."))
+
+		if(confirm2 != "I accept the risk! FOR ZIZO!")
+			revert_cast()
+			return FALSE
+
+		var/path_choice = tgui_alert(user,
+			"What path of the Lesser Work do you seek?",
+			"THE LESSER WORK",
+			list("Progress", "Unlife", "Cancel"))
+
+		if(!path_choice || path_choice == "Cancel")
+			revert_cast()
+			return FALSE
+
+		playsound(user, 'sound/vo/mobs/ghost/whisper (3).ogg', 100, FALSE, -1)
+		user.visible_message(span_boldwarning("[user] throws back [user.p_their()] head, arcyne energy crackling across [user.p_their()] body!"))
+
+		ADD_TRAIT(user, TRAIT_DNR, TRAIT_GENERIC)
+		user.Stun(300)
+
+		user.say("ZIZO! ZIZO! ZI--")
+		sleep(25)
+
+		user.hallucination += 999
+		user.say("...zo?")
+		sleep(40)
+
+		user.emote("huh")
+		user.Jitter(30)
+
+		to_chat(user, span_userdanger("You dare call to me without a proper presentation? How droll. Then... dance for me."))
+		sleep(30)
+
+		var/list/panic_lines = list(
+			"IT'S TEARING— MAKE IT STOP—!!",
+			"MY BONES— NO— NO—!!",
+			"SOMETHING'S INSIDE— GET IT OUT—!!",
+			"I CAN'T HOLD IT— STO—!!",
+			"IT'S COMING OUT— MAKE IT STO—!!",
+			"NO— NO NO NO—!!",
+			"I TAKE IT BACK— I TAKE IT BACK—!!",
+			"ZIZO— WAIT— STO—!!",
+			"PLEASE— IT HURTS— MAKE IT STOP—!!",
+			"NOT LIKE THIS— NOT LIKE THIS—!!",
+			"WRONG— WRONG PATH— STO—!!",
+			"THE RUNE— I NEEDED THE RUNE—!!",
+			"I DIDN'T FINISH— STO—!!",
+			"SHE HEARS— SHE HEARS—!!",
+			"GET OUT OF ME— GET OUT—!!",
+			"IT'S IN MY VEINS— STO—!!",
+			"I CAN FEEL IT— I CAN FEEL IT—!!",
+			"NO MORE— PLEASE— NO MORE—!!",
+			"I CAN'T— I CAN'T—!!",
+			"STOP— STOP— STO—!!",
+			"IT'S PULLING ME APART—!!",
+			"MY SKIN— NO—!!",
+			"IT BURNS— MAKE IT STOP—!!",
+			"I'M BREAKING— I'M BREAKING—!!",
+			"DON'T TAKE ME— DON'T—!!",
+			"PLEASE— PLEASE— STO—!!"
+		)
+
+		addtimer(CALLBACK(user, TYPE_PROC_REF(/mob/living/carbon, vomit), 0, TRUE), 3 SECONDS)
+		spawn()
+			user.say("--ZIZO?!")
+			user.visible_message(span_purple("<i>Unholy, dense necrotic energy gathers around [user] in crackles of ghastly force! Did they anger someone they should not?..."))
+
+			sleep(20)
+			user.emote("agony")
+
+			var/loops = 0
+			var/max_loops = 14
+
+			while(user && !QDELETED(user) && loops < max_loops)
+				sleep(10)
+				user.say(pick(panic_lines))
+				if(prob(50))
+					user.emote("painscream")
+				else
+					user.emote("agony")
+				user.Jitter(20)
+				if(prob(45))
+					if(user && !QDELETED(user))
+						playsound(user.loc, 'sound/combat/dismemberment/dismem (2).ogg', 25)
+				if(prob(25))
+					if(user && !QDELETED(user))
+						user.vomit(blood = TRUE)
+				loops++
+
+		var/turf/origin = get_turf(user)
+		if(!origin)
+			return FALSE
+
+		var/list/valid_turfs = list()
+		for(var/turf/nearby in view(3, user))
+			if(!nearby) continue
+			if(!isopenturf(nearby)) continue
+			if(nearby.density) continue
+			valid_turfs += nearby
+
+		if(!length(valid_turfs))
+			valid_turfs += origin
+
+		sleep(90)
+
+		explosion(user, 0, 0, 1, 0, FALSE, FALSE, 1, FALSE, FALSE)
+		user.visible_message(span_boldwarning("[user] is utterly UNDONE by UNHOLY MAGIC, the shockwave of their bones and leftovers reforming and giving shape to a horde of undead!"))
+
+		visible_message(span_userdanger("<b>ZIZO!! ZIZO!! ZIZO!!</b>"))
+
+		user.gib(no_brain = TRUE, no_organs = TRUE, no_bodyparts = FALSE, safe_gib = FALSE)
+
+		for(var/i = 1 to 8)
+			var/turf/spawnT = pick(valid_turfs)
+			if(!spawnT) continue
+			sleep(1)
+			new /obj/effect/temp_visual/gib_animation(spawnT, "gibbed-h")
+			var/mob/living/skeleton_new = new /mob/living/carbon/human/species/skeleton/npc/bogguard(spawnT, user)
+			spawn(10)
+				if(skeleton_new)
+					skeleton_new.faction |= list("cabal", "[user.mind?.current?.real_name]_faction")
+
+		return FALSE
+
 	var/path_choice = tgui_alert(user, "What path of the Lesser Work do you seek?", "THE LESSER WORK", list("Progress", "Unlife", "Cancel"))
 	if(!path_choice || path_choice == "Cancel")
 		return FALSE
 
+	user.grant_language(/datum/language/undead)
+
 	// The chant - path-specific invocations
 	user.visible_message(span_boldwarning("[user] throws back [user.p_their()] head, arcyne energy crackling across [user.p_their()] body!"))
+	playsound(user, 'sound/vo/mobs/ghost/whisper (3).ogg', 100, FALSE, -1)
 
 	var/list/chant_lines
 	switch(path_choice)
 		if("Progress")
 			chant_lines = list(
 				"ZIZO! ZIZO! ZIZO! GRANT ME INSIGHT UNSHACKLED!",
-				"STRIP ME OF STAGNATION AND IGNORANCE!",
+				",w TEAR OPEN THE VEIL THAT BINDS MY THOUGHT!",
+				"LET NO TRUTH BE HIDDEN, NO PATTERN UNSEEN!",
+				",w STRIP ME OF STAGNATION AND IGNORANCE!",
+				"BREAK THE CHAINS OF STILLNESS THAT CLING TO MY WILL!",
+				",w UNMAKE THE FEAR THAT STAYS MY HAND!",
 				"I OFFER THIS MIND TO COMPLETE THY WORK!",
+				",w CARVE THY DESIGN INTO MY THINKING!",
+				"LET ME BE TOOL, PROCESS, AND RESULT AS ONE! MY MIND IS YOURS, ZIZO!!"
 			)
+
 		if("Unlife")
 			chant_lines = list(
 				"ZIZO! ZIZO! ZIZO! FLENSE FLESH FROM MY BONE!",
-				"STRIP ME OF MORTALITY'S SHACKLE!",
+				",w PEEL AWAY THE LIE OF WARMTH AND BREATH!",
+				"LET BONE AND SINEW BE REVELATION, NOT END!",
+				",w STRIP ME OF MORTALITY'S SHACKLE!",
+				"SEVER THE TYRANNY OF HEART AND PULSE!",
+				",w LET SILENCE TAKE THE PLACE OF BREATH!",
 				"I OFFER THIS VESSEL TO THY LESSER WORK!",
+				",w HOLLOW ME THAT I MAY BE FILLED ANEW!",
+				"GRANT UNTO ME THE PERFECTION OF UNDEATH! THE PERFECTION OF THY GREAT WORK!!"
 			)
 
 	for(var/i in 1 to length(chant_lines))
 		user.say(chant_lines[i], forced = "spell")
 		user.adjustBruteLoss(15)
+		playsound(user, 'sound/vo/mobs/ghost/whisper (1).ogg', 100, FALSE, -1)
 		if(path_choice == "Progress")
-			user.emote(pick("whimper", "gasp"))
-			user.emote("painscream")
+			user.emote(pick("whimper", "painscream", "scream", "breathgasp"))
 		else
-			user.emote("painscream")
+			user.emote(pick("groan", "painscream", "scream", "breathgasp"))
 		if(i > 1)
 			shake_camera(user, i * 2, i)
 		if(!do_after(user, 3 SECONDS, target = user))
 			to_chat(user, span_warning("The ritual collapses. Zizo's gaze turns away."))
 			return FALSE
 
-	user.grant_language(/datum/language/undead)
 	ADD_TRAIT(user, TRAIT_ARCYNE, "[type]")
+	playsound(user, 'sound/vo/mobs/ghost/death.ogg', 100, FALSE, -1)
 
 	switch(path_choice)
 		if("Progress")
@@ -394,42 +552,102 @@ This miracle will interact with Artificer tools, enhancing them, but clearly sho
 
 		if("Unlife")
 			user.mob_biotypes |= MOB_UNDEAD
-			ADD_TRAIT(user, TRAIT_NOHUNGER, "[type]")
-			ADD_TRAIT(user, TRAIT_NOBREATH, "[type]")
-			for(var/obj/item/bodypart/part as anything in user.bodyparts)
-				if(istype(part, /obj/item/bodypart/head))
-					continue
-				part.skeletonize(FALSE)
+
+			ADD_TRAIT(user, TRAIT_NOHUNGER, "[type]") // ye
+			ADD_TRAIT(user, TRAIT_NOBREATH, "[type]") // ye
+			ADD_TRAIT(user, TRAIT_FAKEDEATH, "[type]") // so your heart doesn't beat (you don't got one!!!)
+			ADD_TRAIT(user, TRAIT_TOXIMMUNE, "[type]") // most of your body is bones, bro
+			ADD_TRAIT(user, TRAIT_DEATHLESS, "[type]") // most of your body is bones, bro
+			ADD_TRAIT(user, TRAIT_NOPAINSTUN, "[type]") // most of your body is bones, bro -- PS: I might make a 'NOPAINSTUN_BODY' for this, so neck-up blows do slowdown.
+			ADD_TRAIT(user, TRAIT_ZOMBIE_IMMUNE, "[type]") // just to make sure
+			ADD_TRAIT(user, TRAIT_UNLYCKERABLE, "[type]") // just to make sure
+			ADD_TRAIT(user, TRAIT_SILVER_WEAK, "[type]") // just to make sure
+
+			to_chat(user, span_artery("Something is wrong. <i><u>Terribly wrong.</i></u>"))
+
+			sleep(15)
+
+			user.emote("agony")
+
+			for(var/obj/item/W in user)
+				user.dropItemToGround(W)
+				if(prob(50))
+					step(W, pick(GLOB.alldirs))
+
+			user.Stun(150)
+			user.dir = SOUTH
+
+			user.visible_message(
+				span_boldwarning("[user]'s body stiffens violently, fingers curling as something unseen takes hold."),
+				span_userdanger("My body...! It won't obey. Something is taking it.")
+			)
+
+			sleep(20)
+
 			var/obj/item/bodypart/torso = user.get_bodypart(BODY_ZONE_CHEST)
-			torso?.skeletonize(FALSE)
-			user.update_body_parts()
+			var/list/parts_to_destroy = list()
+			for(var/obj/item/bodypart/part as anything in user.bodyparts)
+				if(part.body_zone == BODY_ZONE_HEAD || part == torso)
+					continue
+				parts_to_destroy += part
+
+			for(var/obj/item/bodypart/part in parts_to_destroy)
+				if(!user || QDELETED(user)) break
+				part.skeletonize(FALSE)
+				user.update_body_parts()
+				user.visible_message(
+					span_boldwarning("[user]'s [part.name] twists unnaturally--! Flesh splitting as bone forces through."),
+					span_userdanger("MY [uppertext(part.name)]—!! IT BURNS!!")
+				)
+				playsound(user.loc, 'sound/misc/smelter_sound.ogg', 50, FALSE)
+				user.emote("painscream")
+				user.Jitter(5)
+				var/msg = pick("MAKE IT STOP—!!", "NO— NO NO—!!", "I CAN'T—!!", "GET IT OFF—!!")
+				user.visible_message(
+					span_boldwarning("Rotting strands slough away from [user]'s [part.name], dissolving into a sickly haze."),
+					span_userdanger(msg)
+				)
+				sleep(35)
+
+			if(user && !QDELETED(user))
+				user.visible_message(span_boldwarning("[user] convulses violently as something within their chest shifts."), span_userdanger("My heart— my LUX— something is inside—!!"))
+
+				playsound(user.loc, 'sound/misc/lava_death.ogg', 70, FALSE)
+			
+				sleep(20)
+
+				torso?.skeletonize(FALSE)
+				user.update_body_parts()
+				user.visible_message(
+					span_boldwarning("[user]'s torso caves inward with a wet collapse— flesh peeling away in heavy sheets."),
+					span_userdanger("...I can't feel it anymore.")
+				)
+				playsound(user.loc, 'sound/misc/smelter_sound.ogg', 50, FALSE)
+
+				sleep(25)
+
+			to_chat(user, span_notice("The pain fades, as if it was never there."))
+			sleep(20)
+			to_chat(user, span_notice("In its place... stillness. Clarity. Reflection."))
+			sleep(20)
+			to_chat(user, span_notice("Bodily functions excised. Bodily fluids minimized. Form reinvented in Her perfect image."))
+			sleep(20)
+			user.emote("cackle")
 			user.adjust_skillrank(/datum/skill/magic/arcane, 3, TRUE)
+
 			if(user.mind)
-				user.mind.setup_mage_aspects(list("mastery" = FALSE, "major" = 0, "minor" = 2, "utilities" = 4, "ward" = TRUE))
 				user.mind.AddSpell(new /obj/effect/proc_holder/spell/invoked/bonechill)
-				grant_poke_spell(user)
-			user.visible_message(span_boldwarning("[user]'s flesh sloughs away in sheets, revealing bare bone beneath as [user.p_they()] [user.p_are()] consumed by the Lesser Work!"), span_notice("THE LESSER WORK IS DONE! My flesh is forfeit - but death itself answers my call!"))
-			to_chat(user, span_small("...what have I done?"))
+				user.mind.AddSpell(new /datum/action/cooldown/spell/bonemend)
+				user.mind.setup_mage_aspects(list("mastery" = FALSE,"major" = 1,"minor" = 1,"utilities" = 6,"ward" = TRUE))
+
+			user.visible_message(
+				span_boldwarning("[user] stands... stripped of flesh, yet not dead. A hollow creecher, wreathed in marrow and bone, yet incomplete from the neck up."),
+				span_notice("THE LESSER WORK IS COMPLETE. The flesh is gone, and what remains... is much better. Progress achieved.")
+			)
+			sleep(10)
+			to_chat(user, span_small("...Still... Incomplete. A mere, lesser work.<br><br>I stand incomplete, yet, it only means that I should strive for completion."))
 
 	// The Lesser Work is done - remove the spell
 	user.mind?.RemoveSpell(src)
 	qdel(src)
 
-/obj/effect/proc_holder/spell/invoked/rituos/proc/grant_poke_spell(mob/living/carbon/human/user)
-	var/list/poke_options = list("Spitfire", "Frost Bolt", "Arc Bolt", "Gravel Blast", "Stygian Efflorescence", "Arcyne Lance")
-	var/poke_choice = tgui_input_list(user, "Choose your offensive cantrip.", "Arcyne Awakening", poke_options)
-	if(!poke_choice || !user.mind)
-		return
-	switch(poke_choice)
-		if("Spitfire")
-			user.mind.AddSpell(new /datum/action/cooldown/spell/projectile/spitfire)
-		if("Frost Bolt")
-			user.mind.AddSpell(new /datum/action/cooldown/spell/projectile/frost_bolt)
-		if("Arc Bolt")
-			user.mind.AddSpell(new /datum/action/cooldown/spell/projectile/arc_bolt)
-		if("Gravel Blast")
-			user.mind.AddSpell(new /datum/action/cooldown/spell/projectile/gravel_blast)
-		if("Stygian Efflorescence")
-			user.mind.AddSpell(new /datum/action/cooldown/spell/projectile/stygian_efflorescence)
-		if("Arcyne Lance")
-			user.mind.AddSpell(new /datum/action/cooldown/spell/projectile/arcyne_lance)
