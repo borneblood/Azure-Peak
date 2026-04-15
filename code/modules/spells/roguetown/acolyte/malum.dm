@@ -408,7 +408,7 @@ var/global/list/anvil_recipe_prices[][]
 
 //T0
 
-/*/obj/effect/proc_holder/spell/invoked/rework //this whole thing, barely works and fixing it causes only further issues
+/obj/effect/proc_holder/spell/invoked/rework //this whole thing, barely works and fixing it causes only further issues
 	name = "Rework"
 	desc = "Burn a piece of equipment to create a blessing for the appropriate type of equipment. Cast once more on another item to bless it."
 	action_icon = 'icons/mob/actions/malummiracles.dmi'
@@ -572,7 +572,7 @@ var/global/list/anvil_recipe_prices[][]
 	max_integrity = initial(max_integrity)
 	obj_integrity = max_integrity/2
 	malumblessed_c = FALSE
-	visible_message("<font color='purple'>A holy blessing no longer affects [name]!</font>")*/
+	visible_message("<font color='purple'>A holy blessing no longer affects [name]!</font>")
 
 /obj/effect/proc_holder/spell/self/repair
 	name = "Order: Repair"
@@ -739,3 +739,438 @@ var/global/list/anvil_recipe_prices[][]
 	revert_cast()
 	return FALSE
 
+/datum/action/cooldown/spell/touch/rework
+	name = "Rework"
+	desc = "Summon divine forgefire into your hand. You can break down objects into usable material and reshape them through Malum's craft."
+	button_icon = 'icons/mob/actions/malummiracles.dmi'
+	button_icon_state = "rework"
+	sound = 'sound/magic/whiteflame.ogg'
+	glow_intensity = GLOW_INTENSITY_LOW
+	click_to_activate = FALSE
+	self_cast_possible = TRUE
+	primary_resource_type = SPELL_COST_STAMINA
+	primary_resource_cost = SPELLCOST_CANTRIP
+	charge_required = FALSE
+	cooldown_time = 5 SECONDS
+	associated_skill = /datum/skill/magic/holy
+	infinite_use = TRUE
+	hand_path = /obj/item/melee/touch_attack/forgehand
+	spell_requirements = SPELL_REQUIRES_NO_ANTIMAGIC | SPELL_REQUIRES_HUMAN | SPELL_REQUIRES_SAME_Z
+
+	var/divine_alloy = 0
+	var/list/materials_known = list()
+
+	var/list/blacklist = list(
+		/obj/item/melee/touch_attack/forgehand,
+	)
+
+/datum/action/cooldown/spell/touch/rework/examine(mob/user)
+	. = ..()
+	var/list/inspec = list()
+
+	if(divine_alloy <= 0)
+		inspec += span_smallnotice("It holds no divine alloy.<br>")
+	else
+		inspec += span_smallnotice("Divine Alloy: [divine_alloy]<br>")
+
+	if(materials_known.len)
+		inspec += span_smallnotice("Known materials:<br>")
+		for(var/T in materials_known)
+			var/obj/item/temp = new T
+			var/name = initial(temp.name)
+			qdel(temp)
+			inspec += span_smallnotice("- [name]<br>")
+
+	to_chat(user, "[inspec.Join()]")
+
+/obj/item/melee/touch_attack/forgehand
+	name = "\improper forgehand"
+	desc = "The teachings of Malum burn within your grasp."
+	icon = 'icons/mob/roguehudgrabs.dmi'
+	icon_state = "grabbing_greyscale"
+	color = "#da9a63"
+	aura_color = "#ff7b00"
+	possible_item_intents = list(
+		/datum/intent/forgehand_fill,
+		/datum/intent/forgehand_bless,
+		/datum/intent/forgehand_smelt,
+		/datum/intent/forgehand_fire
+	)
+	associated_skill = /datum/skill/magic/holy
+	experimental_inhand = FALSE
+
+	var/datum/action/cooldown/spell/touch/rework/source_spell
+
+/obj/item/melee/touch_attack/forgehand/Initialize(mapload)
+	. = ..()
+	if(istype(loc, /mob/living))
+		var/mob/living/M = loc
+		for(var/datum/action/cooldown/spell/touch/rework/S in M.actions)
+			source_spell = S
+			break
+
+/datum/intent/forgehand_fill
+	name = "salvage"
+	icon_state = "infill"
+	no_attack = FALSE
+
+/datum/intent/forgehand_bless
+	name = "bless"
+	icon_state = "inbless"
+
+/datum/intent/forgehand_smelt
+	name = "smelt"
+	icon_state = "inchisel"
+
+/datum/intent/forgehand_fire
+	name = "fire"
+	icon_state = "inshoot"
+	tranged = 1
+	noaa = TRUE
+
+/obj/item/melee/touch_attack/forgehand/attack_self()
+	qdel(src)
+
+/obj/item/melee/touch_attack/forgehand/afterattack(atom/target, mob/living/carbon/human/user, proximity_flag, click_parameters)
+	if(!source_spell)
+		return
+
+	var/datum/intent/I = user.used_intent
+
+	if(istype(I, /datum/intent/forgehand_fill))
+		if(proximity_flag)
+			gather_material(target, user)
+
+	else if(istype(I, /datum/intent/forgehand_bless))
+		if(proximity_flag)
+			bless_weapon(target, user)
+
+	else if(istype(I, /datum/intent/forgehand_smelt))
+		if(proximity_flag)
+			smelt_materials(target, user)
+
+	else if(istype(I, /datum/intent/forgehand_fire))
+		fire_material(target, user)
+	
+/obj/item/melee/touch_attack/forgehand/proc/gather_material(atom/target, mob/living/carbon/human/user)
+	if(!source_spell)
+		return
+
+	if(isitem(target))
+		return absorb_item(target, user)
+
+	if(isturf(target))
+		var/any = FALSE
+		for(var/obj/item/I in target.contents)
+			if(absorb_item(I, user))
+				any = TRUE
+		if(any)
+			return 1
+
+	to_chat(user, span_warning("Nothing here can be reworked."))
+	return
+
+/obj/item/melee/touch_attack/forgehand/proc/get_alloy_value(obj/item/I, list/visited = null)
+	if(!visited)
+		visited = list()
+	if(!I)
+		return 0
+	if(I.type in visited)
+		return 0
+	visited += I.type
+	if(istype(I, /obj/item/ash)) return 0
+	if(istype(I, /obj/item/natural/clay)) return 0
+	if(istype(I, /obj/item/natural/stone)) return 1
+	if(istype(I, /obj/item/natural/glass)) return 2
+	if(istype(I, /obj/item/rogueore/coal)) return 4 
+	if(istype(I, /obj/item/ingot/copper)) return 6 
+	if(istype(I, /obj/item/ingot/tin)) return 6 
+	if(istype(I, /obj/item/scrap)) return 8 
+	if(istype(I, /obj/item/ingot/iron)) return 8 
+	if(istype(I, /obj/item/ingot/aaslag)) return 10 
+	if(istype(I, /obj/item/ingot/bronze)) return 12
+	if(istype(I, /obj/item/ingot/steel)) return 28 
+	if(istype(I, /obj/item/ingot/gold)) return 32
+	if(istype(I, /obj/item/ingot/blacksteel)) return 128
+
+	if(I.smeltresult)
+		var/obj/item/temp = new I.smeltresult
+		var/v = get_alloy_value(temp, visited)
+		qdel(temp)
+		return v
+
+	return 0
+
+/obj/item/melee/touch_attack/forgehand/proc/get_material_type(obj/item/I)
+	if(istype(I, /obj/item/scrap))
+		return /obj/item/rogueore/iron
+
+	if(I.smeltresult)
+		return I.smeltresult
+
+	return null
+
+/obj/item/melee/touch_attack/forgehand/proc/get_material_cost(typepath)
+	switch(typepath)
+		if(/obj/item/ash) return 0
+		if(/obj/item/natural/clay) return 0
+		if(/obj/item/natural/stone) return 0
+		if(/obj/item/natural/glass) return 2
+		if(/obj/item/rogueore/coal) return 4 
+		if(/obj/item/ingot/copper) return 6 
+		if(/obj/item/ingot/tin) return 6 
+		if(/obj/item/scrap) return 8 
+		if(/obj/item/ingot/iron) return 8 
+		if(/obj/item/ingot/bronze) return 12
+		if(/obj/item/ingot/steel) return 28 
+		if(/obj/item/ingot/aaslag) return 28 
+		if(/obj/item/ingot/gold) return 32
+		if(/obj/item/ingot/blacksteel) return 128
+	return 0
+
+/obj/item/melee/touch_attack/forgehand/proc/absorb_item(obj/item/I, mob/user)
+	if(!source_spell || !I)
+		return
+
+	for(var/T in source_spell.blacklist)
+		if(istype(I, T))
+			return
+
+	if(istype(I, /obj/item/rogueweapon))
+		var/int_percent = round(((I.obj_integrity / I.max_integrity) * 100), 1)
+		if(!I.obj_broken && int_percent > 10)
+			to_chat(user, span_warning("[I] must be broken or nearly destroyed before it can be reworked."))
+			return
+
+	var/value = get_alloy_value(I)
+	if(value <= 0)
+		to_chat(user, span_warning("[I] cannot be reworked by the forgehand."))
+		return
+
+	var/typepath = get_material_type(I)
+	if(typepath && !(typepath in source_spell.materials_known))
+		source_spell.materials_known += typepath
+
+	source_spell.divine_alloy += value
+
+	to_chat(user, span_notice("[I] is reduced to a smoldering, molten essence...<br>Divine Alloy (+[value], [source_spell.divine_alloy])"))
+
+	qdel(I)
+	return 1
+
+/obj/item/melee/touch_attack/forgehand/proc/fire_material(atom/target, mob/living/carbon/human/user)
+	if(!source_spell)
+		return
+
+	var/cost = 1
+
+	if(source_spell.divine_alloy < cost)
+		to_chat(user, span_warning("You lack the divine alloy to fire."))
+		return
+
+	source_spell.divine_alloy -= cost
+
+	var/obj/item/ammo_casing/caseless/rogue/sling_bullet/iron/C = new()
+	var/obj/projectile/P = C.BB
+
+	if(!P)
+		qdel(C)
+		return
+
+	var/turf/start = get_turf(user)
+	var/turf/end = get_turf(target)
+
+	P.forceMove(start)
+	P.firer = user
+	P.original = target
+	P.starting = start
+
+	P.fire(get_dir(start, end))
+
+	to_chat(user, span_notice("You loose a forged bullet."))
+
+	qdel(C)
+	return 1
+
+/obj/item/melee/touch_attack/forgehand/proc/bless_weapon(atom/target, mob/living/carbon/human/user)
+	if(!source_spell)
+		return
+
+	if(!isitem(target))
+		to_chat(user, span_warning("That cannot be blessed."))
+		return
+
+	var/obj/item/I = target
+
+	if(!istype(I, /obj/item/rogueweapon))
+		to_chat(user, span_warning("[I] cannot receive Malum's blessing."))
+		return
+
+	var/list/options = list(
+		"Reinforce (Durability) - 30" = "durability",
+		"Temper (Repair) - 20" = "repair",
+		"Overforge (Bonus Force) - 40" = "greater"
+	)
+
+	var/choice = input(user, "Shape the divine alloy into a blessing:", "Forgehand Blessing") as null|anything in options
+	if(!choice)
+		return
+
+	var/selection = options[choice]
+
+	switch(selection)
+
+		if("repair")
+			var/cost = 20
+			if(source_spell.divine_alloy < cost)
+				to_chat(user, span_warning("You lack sufficient Divine Alloy."))
+				return
+
+			source_spell.divine_alloy -= cost
+
+			I.obj_integrity = min(I.max_integrity, I.obj_integrity + 100)
+
+			to_chat(user, span_notice("[I] is mended by flowing divine alloy."))
+			return 1
+
+
+		if("durability")
+			var/cost = 30
+			if(source_spell.divine_alloy < cost)
+				to_chat(user, span_warning("You lack sufficient Divine Alloy."))
+				return
+			source_spell.divine_alloy -= cost
+			I.AddComponent(/datum/component/fit_clothing, 15 MINUTES, TRUE, /datum/skill/magic/holy, DURABILITY_ENCHANT)
+			to_chat(user, span_notice("[I] is reinforced with divine strength."))
+			return 1
+
+		if("greater")
+			var/cost = 40
+			if(source_spell.divine_alloy < cost)
+				to_chat(user, span_warning("You lack sufficient Divine Alloy."))
+				return
+
+			if(!I.force)
+				to_chat(user, span_warning("[I] cannot channel offensive blessing."))
+				return
+
+			source_spell.divine_alloy -= cost
+
+			I.AddComponent(/datum/component/forge_damage_enchant, 5 MINUTES, 10 )
+
+			to_chat(user, span_notice("[I] is engulfed in raging divine fire."))
+			return 1
+
+/obj/item/melee/touch_attack/forgehand/proc/smelt_materials(atom/target, mob/living/carbon/human/user)
+	if(!source_spell)
+		return
+
+	if(!source_spell.materials_known.len)
+		to_chat(user, span_warning("You lack the knowledge to shape any materials."))
+		return
+
+	var/list/display = list()
+	var/list/lookup = list()
+
+	for(var/T in source_spell.materials_known)
+		var/cost = get_material_cost(T)
+		if(cost <= 0)
+			continue
+
+		var/obj/item/temp = new T
+		var/name = initial(temp.name)
+		qdel(temp)
+
+		var/entry = "[name] ([cost])"
+		display += entry
+		lookup[entry] = T
+
+	if(!display.len)
+		to_chat(user, span_warning("None of your known materials can be shaped."))
+		return
+
+	var/choice = input(user, "Shape divine alloy into material:", "Forgehand") as null|anything in display
+	if(!choice)
+		return
+
+	var/typepath = lookup[choice]
+	var/cost = get_material_cost(typepath)
+
+	if(source_spell.divine_alloy < cost)
+		to_chat(user, span_warning("You lack sufficient divine alloy."))
+		return
+
+	var/amount = floor(source_spell.divine_alloy / cost)
+	if(amount <= 0)
+		return
+
+	source_spell.divine_alloy -= (amount * cost)
+
+	var/turf/T = get_turf(user)
+
+	for(var/i in 1 to amount)
+		new typepath(T)
+
+	to_chat(user, span_notice("You shape divine alloy into [amount] [choice]."))
+
+#define DAMAGE_ENCHANT_BONUS 10
+#define DAMAGE_ENCHANT_DURATION (5 MINUTES)
+
+/datum/component/forge_damage_enchant
+	dupe_mode = COMPONENT_DUPE_UNIQUE
+
+	var/endtime
+	var/bonus = DAMAGE_ENCHANT_BONUS
+
+/datum/component/forge_damage_enchant/Initialize(duration_override, bonus_override)
+	if(!istype(parent, /obj/item))
+		return COMPONENT_INCOMPATIBLE
+
+	var/obj/item/I = parent
+
+	if(bonus_override)
+		bonus = bonus_override
+
+	var/duration = duration_override ? duration_override : DAMAGE_ENCHANT_DURATION
+	endtime = world.time + duration
+
+	apply_bonus(I)
+
+	RegisterSignal(parent, COMSIG_PARENT_EXAMINE, PROC_REF(on_examine))
+
+	addtimer(CALLBACK(src, PROC_REF(expire)), duration)
+
+/datum/component/forge_damage_enchant/proc/apply_bonus(obj/item/I)
+	if(I.force)
+		I.force += bonus
+
+	var/filter = I.get_filter("forge_damage")
+	if(!filter)
+		I.add_filter("forge_damage", 2, list(
+			"type" = "outline",
+			"color" = "#ff3c00",
+			"alpha" = 120,
+			"size" = 2
+		))
+
+/datum/component/forge_damage_enchant/proc/remove_bonus()
+	var/obj/item/I = parent
+	if(I?.force)
+		I.force -= bonus
+
+	I?.remove_filter("forge_damage")
+
+/datum/component/forge_damage_enchant/proc/expire()
+	qdel(src)
+
+/datum/component/forge_damage_enchant/Destroy()
+	remove_bonus()
+	. = ..()
+
+/datum/component/forge_damage_enchant/proc/on_examine(datum/source, mob/user, list/examine_list)
+	var/remaining = round((endtime - world.time) / 600)
+	examine_list += "It burns with divine fury (+[bonus] damage)."
+	examine_list += "The blessing will last [remaining] more minutes."
+
+#undef DAMAGE_ENCHANT_BONUS
+#undef DAMAGE_ENCHANT_DURATION
