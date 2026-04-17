@@ -2,6 +2,108 @@
 //ZIZO//
 ////////
 
+/proc/execute_rite(atom/source, mob/living/leader, ritual_length = 4, max_cultists = 5, silent = FALSE)
+	if(!leader || QDELETED(source))
+		return FALSE
+
+	// GATHER CABALISTS
+	var/list/mob/living/cabalists = list()
+	var/list/mob/living/participants = list()
+
+	for(var/mob/living/M in range(1, source))
+		if(HAS_TRAIT(M, TRAIT_CABAL) && M.stat == CONSCIOUS)
+			cabalists += M
+
+	// Always include leader if valid
+	if(!(leader in cabalists) && HAS_TRAIT(leader, TRAIT_CABAL))
+		cabalists += leader
+
+	if(!length(cabalists))
+		to_chat(leader, span_warning("None nearby can answer the rite."))
+		return FALSE
+
+	// CONSENT PHASE (7s timeout)
+	var/list/responders = list()
+
+	for(var/mob/living/M in cabalists)
+		spawn()
+			var/choice = alert(M, "Do you wish to contribute to the rite?", "Ritual Invocation", "Yes", "No")
+			if(choice == "Yes")
+				responders += M
+
+	sleep(7 SECONDS)
+
+	// Clamp participants
+	for(var/mob/living/M in responders)
+		if(length(participants) >= max_cultists)
+			break
+		if(QDELETED(M) || M.stat != CONSCIOUS)
+			continue
+		participants += M
+
+	if(!(leader in participants))
+		participants += leader
+
+	if(!length(participants))
+		to_chat(leader, span_warning("The rite finds no willing voices."))
+		return FALSE
+
+	// CHANT PHASE
+	var/list/chant_lines = list(
+		"Ol sonf vorsg-hoath iaida.",
+		"Zirdo madriax, soba lonshi.",
+		"Faxs to faxs-athan velor.",
+		"Ph'nglui mglw'nafh.",
+		"R'lyeh wgah'nagl fhtagn.",
+		"ZIZO! HEAR US!",
+		"ZIZO! ZIZO! ZIZO!",
+	)
+
+	var/list/silent_chant_lines = list(
+		"#Ol sonf vorsg-hoath iaida.",
+		"#Zirdo madriax, soba lonshi.",
+		"#Faxs to faxs-athan velor.",
+		"#Ph'nglui mglw'nafh.",
+		"#R'lyeh wgah'nagl fhtagn.",
+		"#ZIZO! HEAR US!",
+		"#ZIZO! ZIZO! ZIZO!",
+	)
+
+	var/phases = ritual_length
+	var/list/datum/beam/active_beams = list()
+
+	for(var/phase in 1 to phases)
+		// Chant
+		for(var/mob/living/P in participants)
+			if(silent)
+				P.say(silent_chant_lines[min(phase, length(silent_chant_lines))], forced = "rite invocation", ignore_spam = TRUE)
+			else
+				P.say(chant_lines[min(phase, length(chant_lines))], forced = "rite invocation", ignore_spam = TRUE)
+
+		// Visual beams (optional but consistent with TP)
+		var/turf/T = get_turf(source)
+		for(var/mob/living/P in participants)
+			active_beams += T.Beam(P, icon_state = "b_beam", time = 5 SECONDS, maxdistance = 10)
+
+		// Pain / cost (light, reusable)
+		for(var/mob/living/P in participants)
+			P.adjustBruteLoss(10)
+			if(prob(30) && !(HAS_TRAIT(P, TRAIT_NOPAIN)))
+				P.emote("painscream")
+
+		// Channel time
+		if(!do_after(leader, 5 SECONDS, target = source))
+			to_chat(leader, span_warning("The rite collapses before completion."))
+			for(var/datum/beam/B in active_beams)
+				B.End()
+			return FALSE
+
+	// Cleanup beams
+	for(var/datum/beam/B in active_beams)
+		B.End()
+
+	return TRUE
+
 /obj/effect/proc_holder/spell/invoked/rituos/proc/grant_poke_spell(mob/living/carbon/human/user)
 	var/list/poke_options = list("Spitfire", "Frost Bolt", "Arc Bolt", "Gravel Blast", "Stygian Efflorescence", "Arcyne Lance")
 	var/poke_choice = tgui_input_list(user, "Choose your offensive cantrip.", "Arcyne Awakening", poke_options)

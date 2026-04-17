@@ -1,15 +1,18 @@
-/*///////////////////
-// TO: Macabre Arts 
+/*//////////////
+// TO: Enochian
 A cantrip miracle that lets you delve towards Engineering, Sorcery and (evil) Medicine by using your Holy skill level.
 
 Main ingredients are going to be blood, organs, bones for catalysts, and normal run-up-the-mill ingredients. 
 
 This miracle will interact with Artificer tools, enhancing them, but clearly showing that you're not doing this 
-'naturally' anymore. It will be conspicuous when you "improve" something (or someone). */
+'naturally' anymore. It will be conspicuous when you "improve" something (or someone). 
+
+Similar to Matthios, the big point of this is to help reduce clutter on the map, so it'll work around deleting/recycling
+corpses and discarded junk*/
 
 /datum/action/cooldown/spell/enochian
 	name = "Enochian"
-	desc = "A primordial arcyne language used by the Cabal to shape and command the immaterial forces of Mana in ways that modern arcyne can't come close to replicate. When invoked as a profane miracle, even a simple utterance can weave ephemeral tools into existence, answering the speaker's need.<br><br>It is said that Zizo has oft made use of this before her Ascension."
+	desc = "A primordial arcyne language used by the Cabal to shape and command the immaterial forces of Mana in ways that modern arcyne can't come close to replicate. When invoked as a profane miracle, even a simple utterance can weave ephemeral tools of Progress into existence, answering the speaker's need.<br><br>It is said that Zizo has oft made use of this before her Ascension, and modern Arcyne is but a bastardization of such."
 	button_icon = 'icons/mob/actions/zizomiracles.dmi'
 	button_icon_state = "churn_living"
 	associated_skill = /datum/skill/magic/holy
@@ -21,48 +24,41 @@ This miracle will interact with Artificer tools, enhancing them, but clearly sho
 	cooldown_time = 10 SECONDS
 	spell_requirements = SPELL_REQUIRES_NO_ANTIMAGIC | SPELL_REQUIRES_HUMAN | SPELL_REQUIRES_SAME_Z
 	var/devotion_cost = 20
+	var/list/reaped_lux = list()
 
 	var/list/options = list(
 
-		"Gravechalk Sigil" = list(
-			path = /obj/item/profane_chalk,
-			m_cooldown = 60 SECONDS,
-			m_rank = SKILL_LEVEL_NOVICE,
+		"Corrupted Chalk" = list(
+			path = /obj/item/chalk/zizo,
+			m_cooldown = -1, // don't lose it! :D
+			m_rank = SKILL_LEVEL_NONE,
 			category = "Sepulchral Relics",
-			lines = list(
-				"#From dust, the circle forms.",
-				"#Grave remembers. I borrow.",
-				"#Ash to ash— mark the boundary."
-			)
+			lines = list("Ol sonf vorsg, hoath zir.","Madriax soba-lonshi od zorge.","Faxs to faxs-sobol athan."),
 		),
-
-		"Profane Riteblade" = list(
-			path = /obj/item/kitchen/knife,
-			m_cooldown = 40 SECONDS,
-			m_rank = SKILL_LEVEL_NOVICE,
-			category = "Rite Instruments",
-			lines = list(
-				"#Flesh yields. Bone remembers.",
-				"#A clean cut is a kind mercy.",
-				"#Let the marrow speak."
-			)
-		),
-
-		"Vial of Corrosion" = list(
-			path = /obj/item/reagent_containers/glass/bottle,
-			m_cooldown = 80 SECONDS,
+		"Profane Rite Chalk" = list(
+			path = /obj/item/ritechalk_zizo,
+			m_cooldown = -1, // don't lose it! :D
 			m_rank = SKILL_LEVEL_APPRENTICE,
-			category = "Blackblood Vials",
-			lines = list(
-				"#Distill the unseen.",
-				"#Let shadow take form.",
-				"#The unseen made wet."
-			)
+			category = "Sepulchral Relics",
+			lines = list("Ol sonf vorsg, hoath zir.","Madriax soba-lonshi od zorge.","Faxs to faxs-sobol athan."),
+		),
+		"Profane Riteblade" = list(
+			path = /obj/item/rogueweapon/huntingknife/idagger/zizo,
+			m_cooldown = -1, // don't lose it! :D
+			m_rank = SKILL_LEVEL_NONE,
+			category = "Rite Instruments",
+			lines = list("Zorge, zorge-od comselh.","Micaolz brin-zir faonts.","Gohol oriad-laneth vors."),
+		),
+		"Vial of Corrosion" = list(
+			path = /obj/item/matthios_canister/zizo_corrosive,
+			m_cooldown = 5 MINUTES,
+			m_rank = SKILL_LEVEL_NONE,
+			category = "Dark Malchem Vials",
+			lines = list("Soba iaida-zorge athan.", "Lonshi tox-brin madriax.", "Faonts velor-ol comah."),
 		),
 	)
 
 	var/list/item_cooldowns = list()
-
 
 /datum/action/cooldown/spell/enochian/cast(atom/cast_on)
 	. = ..()
@@ -87,8 +83,8 @@ This miracle will interact with Artificer tools, enhancing them, but clearly sho
 
 	var/list/categories = list(
 		"Sepulchral Relics",
-		"Butcher's Instruments",
-		"Black Vials"
+		"Rite Instruments",
+		"Dark Malchem Vials"
 	)
 
 	var/category = tgui_input_list(H, "Choose your rite", name, categories)
@@ -135,7 +131,7 @@ This miracle will interact with Artificer tools, enhancing them, but clearly sho
 		return FALSE
 
 	if(item_cooldowns[choice] == -1)
-		to_chat(H, span_warning("[choice] will not answer you again."))
+		to_chat(H, span_warning("[choice] will work again."))
 		return FALSE
 
 	if(item_cooldowns[choice] && world.time < item_cooldowns[choice])
@@ -376,18 +372,15 @@ This miracle will interact with Artificer tools, enhancing them, but clearly sho
 			return FALSE
 
 		playsound(user, 'sound/vo/mobs/ghost/whisper (3).ogg', 100, FALSE, -1)
+		ADD_TRAIT(user, TRAIT_PSYCHOSIS, TRAIT_GENERIC) // you done
+		ADD_TRAIT(user, TRAIT_DNR, TRAIT_GENERIC) // 			goofed
+		user.hallucination += 999
 		user.visible_message(span_boldwarning("[user] throws back [user.p_their()] head, arcyne energy crackling across [user.p_their()] body!"))
-
-		ADD_TRAIT(user, TRAIT_DNR, TRAIT_GENERIC)
 		user.Stun(300)
-
 		user.say("ZIZO! ZIZO! ZI--")
 		sleep(25)
-
-		user.hallucination += 999
 		user.say("...zo?")
 		sleep(40)
-
 		user.emote("huh")
 		user.Jitter(30)
 
@@ -410,7 +403,7 @@ This miracle will interact with Artificer tools, enhancing them, but clearly sho
 			"I am being addressed without ceremony. That alone decides your fate.",
 			"You wanted my attention. You should have considered the cost more carefully.",
 			"I have no interest in teaching you properly. This lesson will have to suffice.",
-			"...Next time, try a rite circle. Ah... No, there won't be one."
+			"...Next time, try a rite circle. Ah... Wait. No. There won't be a 'next time'."
 		)
 
 		to_chat(user, span_userdanger((pick(lines))))
@@ -665,7 +658,7 @@ This miracle will interact with Artificer tools, enhancing them, but clearly sho
 				span_notice("THE LESSER WORK IS COMPLETE. The flesh is gone, and what remains... is better, faster, stronger. Another step toward Progress.")
 			)
 			sleep(10)
-			to_chat(user, span_small("...Still incomplete. A mere, LESSER work.<br><br>I stand incomplete, yet, it only means that I must strive for Her GREAT work."))
+			to_chat(user, span_small("...Still incomplete. A mere, LESSER work.<br><br>I must find a way to rid myself of this mortality, once and for all... But that is not a plan for today. Not yet. There is much to do."))
 
 	// The Lesser Work is done - remove the spell
 	user.mind?.RemoveSpell(src)
