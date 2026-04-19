@@ -544,10 +544,10 @@ corpses and discarded junk*/
 		if(path_choice == "Progress")
 			user.emote(pick("whimper", "painscream", "scream", "breathgasp"))
 		else
-			user.emote(pick("groan", "painscream", "scream", "breathgasp"))
+			user.emote(pick("paincrit", "painscream", "scream", "breathgasp"))
 		if(i > 1)
-			shake_camera(user, i * 2, i)
-		if(!do_after(user, 3 SECONDS, target = user))
+			shake_camera(user, i * 1, i)
+		if(!do_after(user, 4 SECONDS, target = user))
 			to_chat(user, span_warning("The ritual collapses...! I must do it all over."))
 			return FALSE
 
@@ -651,14 +651,15 @@ corpses and discarded junk*/
 			if(user.mind)
 				user.mind.AddSpell(new /obj/effect/proc_holder/spell/invoked/bonechill)
 				user.mind.AddSpell(new /datum/action/cooldown/spell/bonemend)
-				user.mind.setup_mage_aspects(list("mastery" = FALSE,"major" = 1,"minor" = 1,"utilities" = 6,"ward" = TRUE))
+				user.mind.setup_mage_aspects(list("mastery" = FALSE, "major" = 0, "minor" = 2, "utilities" = 4, "ward" = TRUE))
+				grant_poke_spell(user)				
 
 			user.visible_message(
 				span_boldwarning("[user] stands... stripped of flesh, yet not dead. A hollow creecher, wreathed in marrow and bone, yet incomplete and mortal from the neck up."),
 				span_notice("THE LESSER WORK IS COMPLETE. The flesh is gone, and what remains... is better, faster, stronger. Another step toward Progress.")
 			)
 			sleep(10)
-			to_chat(user, span_small("...Still incomplete. A mere, LESSER work.<br><br>I must find a way to rid myself of this mortality, once and for all... But that is not a plan for today. Not yet. There is much to do."))
+			to_chat(user, span_small("...I am still incomplete. A half-Lych.<br><br>Vestiges of mortality still cling to me.<br><br>...What have I done?"))
 
 	// The Lesser Work is done - remove the spell
 	user.mind?.RemoveSpell(src)

@@ -146,10 +146,10 @@
 	. = ..()
 	if(HAS_TRAIT(user, TRAIT_CABAL))
 		. += span_artery("Larger than its stick-like sibling, it helps concentrate more the essence of avantyne onto any rite you draw. Prying hands may suffer trying to keep this from your righteously-deserving ones.")
-		. += span_warning("<b>Rune of Zizo:</b> While only the real devout can make use of it for armaments, this rune is known to appease your Dark Lady, and guarantee success on Rituos.")
+		. += span_warning("<b>Rune of Zizo:</b> While only the real devout can make use of it for armaments, this rune is known to appease your Dark Lady, and guarantee success on Lesser Work Rituos.")
 		. += span_warning("<b>Rite of Profane Melding:</b> This rite allows you to recycle ancient corpses, skeletons, bones, organs and so on, into useful bits and pieces for Artificery.")
-		. += span_warning("<b>Veil-Rending Imbuement Matrix:</b> The proper, progressive method to harvest useful materials from Leylines. Surrounding all the cardinals of a Leyline is required. On use, undergo a long, loud and painful ritual, attempting to extract the materials directly from it, destabilizing the natural formation permanently.")
-		. += span_warning("<b>Enochian Motive Force Array:</b> Convert avantyne-corroded lux and arcyne meld into essence of motive force. This is used to power contraptions without the need of rotational power, but make it unusable for any outside the Cabal.")
+		. += span_warning("<b>Veil-Rending matrix:</b> The proper, progressive method to harvest useful materials from Leylines. Surrounding all the cardinals of a Leyline is required. On use, undergo a long, loud and painful ritual, attempting to extract the materials directly from it, destabilizing the natural formation permanently.")
+		. += span_warning("<b>Great Work Rituos:</b> This rite attempts to forcefully tear out Lux from an unwilling subject. They must be crucified to a profane cross for this to work. Very painful and permanently scarring.")
 
 /obj/item/ritechalk_zizo/attack_self(mob/living/user)
 	if(!HAS_TRAIT(user, TRAIT_CABAL))
@@ -170,7 +170,10 @@
 	ritechoices+="Rite of Profane Melding"
 
 	// used to sabotage leylines and get free mats out of them, including something that outright destroys the leyline but lets you use the following
-	ritechoices+="Veil-Rending Imbuement Matrix" 
+	ritechoices+="Veil-Rending matrix" 
+
+	// used to extract lux without medicine, pretty simple thing. traumatizes PCs, gibs NPCs
+	ritechoices+="Great Work Rituos" 
 
 	var/runeselection = input(user, "Which rune shall I inscribe?", src) as null|anything in ritechoices
 	var/turf/step_turf = get_step(get_turf(user), user.dir)
@@ -187,11 +190,17 @@
 				playsound(src, 'sound/foley/scribble.ogg', 40, TRUE)
 				new /obj/structure/ritualcircle/profane/melding(step_turf)
 
-		if("Veil-Rending Imbuement Matrix")
+		if("Veil-Rending matrix")
 			to_chat(user,span_cultsmall("I begin inscribing the matrix that rends the veil and siphons from the Ley..."))
 			if(do_after(user, 40, src)) 
 				playsound(src, 'sound/foley/scribble.ogg', 40, TRUE)
 				new /obj/structure/ritualcircle/profane/leyline(step_turf)
+
+		if("Great Work Rituos")
+			to_chat(user,span_cultsmall("I begin inscribing the runes in raw Enochian language... My fingers twist painfully during it. A replica of Her Great Work..."))
+			if(do_after(user, 40, src)) 
+				playsound(src, 'sound/foley/scribble.ogg', 40, TRUE)
+				new /obj/structure/ritualcircle/profane/riplux(step_turf)
 
 /obj/structure/ritualcircle/profane/melding
 	name = "Profane Melding Circle"
@@ -402,11 +411,11 @@
 		return
 	var/obj/item/ingot/aaslag_zizo/A = new(get_turf(src))
 	A.value = stored_value
-	to_chat(user, span_artery("I condense [stored_value] zhxys of liquid hate into a single slag."))
+	to_chat(user, span_artery("I condense [stored_value] motes of liquid hatred into a single slag."))
 	stored_value = 0
 
 /obj/structure/ritualcircle/profane/leyline
-	name = "Veil-Rending Matrix"
+	name = "Veil-Rending matrix"
 	desc = "A violent geometric construct meant to tear at creechers from within the leylines."
 	icon_state = "zizo_chalky"
 	color = "#00eeff"
@@ -471,13 +480,71 @@
 		"<i>You hear a piercing, unnatural scream tear through the air.</i>"
 	)
 
-/obj/structure/ritualcircle/profane/deconstruct
-	name = "Vilem Undertaker Circle"
+/obj/structure/ritualcircle/profane/luxrip
+	name = "Great Work Rituos circle"
 	desc = "An acidic-looking transmutation circle. ."
 	icon_state = "zizo_chalky"
 	color = "#00ff15"
 	var/stored_value = 0
 
+/obj/structure/ritualcircle/profane/luxrip/attack_hand(mob/living/user)
+	if(!..())
+		return
+
+	if((user.patron?.type) != /datum/patron/inhumen/zizo)
+		to_chat(user, span_smallred("This rite is not meant for me..."))
+		return
+
+	// CHECK BLEEDING
+	var/has_bleeding = FALSE
+	for(var/mob/living/carbon/C in view(1, src))
+		if(C.bleed_rate)
+			has_bleeding = TRUE
+			break
+
+	if(!has_bleeding)
+		to_chat(user, span_warning("The circle remains inert. It demands fresh blood from bleeding wounds."))
+		return
+
+	// FIND VALID CROSSES WITH VICTIMS
+	var/list/valid_targets = list()
+
+	for(var/obj/structure/fluff/psycross/zizocross/C in view(3, src))
+		if(C.buckled_mobs && C.buckled_mobs.len)
+			for(var/mob/living/L in C.buckled_mobs)
+				valid_targets += L
+
+	if(!valid_targets.len)
+		to_chat(user, span_warning("The rite demands subjects bound to profane crosses."))
+		return
+
+	to_chat(user, span_cultsmall("I begin invoking the Great Work..."))
+
+	if(!execute_rite(src, user, 10, 5, TRUE))
+		return
+
+	playsound(src, 'sound/magic/swap.ogg', 70, TRUE)
+
+	// APPLY EFFECTS
+	for(var/mob/living/L in valid_targets)
+		if(!L)
+			continue
+
+		// KILL NPCs here
+		if(!L.client)
+			L.gib(TRUE, TRUE, FALSE)
+			continue
+
+		// TRAUMATIZE PCs here
+		//L.add_stress(/datum/stressevent/cult_trauma) // to-do, add a stress for it
+		//ADD_TRAIT(L, TRAIT_TORNLUX, INNATE_TRAIT) // to-do, add a trait that prevents lux from regenning, reason im not for now is so the TM makes it in without conflicts
+ 
+	// FEEDBACK
+	visible_message(
+		span_artery("The circle pulses violently as Lux is torn screaming from bound bodies!"),
+		null,
+		"<i>You hear a chorus of distorted, agonized whispers.</i>"
+	)
 
 /obj/item/rogueweapon/huntingknife/idagger/zizo
 	name = "luxdrinker blade"
