@@ -151,6 +151,13 @@
 					/obj/item/rogueweapon/eaglebeak/lucerne,
 				)
 
+/datum/supply_pack/rogue/iron_weapons/maul
+	name = "Maul"
+	cost = 40 // 2 Iron Ingot
+	contains = list(
+					/obj/item/rogueweapon/mace/maul,
+				)
+
 /datum/supply_pack/rogue/iron_weapons/goedendag
 	name = "Goedendag"
 	cost = 40 // 2 Iron Ingot
