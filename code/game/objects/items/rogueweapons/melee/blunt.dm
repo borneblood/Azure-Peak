@@ -93,6 +93,12 @@
 	damfactor = 1.1
 	demolition_mod = 1.25
 
+/datum/intent/mace/strike/demolish
+	name = "demolishing strike"
+	demolition_mod = 6
+	intent_intdamage_factor = 3
+	icon_state = "inbash"
+
 /datum/intent/mace/smash/grand
 	name = "heavy smash"
 	damfactor = 1.1
@@ -878,6 +884,40 @@
 				return list("shrink" = 0.6,"sx" = -7,"sy" = 2,"nx" = 7,"ny" = 3,"wx" = -2,"wy" = 1,"ex" = 1,"ey" = 1,"northabove" = 0,"southabove" = 1,"eastabove" = 1,"westabove" = 0,"nturn" = -38,"sturn" = 37,"wturn" = 30,"eturn" = -30,"nflip" = 0,"sflip" = 8,"wflip" = 8,"eflip" = 0)
 			if("wielded")
 				return list("shrink" = 0.6,"sx" = 5,"sy" = -3,"nx" = -5,"ny" = -2,"wx" = -5,"wy" = -1,"ex" = 3,"ey" = -2,"northabove" = 0,"southabove" = 1,"eastabove" = 1,"westabove" = 0,"nturn" = 7,"sturn" = -7,"wturn" = 16,"eturn" = -22,"nflip" = 8,"sflip" = 0,"wflip" = 8,"eflip" = 0)
+
+/obj/item/rogueweapon/mace/maul/psy
+	minstr = 11
+	name = "psydonic maul"
+	color = "#ffffff"
+	aura_color = "#ffffff"
+	gripped_intents = list(/datum/intent/mace/strike/grand, /datum/intent/mace/sweep, /datum/intent/effect/hobble, /datum/intent/mace/strike/demolish)
+	desc = "A heavy war-maul of consecrated silver and obsidian, forged for total demolition over finesse. \
+	It rose to prominence as a symbol of HIS might, after the successful Siege of Blackreach, where heretics fortified a location with dark magicka, suffice to say, the solution was to keep it simple\
+	<br><br>Deliberate in weight and unforgiving in swing, it exists for a single truth: if heresy does not break, then it must be utterly crushed under the weight of HIS name."
+	is_silver = TRUE
+	smeltresult = /obj/item/ingot/silverblessed
+
+/obj/item/rogueweapon/greataxe/psy/ComponentInitialize()
+	AddComponent(\
+		/datum/component/silverbless,\
+		pre_blessed = BLESSING_NONE,\
+		silver_type = SILVER_PSYDONIAN,\
+		added_force = 0,\
+		added_blade_int = 100,\
+		added_int = 50,\
+		added_def = 2,\
+	)
+
+/obj/item/rogueweapon/greataxe/psy/preblessed/ComponentInitialize()
+	AddComponent(\
+		/datum/component/silverbless,\
+		pre_blessed = BLESSING_PSYDONIAN,\
+		silver_type = SILVER_PSYDONIAN,\
+		added_force = 0,\
+		added_blade_int = 100,\
+		added_int = 50,\
+		added_def = 2,\
+	)
 
 /obj/item/rogueweapon/mace/maul/grand
 	name = "grand maul"
