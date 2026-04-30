@@ -103,6 +103,10 @@
 		return
 	var/mob/living/carbon/human/H = user
 
+	if(H.real_name in contributing_names && H.get_role_title() == "Keeper")
+		handle_keeper_interaction(H)
+		return
+
 	if(H.real_name in contributing_names)
 		to_chat(H, span_warning("The calyx has already tasted your essence. It finds no more interest in you."))
 		return
@@ -183,3 +187,104 @@
 	else
 		visible_message(span_info("The calyx harmlessly retreats underground after suffering some abuse."))
 	. = ..()
+
+/obj/structure/roguemachine/chimeric_calyx/proc/handle_keeper_interaction(mob/living/carbon/human/H)
+	if(!H.get_active_held_item() || !istype(H.get_active_held_item(), /obj/item/scalpel))
+		to_chat(H, span_warning("The calyx pulses expectantly. A thought presses into your mind: you could shape it... if you had the proper instrument."))
+		return
+
+	to_chat(H, span_notice("The tendrils coil around your hand. They want to see. You can help them."))
+	if(!do_after(H, 3 SECONDS, target = src))
+		return
+
+	play_eldritch_game(H)
+
+/obj/structure/roguemachine/chimeric_calyx/proc/play_eldritch_game(mob/living/carbon/human/H)
+	var/list/options = list("GRASP", "SLICE", "YIELD")
+	var/player = input(H, "How do you shape the writhing flesh?", "Fleshcrafting") in options
+	if(!player) return
+
+	var/beast = pick(options)
+
+	to_chat(H, span_warning("The calyx responds with [beast]..."))
+
+	var/result = resolve_rps(player, beast)
+
+	switch(result)
+		if("win")
+			to_chat(H, span_good("The tendrils shudder in delight. They accept your shaping."))
+			on_keeper_success(H)
+
+		if("lose")
+			to_chat(H, span_userdanger("The flesh recoils violently! It bites back."))
+			H.apply_damage(15, BRUTE)
+
+		if("draw")
+			to_chat(H, span_warning("The creature hesitates... uncertain."))
+			if(prob(50))
+				H.apply_damage(10, BRUTE)
+			else
+				to_chat(H, span_notice("You glimpse its intent before it moves next time."))
+
+/obj/structure/roguemachine/chimeric_calyx/proc/resolve_rps(p, b)
+	if(p == b)
+		return "draw"
+
+	if(
+		(p == "GRASP" && b == "SLICE") ||
+		(p == "SLICE" && b == "YIELD") ||
+		(p == "YIELD" && b == "GRASP")
+	)
+		return "win"
+
+	return "lose"
+
+var/list/revealed_heartbeast_aspects = list()
+
+/obj/structure/roguemachine/chimeric_calyx/proc/on_keeper_success(mob/living/carbon/human/H)
+	var/list/aspects = list(
+		"It fears silence.",
+		"It favors warm blood.",
+		"It resents hesitation.",
+		"It responds to authority.",
+		"It delights in suffering.",
+		"It recoils from decay.",
+		"Its hunger is not physical.",
+		"It listens more than it sees."
+	)
+
+	var/aspect = pick(aspects - revealed_heartbeast_aspects)
+	if(!aspect)
+		aspect = pick(aspects)
+
+	revealed_heartbeast_aspects += aspect
+
+	to_chat(H, span_notice("You understand something about the beast: [aspect]"))
+
+	final_calyx_sequence(H)
+
+/obj/structure/roguemachine/chimeric_calyx/proc/final_calyx_sequence(mob/living/carbon/human/H)
+	visible_message(span_notice("The calyx blossoms with crude, blinking eyes. It scans the surroundings."))
+
+	spawn(20)
+		visible_message(span_notice("The eyes soften. The tendrils relax, satisfied."))
+
+	spawn(40)
+		visible_message(span_notice("The flesh melts back into itself, retreating beneath the soil."))
+
+	// whisper to keeper
+	var/list/whispers = list(
+		"You have done well.",
+		"I see now. I like it.",
+		"We will remember you.",
+		"The path opens.",
+		"Understanding grows.",
+		"You are favored.",
+		"Thank you.",
+		"Wonderful world.",
+		"I want to sustain this world."
+	)
+
+	to_chat(H, span_necrosis(pick(whispers)))
+
+	qdel(src)

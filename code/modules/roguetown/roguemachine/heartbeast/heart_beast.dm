@@ -29,6 +29,11 @@
 			. += span_info("Now, they are employed in most regions of the world where the light of the ten shines. Decreasing suffering.")
 			. += span_infection("For the great beast of Pestra, made through the ingenuity of humenkind influences all divine magic within a region.")
 
+			if(length(revealed_heartbeast_aspects))
+				. += span_notice("You recall what the calyx revealed:")
+				for(var/A in revealed_heartbeast_aspects)
+					. += span_info(" - [A]")
+
 /obj/structure/roguemachine/chimeric_heart_beast/proc/initialize_personality()
 	// Pick random archetype
 	var/archetype_types = list(
