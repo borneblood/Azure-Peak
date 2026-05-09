@@ -1334,7 +1334,7 @@
 	grid_width = 32
 	grid_height = 32
 	name = "toll"
-	desc = "A hollow token of strange metal that softly weeps blood, mysteriously formed when enough shimmering lux-threads are tangled together as an offering. It is said the Ferryman grants tolls to those who aid in its work, and claim them back in exchange for favors."
+	desc = "A hollow token of strange metal that softly weeps blood, formed when enough shimmering lux-threads are knotted together as an offering. The Ferryman is said to grant these tolls to those who aid in its work, and reclaim them later in payment for favors rendered."
 	icon = 'icons/roguetown/underworld/enigma_husks.dmi'
 	icon_state = "soultoken"
 	sellprice = 30
