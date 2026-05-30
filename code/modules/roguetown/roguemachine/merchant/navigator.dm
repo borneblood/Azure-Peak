@@ -19,7 +19,7 @@
 	var/motto = "NAVIGATOR - Your goods, airborne."
 	var/pay_taxes = TRUE
 	var/pay_merchant_share = TRUE
-	var/list/profit_id = list("Merchant", "Shophand")
+	var/list/profit_id = list("Merchant", "Shophand", "Procurator")
 	var/duty_collected_here = 0
 	var/duty_evaded_here = 0.
 	var/levy_collected_here = 0

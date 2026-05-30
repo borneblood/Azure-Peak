@@ -71,6 +71,7 @@
 #define BATHMASTER	(1<<7)
 #define CRIER		(1<<8)
 #define APPRENTICE	(1<<9) //Readd the mage part if you are going to add any other role that uses this tag or use ASSOCIATE to avoid weird spacing.
+#define PROCURATOR  (1<<10)
 
 #define PEASANTS			(1<<6)
 
@@ -178,6 +179,7 @@
 // Azurian Trading Company
 #define JDO_MERCHANT 6
 #define JDO_SHOPHAND 6.05
+#define JDO_PROCURATOR 6.06
 
 // Town Burghers
 #define JDO_GUILDMASTER 6.1

@@ -700,7 +700,7 @@
 /obj/structure/roguemachine/vaultbank/merchant
 	name = "\improper MERCHANT JAWBANK"
 	desc = "A biomechanical obselisk that secures the coffers of the Azurian Trading Company. Throttle it with a strike to spill that which is rightfully yours."
-	alert_jobs = list("Merchant", "Shophand")
+	alert_jobs = list("Merchant", "Shophand", "Procurator")
 	alert_location = "the Merchant's quarter"
 	bash_floor = 500
 	lump_payout = 100

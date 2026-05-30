@@ -379,7 +379,7 @@
 	desc = "An Azurian Trading Company zadcote. The brass plate reads ATC and a tally of late dispatches. The zads are sold exclusively by the Azurian Trading Company (officially), and sourced from the zad training grounds in Rosporth, where elven and humen keepers raise zads and train them to navigate and home in. In the yil 1421, in the nascent yils of the Company during the Actions off Rosporth between the Azurian and Etruscan Trading Company, the Azurian company attempted to use its newly acquired zads to bombard the Etruscan ships. Unfortunately, most of the zads homed back onto the ATC ships, leading to the loss of at least four warships and a hundred men. Since then, ATC has limited the usage of bomb zads to within Azurian territories."
 	faction = ZADCOTE_FACTION_MERCHANT
 	motto = "COMPANY ZADCOTE"
-	operator_jobs = list("Merchant", "Shophand")
+	operator_jobs = list("Merchant", "Shophand", "Procurator")
 	operator_trait = TRAIT_AGENT_MERCHANT
 	allows_voyeur = TRUE
 

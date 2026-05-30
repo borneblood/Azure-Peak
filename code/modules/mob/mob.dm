@@ -1299,18 +1299,26 @@ GLOBAL_VAR_INIT(mobids, 1)
 /// Updates the grab state of the mob and updates movespeed
 /mob/setGrabState(newstate)
 	. = ..()
+
 	if(!pulling)
 		remove_movespeed_modifier(MOVESPEED_ID_MOB_GRAB_STATE, update=TRUE)
+		return
+
+	if(HAS_TRAIT(src, TRAIT_CARGOTECHIE))
+		if(!ismob(pulling)) // do not work vs mobs, woe
+			remove_movespeed_modifier(MOVESPEED_ID_MOB_GRAB_STATE, update=TRUE)
+			return
+
+	if(!newstate)
+		remove_movespeed_modifier(MOVESPEED_ID_MOB_GRAB_STATE, update=TRUE)
 	else
-		if(!newstate)
+		if(grab_state == GRAB_PASSIVE)
 			remove_movespeed_modifier(MOVESPEED_ID_MOB_GRAB_STATE, update=TRUE)
 		else
-			if(grab_state == GRAB_PASSIVE)
-				remove_movespeed_modifier(MOVESPEED_ID_MOB_GRAB_STATE, update=TRUE)
-			else
-				var/usedmove = grab_state*3
-				if(usedmove)
-					add_movespeed_modifier(MOVESPEED_ID_MOB_GRAB_STATE, update=TRUE, priority=100, override=TRUE, multiplicative_slowdown=usedmove, blacklisted_movetypes=FLOATING)
+			var/usedmove = grab_state * 3
+
+			if(usedmove)
+				add_movespeed_modifier(MOVESPEED_ID_MOB_GRAB_STATE, update=TRUE, priority=100, override=TRUE, multiplicative_slowdown=usedmove, blacklisted_movetypes=FLOATING)
 
 /mob/proc/update_equipment_speed_mods()
 	var/speedies = equipped_speed_mods()

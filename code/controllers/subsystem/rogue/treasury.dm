@@ -726,7 +726,7 @@ SUBSYSTEM_DEF(treasury)
 		return POLL_TAX_CAT_GARRISON
 	if(H.job in list("Guildmaster", "Guildsman", "Tailor"))
 		return POLL_TAX_CAT_GUILDS
-	if(H.job == "Merchant")
+	if(H.job in list("Merchant", "Procurator"))
 		return POLL_TAX_CAT_MERCHANT
 	if((H.job in list("Innkeeper", "Head Physician", "Apothecary", "Bathmaster", "Town Crier", "Magicians Associate")) || HAS_TRAIT(H, TRAIT_RESIDENT))
 		return POLL_TAX_CAT_BURGHER

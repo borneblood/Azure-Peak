@@ -34,7 +34,7 @@
 	var/motto = "GOLDFACE - In the name of greed."
 	var/lockid = "merchant"
 	// Which job can access profit from this vendor
-	var/profit_id = list("Merchant", "Shophand")
+	var/profit_id = list("Merchant", "Shophand", "Procurator")
 	// Where to record value spent
 	var/value_record_key = STATS_GOLDFACE_VALUE_SPENT
 	// True to make sure it bypass all taxes no matter what
@@ -82,7 +82,7 @@
 	is_command_center = FALSE
 	motto = "SILVERFACE - Commerce for all."
 	// There's no profit but this is for futureproofing
-	profit_id = list("Merchant", "Shophand")
+	profit_id = list("Merchant", "Shophand", "Procurator")
 	value_record_key = STATS_SILVERFACE_VALUE_SPENT
 	categories = list(
 		"Adventuring Supplies",
