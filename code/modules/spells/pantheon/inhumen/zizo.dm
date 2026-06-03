@@ -487,13 +487,6 @@
 
 		return TRUE
 
-/obj/item/bone/splinter
-	name = "bone splinter"
-	desc = "A jagged shard of shattered bone."
-	icon = 'icons/obj/projectiles.dmi'
-	icon_state = "chronobolt"
-	embedding = list("embed_chance" = 100, "embedded_pain_chance" = 45, "embedded_fall_chance" = 0, "embedded_bloodloss" = 0, "embedded_ignore_throwspeed_threshold" = TRUE)
-
 /datum/action/cooldown/spell/zizo/bone_cataclysm/proc/explode_skeleton(mob/living/S, mob/living/caster, datum/beam/B)
 	if(B)
 		B.End()
@@ -578,7 +571,7 @@
 			if(!length(C.bodyparts))
 				break
 			var/obj/item/bodypart/limb = pick(C.bodyparts)
-			var/obj/item/bone/splinter/P = new
+			var/obj/item/bone/profane_splinter/P = new
 			limb.add_embedded_object(P, FALSE, TRUE)
 		C.apply_status_effect(/datum/status_effect/debuff/clickcd, 8 SECONDS)
 		C.apply_status_effect(/datum/status_effect/debuff/exposed, 10 SECONDS)
