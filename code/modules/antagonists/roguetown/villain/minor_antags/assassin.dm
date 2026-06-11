@@ -20,10 +20,12 @@
 	storyteller_slot_default_cap = 2
 	storyteller_maxcaps = list(/datum/storyteller/graggar = 3)
 	confess_lines = list(
-		"MY CREED IS BLOOD!",
-		"THE DAGGER TOLD ME WHO TO CUT!",
-		"DEATH IS MY DEVOTION!",
-		"THE DARK SUN GUIDES MY HAND!",
+		"I AM AN ASSASSIN!",
+		"I WAS SENT TO KILL TARGETS!",
+		"THE DAGGER CHOSE ITS TARGET THROUGH ME!",
+		"I WILL PUT YOU IN THAT DAGGER!",
+		"KILLERS JUST KILL, ASSASSINS MAKE SURE THEY'RE GONE FOREVER!",
+		"YOU'LL NEVER SEE THE ONES I KILLED EVER AGAIN!",
 	)
 	antag_flags = FLAG_FAKE_ANTAG
 

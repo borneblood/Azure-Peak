@@ -18,9 +18,13 @@
 					/obj/effect/proc_holder/spell/invoked/resurrect/malum		= CLERIC_T4,
 	)
 	confess_lines = list(
+		"I SERVE MALUM!",
 		"MALUM IS MY MUSE!",
-		"TRUE VALUE IS IN THE TOIL!",
-		"I AM AN INSTRUMENT OF CREATION!",
+		"ALL CRAFT IS SACRED TO MALUM!",
+		"MALUM TEACHES THAT THE WORK IS WHAT MATTERS!",
+		"THE FORGEFIRE OF MALUM REFINES ALL THINGS!",
+		"I AM AN INSTRUMENT OF MALUM!",
+		"THROUGH MALUM, I CREATE AND DESTROY!",
 	)
 
 	storyteller = /datum/storyteller/malum

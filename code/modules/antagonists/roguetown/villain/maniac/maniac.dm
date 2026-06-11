@@ -8,10 +8,11 @@
 	antag_hud_type = ANTAG_HUD_TRAITOR
 	antag_hud_name = "villain"
 	confess_lines = list(
-		"I gave them no time to squeal.",
-		"I shant quit ripping them.",
-		"They deserve to be put at my blade.",
-		"Do what thou wilt shall be the whole of the law.",
+		"I AM THE ONE WHO REMEMBERS WRONG WORLDS!",
+		"I DID NOT GIVE THEM TIME. IT WAS NOT IMPORTANT.",
+		"I ONLY FOLLOWED WHAT THE VISIONS SHOWED ME.",
+		"I DO NOT KNOW WHICH WORLD I AM IN ANYMORE.",
+		"THE LAW DOES NOT HOLD ACROSS BOTH REALITIES.",
 	)
 	rogue_enabled = FALSE
 	/// Traits we apply to the owner

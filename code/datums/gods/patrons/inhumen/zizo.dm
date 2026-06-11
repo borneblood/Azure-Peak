@@ -17,9 +17,13 @@
 					/datum/action/cooldown/spell/lacrima/zizo							= CLERIC_T4,	
 	)
 	confess_lines = list(
-		"PRAISE ZIZO!",
-		"LONG LIVE ZIZO!",
-		"ZIZO IS QUEEN!",
+		"I SERVE ZIZO!",
+		"ZIZO IS THE FUTURE WE BUILD!",
+		"THE PAST IS NOTHING TO ZIZO!",
+		"ZIZO DEMANDS PROGRESS AT ANY COST!",
+		"I STRIP AWAY THE OLD IN ZIZO'S NAME!",
+		"ZIZO IS THE WILL TO BECOME MORE!",
+		"THROUGH ZIZO, HUMENITY ADVANCES!",
 	)
 	storyteller = /datum/storyteller/zizo
 

@@ -12,9 +12,12 @@
 	storyteller_antag_flags = STORYTELLER_ANTAG_SOFT
 	storyteller_favor_flags = STORYTELLER_FAVOR_DREAMWALKER
 	confess_lines = list(
-		"MY VISION ABOVE ALL!",
-		"I'LL TAKE YOU TO MY REALM!",
-		"HIS FORM IS MAGNICIFENT!",
+		"I NEED TO WAKE UP!",
+		"I CANNOT WAKE UP!",
+		"I MUST WAKE YOU ALL UP!",
+		"I MUST PUT YOU ALL TO SLEEP!",
+		"ABYSSOR'S DREAM WILL NOT END!",
+		"YOU ARE ALL STILL DREAMING!",
 	)
 	rogue_enabled = TRUE
 	has_tempo = TRUE

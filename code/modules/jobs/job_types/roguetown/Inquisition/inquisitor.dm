@@ -306,94 +306,141 @@
 /mob/living/carbon/human/proc/faith_test()
 	set name = "Test Faith"
 	set category = "RoleUnique.Interrogation"
+
 	var/obj/item/grabbing/I = get_active_held_item()
 	var/mob/living/carbon/human/H
-	var/obj/item/S = get_inactive_held_item()
+	var/obj/item/clothing/neck/roguetown/psicross/silver/S = get_inactive_held_item()
 	var/found = null
+
 	if(!istype(I) || !ishuman(I.grabbed))
 		to_chat(src, span_warning("I don't have a victim in my hands!"))
 		return
+
 	H = I.grabbed
+
 	if(H == src)
-		to_chat(src, span_warning("I already torture myself."))
+		to_chat(src, span_warning("I already torture myself for being like this."))
 		return
-	if (!H.restrained())
-		to_chat(src, span_warning ("My victim needs to be restrained in order to do this!"))
+
+	if(!H.restrained())
+		to_chat(src, span_warning("My victim needs to be restrained in order to do this!"))
 		return
-	if(!istype(S, /obj/item/clothing/neck/roguetown/psicross/silver))
+
+	if(!istype(S))
 		to_chat(src, span_warning("I need to be holding a silver psycross to extract this divination!"))
 		return
+
+	if(world.time < S.interrogation_cooldown)
+		var/time_remaining = max(0, S.interrogation_cooldown - world.time)
+
+		var/total_seconds = round(time_remaining / 10)
+		var/minutes = floor(total_seconds / 60)
+		var/seconds = total_seconds % 60
+
+		to_chat(src, span_warning("The psycross has not yet regained its divinatory power. ([minutes]m [seconds]s remaining)"))
+		return
+
 	for(var/obj/structure/fluff/psycross/N in oview(5, src))
 		found = N
+
 	if(!found)
-		to_chat(src, span_warning("I need a large psycross structure nearby to extract this divination!"))	
+		to_chat(src, span_warning("I need a large psycross structure nearby to extract this divination!"))
 		return
+
 	if(!H.stat)
 		var/static/list/faith_lines = list(
 			"TO WHOM DO YOU PRAY!?",
 			"WHO IS YOUR GOD!?",
 			"ARE YOU FAITHFUL!?",
 			"WHO IS YOUR SHEPHERD!?",
+			"WHO GUIDES YOUR SOUL!?",
+			"WHO CLAIMS YOUR DEVOTION!?",
+			"NAME THE ONE YOU WORSHIP!",
+			"WHO HEARS YOUR PRAYERS!?",
+			"WHOSE LIGHT DO YOU FOLLOW!?",
+			"WHOSE WILL DO YOU SERVE!?",
+			"WHO WATCHES OVER YOU!?",
+			"WHO HOLDS YOUR FAITH!?",
+			"WHOSE ALTAR DO YOU KNEEL BEFORE!?",
+			"WHO RECEIVES YOUR OFFERINGS!?",
+			"WHO DO YOU CALL UPON IN DARKNESS!?",
+			"WHO IS YOUR PATRON!?",
+			"DECLARE YOUR FAITH!",
+			"SPEAK THE NAME OF YOUR GOD!",
+			"REVEAL YOUR PATRON!",
+			"CONFESS YOUR DEVOTION!",
+			"WHOSE WORD DO YOU OBEY!?",
+			"WHOSE GRACE DO YOU SEEK!?",
+			"WHOSE BLESSING DO YOU BEAR!?",
+			"WHO GUIDES YOUR HAND!?",
+			"BY WHAT FAITH ARE YOU SAVED!?",
+			"WHOSE TEMPLE CLAIMS YOU!?",
+			"WHOSE SYMBOL DO YOU CARRY IN YOUR HEART!?",
+			"WHAT DIVINE POWER DO YOU SERVE!?",
+			"WHOSE NAME DO YOU UTTER IN PRAYER!?",
+			"TELL ME WHERE YOUR FAITH LIES!",
 		)
-		src.visible_message(span_warning("[src] shoves the silver psycross in [H]'s face!"))
+
+		src.visible_message(span_warning("[src] shoves the silver psycross in [H]'s chest, searing against their Lux!"))
 		say(pick(faith_lines), spans = list("torture"))
 		H.emote("agony", forced = TRUE)
 
-		if(!(do_mob(src, H, 10 SECONDS)))
+		if(!do_mob(src, H, 10 SECONDS))
 			return
-		src.visible_message(span_warning("[src]'s silver psycross abruptly catches flame, burning away in an instant!"))
+
+		src.visible_message(span_warning("[src]'s silver psycross briefly glows with sacred light before falling dormant."))
+		S.interrogation_cooldown = world.time + (30 MINUTES)
+
 		H.confess_sins("patron")
-		qdel(S)
 		return
+
 	to_chat(src, span_warning("This one is not in a ready state to be questioned..."))
 
-/mob/living/carbon/human/proc/confess_sins(confession_type = "antag")
-	var/static/list/innocent_lines = list(
-		"I AM NO SINNER!",
-		"I'M INNOCENT!",
-		"I HAVE NOTHING TO CONFESS!",
-		"I AM FAITHFUL!",
-	)
-	var/list/confessions = list()
-	switch(confession_type)
-		if("patron")
-			if(length(patron?.confess_lines))
-				confessions += patron.confess_lines
-		if("antag")
-			for(var/datum/antagonist/antag in mind?.antag_datums)
-				if(!length(antag.confess_lines))
-					continue
-				confessions += antag.confess_lines
-	if(length(confessions))
-		say(pick(confessions), spans = list("torture"))
-		return
-	say(pick(innocent_lines), spans = list("torture"))
 
 /mob/living/carbon/human/proc/torture_victim()
 	set name = "Reveal Allegiance"
 	set category = "RoleUnique.Interrogation"
+
 	var/obj/item/grabbing/I = get_active_held_item()
 	var/mob/living/carbon/human/H
-	var/obj/item/S = get_inactive_held_item()
+	var/obj/item/clothing/neck/roguetown/psicross/silver/S = get_inactive_held_item()
 	var/found = null
+
 	if(!istype(I) || !ishuman(I.grabbed))
 		to_chat(src, span_warning("I don't have a victim in my hands!"))
 		return
+
 	H = I.grabbed
+
 	if(H == src)
-		to_chat(src, span_warning("I already torture myself."))
+		to_chat(src, span_warning("I already torture myself for being like this."))
 		return
-	if (!H.restrained())
-		to_chat(src, span_warning ("My victim needs to be restrained in order to do this!"))
+
+	if(!H.restrained())
+		to_chat(src, span_warning("My victim needs to be restrained in order to do this!"))
 		return
-	if(!istype(S, /obj/item/clothing/neck/roguetown/psicross/silver))
+
+	if(!istype(S))
 		to_chat(src, span_warning("I need to be holding a silver psycross to extract this divination!"))
 		return
+
+	if(world.time < S.interrogation_cooldown)
+		var/time_remaining = max(0, S.interrogation_cooldown - world.time)
+
+		var/total_seconds = round(time_remaining / 10)
+		var/minutes = floor(total_seconds / 60)
+		var/seconds = total_seconds % 60
+
+		to_chat(src, span_warning("The psycross has not yet regained its divinatory power. ([minutes]m [seconds]s remaining)"))
+		return
+
 	for(var/obj/structure/fluff/psycross/N in oview(5, src))
 		found = N
+
 	if(!found)
-		to_chat(src, span_warning("I need a large psycross structure nearby to extract this divination!"))
-		return	
+		to_chat(src, span_warning("I need a built holy cross structure nearby to extract this divination!"))
+		return
+
 	if(!H.stat)
 		var/static/list/torture_lines = list(
 			"CONFESS!",
@@ -401,14 +448,53 @@
 			"SPEAK!",
 			"YOU WILL SPEAK!",
 			"TELL ME!",
+			"REVEAL THE TRUTH!",
+			"OUT WITH IT!",
+			"WHAT ARE YOU HIDING!?",
+			"WHO DO YOU SERVE!?",
+			"WHO ARE YOUR ALLIES!?",
+			"WHO SENT YOU!?",
+			"WHO ARE YOUR MASTERS!?",
+			"WHO ARE YOUR CO-CONSPIRATORS!?",
+			"NAME THEM!",
+			"REVEAL YOUR ACCOMPLICES!",
+			"WHO PLOTS WITH YOU!?",
+			"WHAT IS YOUR PURPOSE HERE!?",
+			"WHAT ARE YOUR INTENTIONS!?",
+			"WHAT HAVE YOU DONE!?",
+			"WHAT CRIMES HAVE YOU COMMITTED!?",
+			"WHAT SINS WEIGH UPON YOUR SOUL!?",
+			"WHAT DO YOU FEAR!?",
+			"WHAT ARE YOU KEEPING FROM US!?",
+			"WHAT IS YOUR SECRET!?",
+			"REVEAL YOUR ALLEGIANCE!",
+			"WHOSE BANNER DO YOU FOLLOW!?",
+			"WHOSE CAUSE DO YOU CHAMPION!?",
+			"WHERE DOES YOUR LOYALTY LIE!?",
+			"TO WHOM HAVE YOU SWORN YOURSELF!?",
+			"WHOSE ORDERS DO YOU OBEY!?",
+			"WHAT DARKNESS DO YOU HARBOR!?",
+			"WHAT TREACHERY HAVE YOU PLANNED!?",
+			"EXPLAIN YOUR ACTIONS!",
+			"UNBURDEN YOUR SOUL!",
+			"SPEAK THE TRUTH!",
+			"NO MORE LIES!",
+			"YOUR DECEIT ENDS HERE!",
+			"THE TRUTH WILL OUT!",
+			"THE PSYCROSS DEMANDS ANSWERS!",
+			"LET THE GODS HEAR YOUR CONFESSION!",
 		)
+
 		say(pick(torture_lines), spans = list("torture"))
 		H.emote("agony", forced = TRUE)
 
-		if(!(do_mob(src, H, 10 SECONDS)))
+		if(!do_mob(src, H, 10 SECONDS))
 			return
-		src.visible_message(span_warning("[src]'s silver psycross abruptly catches flame, burning away in an instant!"))
+
+		src.visible_message(span_warning("[src] holds [H]'s head towards [S], as their Lux react violently to the demand!"))
+		S.interrogation_cooldown = world.time + (30 MINUTES)
+
 		H.confess_sins("antag")
-		qdel(S)
 		return
+
 	to_chat(src, span_warning("This one is not in a ready state to be questioned..."))

@@ -19,9 +19,13 @@
 					/obj/effect/proc_holder/spell/invoked/resurrect/baotha			= CLERIC_T4,
 	)
 	confess_lines = list(
+		"I SERVE BAOTHA!",
 		"BAOTHA DEMANDS PLEASURE!",
-		"LIVE, LAUGH, LOVE!",
-		"BAOTHA IS MY JOY!",
+		"BAOTHA DEMANDS RELEASE FROM PAIN!",
+		"I FIND COMFORT IN BAOTHA!",
+		"BAOTHA IS THE END OF ALL SUFFERING!",
+		"THE SCORNED HEARTS OF BAOTHA NEVER HEAL!",
+		"I DROWN MYSELF IN BAOTHA'S EMBRACE!",
 	)
 	storyteller = /datum/storyteller/baotha
 	traits_tier = list(TRAIT_CRACKHEAD = CLERIC_T1)

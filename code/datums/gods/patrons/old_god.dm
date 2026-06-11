@@ -14,12 +14,14 @@
 	)
 	traits_tier = list(TRAIT_PSYDONITE = CLERIC_T0) //Requires a minimal holy skill or the 'Devotee' virtue to unlock. Offers passive wound regeneration, but prevents healing from most miracles.
 	confess_lines = list(
-		"THERE IS ONLY ONE TRUE GOD!",
+		"I SERVE THE ALLFATHER!",
+		"PSYDON IS THE ONE TRUE GOD!",
 		"PSYDON YET LYVES! PSYDON YET ENDURES!",
-		"REBUKE THE HEATHEN, SUNDER THE MONSTER!",
-		"MY GOD - WITH EVERY BROKEN BONE, I SWORE I LYVED!",
-		"EVEN NOW, THERE IS STILL HOPE FOR MAN! AVE PSYDONIA!",
-		"WITNESS ME, PSYDON; THE SACRIFICE MADE MANIFEST!",
+		"PSYDON SHALL RETURN TO HIS CHILDREN!",
+		"ALL HOPE RESTS WITH PSYDON!",
+		"AVE PSYDON! AVE PSYDONIA!",
+		"WITNESS ME, PSYDON!",
+		"I DON'T CARE! PSYDON ENDURES!",
 	)
 
 	titles = list(

@@ -20,9 +20,12 @@ GLOBAL_LIST_EMPTY(vampire_objects)
 	antag_hud_type = ANTAG_HUD_VAMPIRE
 	antag_hud_name = "vamp_spawn_hud"
 	confess_lines = list(
-		"I WANT YOUR BLOOD!",
-		"DRINK THE BLOOD!",
-		"DEATH DID LITTLE THE FIRST TIME!",
+		"I WANT YOUR BLOOD! HISS!",
+		"I DRINK BLOOD TO SURVIVE! HISS!",
+		"I REVILE ASTRATA'S LIGHT! HISS!",
+		"BLOOD IS MY ONLY SUSTENANCE! HISS!",
+		"I WILL DRAIN YOU DRY! HISS!",
+		"I WILL FEAST FROM YOUR VEINS! HISS!"
 	)
 	rogue_enabled = TRUE
 	show_in_roundend = FALSE

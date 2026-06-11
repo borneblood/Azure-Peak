@@ -8,11 +8,11 @@
 	antag_hud_type = ANTAG_HUD_VAMPIRE
 	antag_hud_name = "vamplord"
 	confess_lines = list(
-		"I AM ANCIENT!",
-		"I AM THE LAND!",
-		"I AM THE ETERNAL!",
-		"I AM THE INHERITOR!",
-		"I WILL NOT BE FORGOTTEN!",
+		"I DRINK BLOOD AS I HAVE FOR CENTURIES! HISS!",
+		"I AM THE LAND THAT REMEMBERS BLOOD! HISS!",
+		"I AM THE ETERNAL BLOODHUNGER! HISS!",
+		"ASTRATA HAS ALWAYS BEEN MY ENEMY! HISS!",
+		"I WILL NOT BE FORGOTTEN! HISS!",
 	)
 	show_in_roundend = TRUE
 	var/ascended = FALSE

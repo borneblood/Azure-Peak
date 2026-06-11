@@ -17,9 +17,13 @@
 					/obj/effect/proc_holder/spell/invoked/deaths_door				= CLERIC_T4
 	)
 	confess_lines = list(
+		"I SERVE NECRA!",
 		"ALL SOULS FIND THEIR WAY TO NECRA!",
-		"THE UNDERMAIDEN IS OUR FINAL REPOSE!",
-		"I FEAR NOT DEATH, MY LADY AWAITS ME!",
+		"NECRA WAITS FOR US ALL!",
+		"NO MORTAL ESCAPES NECRA!",
+		"NECRA KEEPS THE DEAD IN HER CARE!",
+		"I FEAR NOT DEATH, FOR NECRA AWAITS ME!",
+		"THE VEILED LADY NECRA IS OUR FINAL REPOSE!",
 	)
 	storyteller = /datum/storyteller/necra
 

@@ -18,9 +18,13 @@
 					/obj/effect/proc_holder/spell/invoked/immolation		= CLERIC_T4,
 	)
 	confess_lines = list(
+		"I SERVE ASTRATA!",
 		"ASTRATA IS MY LIGHT!",
 		"ASTRATA BRINGS LAW!",
-		"I SERVE THE GLORY OF THE SUN!",
+		"THE SUN OF ASTRATA BURNS AWAY EVIL!",
+		"ALL THINGS ARE BROUGHT TO ORDER BY ASTRATA!",
+		"I WALK IN THE LIGHT OF ASTRATA!",
+		"ASTRATA'S RADIANCE GUIDES ME!",
 	)
 	storyteller = /datum/storyteller/astrata
 	titles = list(

@@ -7,11 +7,13 @@
 	preference_accessible = FALSE
 	undead_hater = FALSE
 	confess_lines = list(
+		"I SERVE THE MOSSMOTHER!",
 		"THE MOSSMOTHER SEES YOU!",
-		"YOU WILL PAY THE PRICE DEARIE!",
-		"You're so far up Psydon's cake you can't see straight. Pathetic.",
-		"REVENGE IS DUE.",
-		"I AM THE LAND. YOU SHOULD BE THANKING ME FOR THREADING IT.",
+		"THE MOSSMOTHER'S ROOTS RUN BENEATH YOUR FEET!",
+		"THE LAND BELONGS TO THE MOSSMOTHER!",
+		"THE MOSSMOTHER DEMANDS REVENGE!",
+		"THE SOIL REMEMBERS FOR THE MOSSMOTHER!",
+		"OLD GRUDGES WILL BE PAID IN THE MOSSMOTHER'S NAME!",
 	)
 
 /datum/patron/mossmother/can_pray(mob/living/follower)

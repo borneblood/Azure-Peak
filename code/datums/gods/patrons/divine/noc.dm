@@ -19,9 +19,13 @@
 					/obj/effect/proc_holder/spell/invoked/resurrect/noc			= CLERIC_T4
 	)
 	confess_lines = list(
-		"NOC IS NIGHT!",
-		"NOC SEES ALL!",
-		"I SEEK THE MYSTERIES OF THE MOON!",
+		"I SERVE NOC!",
+		"NOC IS THE LORD OF NIGHT!",
+		"NOC SEES ALL BENEATH THE MOON!",
+		"NOC GUIDES ME THROUGH DARKNESS!",
+		"ALL KNOWLEDGE IS ILLUMINATED BY NOC!",
+		"I SEEK THE MYSTERIES OF NOC!",
+		"THE MOON OF NOC LIGHTS MY PATH!",
 	)
 	traits_tier = list(TRAIT_DARKVISION = CLERIC_T1)
 	storyteller = /datum/storyteller/noc

@@ -17,9 +17,13 @@
 					/obj/effect/proc_holder/spell/invoked/resurrect/graggar				= CLERIC_T4,
 	)
 	confess_lines = list(
-		"GRAGGAR IS THE BEAST I WORSHIP!",
-		"THROUGH VIOLENCE, DIVINITY!",
-		"THE GOD OF CONQUEST DEMANDS BLOOD!",
+		"I SERVE GRAGGAR!",
+		"GRAGGAR IS THE GOD OF CONQUEST!",
+		"GRAGGAR DEMANDS VICTORY!",
+		"THROUGH GRAGGAR, CHAINS ARE BROKEN!",
+		"GRAGGAR REWARDS ONLY THE STRONG!",
+		"BLOOD AND IRON FOR GRAGGAR!",
+		"I WIN IN THE NAME OF GRAGGAR!",
 	)
 	storyteller = /datum/storyteller/graggar
 	crafting_recipes = list(/datum/crafting_recipe/roguetown/structure/graggar_cross_stone, /datum/crafting_recipe/roguetown/structure/graggar_cross_meat)

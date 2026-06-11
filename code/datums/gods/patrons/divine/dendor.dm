@@ -17,9 +17,13 @@
 					/obj/effect/proc_holder/spell/invoked/root_affinity			= CLERIC_T4,
 	)
 	confess_lines = list(
+		"I SERVE DENDOR!",
 		"DENDOR PROVIDES!",
-		"THE TREEFATHER BRINGS BOUNTY!",
-		"I ANSWER THE CALL OF THE WILD!",
+		"DENDOR IS THE TREEFATHER!",
+		"DENDOR'S WILDS CALL TO ME!",
+		"ALL LIFE SPRANG FORTH FROM DENDOR!",
+		"I ANSWER THE CALL OF DENDOR!",
+		"THE ROOTS OF DENDOR RUN DEEP!",
 	)
 	storyteller = /datum/storyteller/dendor
 	titles = list(

@@ -7,10 +7,11 @@
 	antag_hud_type = ANTAG_HUD_TRAITOR
 	antag_hud_name = "villain"
 	confess_lines = list(
-		"Hah- ahah- ahahah! You're LIVING ON A CORPSE!!",
-		"God is coming. God is here.",
-		"I AM GOD.",
-		"THE DECK IS LINED, AND THE RIVER TURNS.",
+		"I AM AN ASCENDANT!",
+		"I AM IN THE PROCESS OF ASCENSION!",
+		"I AM BECOMING SOMETHING ABOVE HUMENITY! ABOVE PSYDON! ABOVE THE TEN!",
+		"MY BODY IS NOT FINISHED YET. IT IS STILL TRANSFORMING!",
+		"PSYDON'S DEATH IS PART OF MY ASCENSION!",
 	)
 	rogue_enabled = TRUE
 	/// Traits we apply to the owner

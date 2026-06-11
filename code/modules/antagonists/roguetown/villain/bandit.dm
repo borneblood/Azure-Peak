@@ -13,9 +13,13 @@
 	antag_hud_type = ANTAG_HUD_TRAITOR
 	antag_hud_name = "bandit"
 	confess_lines = list(
-		"FREEDOM!!!",
+		"I AM A BANDIT!",
+		"I TAKE WHAT I NEED!",
 		"I WILL NOT LIVE IN YOUR WALLS!",
 		"I WILL NOT FOLLOW YOUR RULES!",
+		"I LIVE OUTSIDE YOUR LAW!",
+		"I SURVIVE BY MY OWN HAND!",
+		"I ANSWER TO NO MASTER!",
 	)
 	rogue_enabled = TRUE
 	has_tempo = TRUE

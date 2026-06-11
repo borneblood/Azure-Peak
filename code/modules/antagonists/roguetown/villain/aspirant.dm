@@ -10,7 +10,13 @@
 	job_rank = ROLE_ASPIRANT
 	show_in_roundend = FALSE
 	confess_lines = list(
-		"THE CHOSEN MUST TAKE THE THRONE!",
+		"I AM AN ASPIRANT!",
+		"I WILL TAKE THE THRONE!",
+		"I MEAN TO USURP THE CURRENT ORDER!",
+		"I WILL REPLACE THOSE WHO RULE!",
+		"I COME FOR THE SEAT ABOVE ME!",
+		"I WILL TAKE WHAT I AM NOT GIVEN!",
+		"I WILL OVERTHROW WHAT STANDS ABOVE ME!",
 	)
 	increase_votepwr = FALSE
 	rogue_enabled = TRUE

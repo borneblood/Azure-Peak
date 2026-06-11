@@ -1142,6 +1142,7 @@
 	buckle_prevents_pull = 1
 	var/divine = TRUE
 	obj_flags = UNIQUE_RENAME | CAN_BE_HIT
+	var/interrogation_cooldown
 
 /obj/structure/fluff/psycross/get_mechanics_examine(mob/user)
 	. = ..()

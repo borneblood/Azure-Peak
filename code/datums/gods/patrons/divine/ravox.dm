@@ -19,9 +19,13 @@
 					/obj/effect/proc_holder/spell/invoked/resurrect/ravox	= CLERIC_T4,
 	)
 	confess_lines = list(
+		"I SERVE RAVOX!",
 		"RAVOX IS JUSTICE!",
-		"THROUGH STRIFE, GRACE!",
-		"THROUGH PERSISTENCE, GLORY!",
+		"RAVOX DEMANDS STRENGTH AND RIGHTEOUSNESS!",
+		"THROUGH STRIFE, RAVOX GIVES GRACE!",
+		"THROUGH PERSISTENCE, RAVOX GIVES GLORY!",
+		"RAVOX GUIDES MY BLADE!",
+		"I FIGHT IN THE NAME OF RAVOX!",
 	)
 	storyteller = /datum/storyteller/ravox
 	COOLDOWN_DECLARE(lesser_heal_buff_cooldown)

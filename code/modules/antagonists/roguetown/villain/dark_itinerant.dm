@@ -4,8 +4,13 @@
 	antagpanel_category = "Dark Itinerant Knight"
 	job_rank = ROLE_DARK_ITINERANT
 	confess_lines = list(
-		"ZIZO! ZIZO! ZIZO!",
-		"FOR THE PALE LADY!",
+		"I AM A DARK KNIGHT!",
+		"I SERVE ZIZO!",
+		"ZIZO GUIDES MY PATH!",
+		"I TRAVEL IN ZIZO'S NAME!",
+		"THE DARK LADY ZIZO CALLS ME FORWARD!",
+		"I CARRY ZIZO'S WILL THROUGH THE LAND!",
+		"ZIZO IS MY PURPOSE!",
 	)
 	rogue_enabled = TRUE
 	var/outfit_path = /datum/outfit/job/dark_itinerant_knight

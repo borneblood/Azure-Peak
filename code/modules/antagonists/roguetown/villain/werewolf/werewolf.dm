@@ -48,9 +48,12 @@
 		TRAIT_ZOMBIE_IMMUNE
 	)
 	confess_lines = list(
-		"THE BEAST INSIDE ME!",
-		"BEWARE THE BEAST!",
-		"MY LUPINE MARK!",
+		"THE MOON! THE MOON IS CALLING! RrRRrrr!",
+		"I HUNGER FOR YOUR HEART UNDER THE MOONLIGHT! RrRRrrr!",
+		"THE WEREVOLF IN ME WILL NOT BE CAGED! RrRRrrr!",
+		"I BEAR DENDOR'S BLESSING! RrRRrrr!",
+		"I BEAR DENDOR'S CURSE! RrRRrrr!",
+		"AWWWWWWOOOOOOOoooooo! RrRRrrr!",
 	)
 	rogue_enabled = TRUE
 	var/special_role = ROLE_WEREWOLF

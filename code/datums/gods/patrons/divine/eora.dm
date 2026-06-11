@@ -17,9 +17,13 @@
 					/obj/effect/proc_holder/spell/invoked/resurrect/eora		= CLERIC_T4,
 	)
 	confess_lines = list(
+		"I SERVE EORA!",
 		"EORA BRINGS US TOGETHER!",
-		"HER BEAUTY IS EVEN IN THIS TORMENT!",
-		"I LOVE YOU, EVEN AS YOU TRESPASS AGAINST ME!",
+		"EORA'S LOVE KNOWS NO BOUNDS!",
+		"EORA TEACHES THAT LOVE ENDURES ALL THINGS!",
+		"ALL BEAUTY FLOWS FROM EORA!",
+		"I WALK IN THE LOVE OF EORA!",
+		"EORA'S HEART EMBRACES ALL!",
 	)
 	traits_tier = list(TRAIT_EORAN_CALM = CLERIC_T0, TRAIT_EORAN_SERENE = CLERIC_T2)
 	storyteller = /datum/storyteller/eora

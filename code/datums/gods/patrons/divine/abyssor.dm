@@ -18,9 +18,13 @@
 					/obj/effect/proc_holder/spell/invoked/resurrect/abyssor		= CLERIC_T4,
 	)
 	confess_lines = list(
+		"I SERVE ABYSSOR!",
 		"ABYSSOR COMMANDS THE WAVES!",
 		"THE OCEAN'S FURY IS ABYSSOR'S WILL!",
-		"I AM DRAWN BY THE PULL OF THE TIDE!",
+		"ABYSSOR CALLS TO ME IN MY DREAMS!",
+		"THE TIDES OBEY ABYSSOR!",
+		"ALL WATERS FLOW FROM ABYSSOR!",
+		"ABYSSOR IS THE FATHER OF THE SEA!",
 	)
 	titles = list(
 		"Dreamer",

@@ -18,9 +18,13 @@
 					/obj/effect/proc_holder/spell/invoked/resurrect/pestra		= CLERIC_T4,
 	)
 	confess_lines = list(
+		"I SERVE PESTRA!",
 		"PESTRA SOOTHES ALL ILLS!",
-		"DECAY IS A CONTINUATION OF LIFE!",
-		"MY AFFLICTION IS MY TESTAMENT!",
+		"PESTRA TAUGHT US THE HEALING ARTS!",
+		"ALL DECAY FALLS UNDER PESTRA'S CARE!",
+		"PESTRA GUIDES MY HAND IN MEDICINE!",
+		"MY AFFLICTIONS ARE KNOWN TO PESTRA!",
+		"LIFE, DEATH, AND DECAY ARE THE GIFTS OF PESTRA!",
 	)
 	storyteller = /datum/storyteller/pestra
 

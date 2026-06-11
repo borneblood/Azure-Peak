@@ -7,8 +7,12 @@
 	preference_accessible = FALSE
 	undead_hater = FALSE
 	confess_lines = list(
-		"Gods are WORTHLESS!",
-		"I DON'T NEED GODS!",
+		"I FOLLOW NO GOD!",
+		"I PRAY TO NO ONE!",
+		"I HAVE NO PATRON!",
+		"NO GOD GUIDES MY HAND!",
+		"I PLACE MY FAITH IN MYSELF!",
+		"I BOW TO NO DIVINITY!",
 		"NO GODS, NO MASTERS!",
 	)
 

@@ -19,9 +19,13 @@
 					/obj/effect/proc_holder/spell/invoked/resurrect/undivided			= CLERIC_T4
 	)
 	confess_lines = list(
-		"THE HOLY DECAGRAM SHALL SHIELD MY SOUL!",
-		"I SERVE THE PANTHEON RESPLENDENT!",
-		"THE TEN ETERNAL, FOREVERMORE!",
+		"I SERVE THE TEN!",
+		"THE TEN WATCHES OVER ALL!",
+		"THE TEN ETERNAL ARE MY MASTERS!",
+		"THE TEN SHIELDS MY SOUL!",
+		"I WALK UNDER THE TEN'S LIGHT!",
+		"THE TEN GUIDES ALL EXISTENCE!",
+		"FOREVER I SERVE THE TEN!",
 	)
 	storyteller = /datum/storyteller/astrata // no unique storyteller for this one, since its so broad. No real reason to have a unique storyteller - Undivided contributes to ecah of the Ten's follower count.
 

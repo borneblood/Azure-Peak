@@ -10,9 +10,12 @@
 	antag_hud_name = "rev"
 	show_in_roundend = FALSE
 	confess_lines = list(
-		"VIVA!",
+		"I AM A PEASANT REBEL!",
+		"I RISE AGAINST MY BETTERS!",
 		"DEATH TO THE NOBLES!",
-		"STICK IT TO THE MAN!",
+		"THE CROWN DOES NOT OWN ME!",
+		"I WILL BREAK THE CHAINS OF THE LORDS!",
+		"I FIGHT FOR THE PEASANTS!",
 		"NO GODS, NO MASTERS!",
 	)
 	increase_votepwr = FALSE

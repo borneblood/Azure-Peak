@@ -19,9 +19,13 @@
 					/obj/effect/proc_holder/spell/invoked/resurrect/matthios	= CLERIC_T3, // Counterpart to anastasis
 	)
 	confess_lines = list(
-		"MATTHIOS STEALS FROM THE WORTHLESS!",
-		"MATTHIOS IS JUSTICE!",
-		"MATTHIOS IS MY LORD!",
+		"I SERVE MATTHIOS!",
+		"MATTHIOS IS THE GOD OF EXCHANGE!",
+		"MATTHIOS TAKES FROM THE WORTHLESS AND GIVES TO THE DESERVING!",
+		"ALL VALUE FLOWS THROUGH MATTHIOS!",
+		"MATTHIOS GUIDES THE HAND OF THE THIEF AND THE ALCHEMIST!",
+		"I TRADE ONLY IN THE NAME OF MATTHIOS!",
+		"MATTHIOS SEES ALL COSTS AND ALL GAINS!",
 	)
 	storyteller = /datum/storyteller/matthios
 
