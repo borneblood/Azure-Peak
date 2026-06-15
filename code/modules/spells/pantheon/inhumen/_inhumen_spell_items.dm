@@ -405,10 +405,10 @@ var/global/list/da_bubbles = list('sound/foley/bubb (1).ogg','sound/foley/bubb (
 	if(!istype(target, /mob/living/carbon))
 		return
 	if(target.stat != DEAD)
-		to_chat(user, span_notice("They are not dead!"))
+		to_chat(user, span_warning("They are not dead!"))
 		return
 	if(!target.mind || !target.mind.active)
-		to_chat(user, "Strangely, the fluid seems a little colder when you try.")
+		to_chat(user, span_warning("Strangely, the fluid seems a little colder when you try. They are unworthy."))
 		return
 	if(HAS_TRAIT(target, TRAIT_DNR))
 		to_chat(user, span_danger("The Geald within the vial does not react to them at all. Strange."))
@@ -430,22 +430,24 @@ var/global/list/da_bubbles = list('sound/foley/bubb (1).ogg','sound/foley/bubb (
 
 	var/choice
 	if(target.client)
-		choice = alert(target, "You feel divine warmth offering you freedom from the shackles of Necra...", "Revival", "I need to wake up! Freedom!", "I'd rather be dead than free.")
+		choice = alert(target, "You feel divine warmth offering you FREEDOM from the shackles of Necra...",	"Revival", "I need to wake up! FREEDOM!", "I'd rather be dead than free.")
 	else
 		choice = "I'd rather be dead than free."
 
-	var/accepted = (choice == "I need to wake up! Freedom!")
+	var/accepted = (choice == "I need to wake up! FREEDOM!")
 
 	if(accepted)
 		target.revive(full_heal = TRUE)
-		to_chat(target, span_warning("Your body is violently forced back to life, as a searing heat floods from within— IT BURNS!!"))
-		target.visible_message(span_warning("[target.name]'s body rewinds to life... only for a massive shockwave of fire to burst from them!"))
+		target.grab_ghost(force = TRUE)
+		to_chat(target, span_warning("Your body is violently forced back to lyfe, as a searing heat floods from within— IT BURNS!!"))
+		target.visible_message(span_warning("[target.name]'s body is miraculously restored to lyfe... only for a massive shockwave of fire to burst from them!"))
 		target.adjust_fire_stacks(5)
 		target.ignite_mob()
 		target.emote("superagony", forced = TRUE)
 	else
-		to_chat(target, span_warning("You refuse the call... but the warmth curdles into something volatile."))
-		target.visible_message(span_warning("[target.name] does not rise. The Geald within them destabilizes violently!"))
+		to_chat(user, span_warningbig("They refused. They should have accepted. Ohhh my patr--!"))
+		to_chat(target, span_warningbig("You refuse the call... but the warmth curdles into something volatile."))
+		target.visible_message(span_warningbig("[target.name] does not rise, yet the poured Geald onto them destabilizes violently anyway!"))
 
 	var/turf/T = get_turf(target)
 	if(T)
@@ -457,7 +459,7 @@ var/global/list/da_bubbles = list('sound/foley/bubb (1).ogg','sound/foley/bubb (
 		var/dir = get_dir(target, M)
 		var/turf/throw_target = get_edge_target_turf(M, dir)
 		if(throw_target)
-			M.throw_at(throw_target, 4, 2)
+			M.throw_at(throw_target, 8, 2)
 
 	qdel(src)
 
