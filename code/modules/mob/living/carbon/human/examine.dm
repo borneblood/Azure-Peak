@@ -381,7 +381,7 @@
 			if(HAS_TRAIT(src, TRAIT_DARKBLOOD))
 				. += span_userdanger("This foul Vitae... They are a Nitecured vermin! Disgusting!")
 			if(HAS_TRAIT(src, TRAIT_PALLID))
-				. += span_userdanger("The scent of thinblood... Nay, it is fainter than that. Strange.")
+				. += span_userdanger("The scent of thinblood... Nay, it is fainter than that. How strange.")
 	if(wear_shirt && !(SLOT_SHIRT in obscured))
 		var/str = "[m3] [wear_shirt.generate_tooltip(wear_shirt.get_examine_string(user))]. "
 		str += "[wear_shirt.integrity_check(is_smart)]"

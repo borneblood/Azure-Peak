@@ -191,7 +191,7 @@
 		if(ishuman(user))
 			var/mob/living/carbon/human/H = user
 			if(HAS_TRAIT(src, TRAIT_DARKBLOOD) ||HAS_TRAIT(src, TRAIT_PALLID) || HAS_TRAIT(user, TRAIT_ROTMAN) || HAS_TRAIT(user, TRAIT_DEATHLESS))	//Can't be a Martyr if you're undead already.
-				to_chat(H, span_warn("It burns and sizzles! It does not tolerate my pallid flesh!"))
+				to_chat(H, span_warn("It burns and sizzles as I let go of it! The TEN do not tolerate my inhumen traits!"))
 				H.dropItemToGround(parent)
 				return
 			var/datum/job/J = SSjob.GetJob(H.mind?.assigned_role)

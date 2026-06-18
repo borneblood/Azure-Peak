@@ -1549,9 +1549,8 @@ var/global/list/da_bubbles = list('sound/foley/bubb (1).ogg','sound/foley/bubb (
 
 /obj/item/alchserum/matthios_kingsblood/examine(mob/user)
 	. = ..()
-
 	if(user?.mind?.has_antag_datum(/datum/antagonist/vampire) || HAS_TRAIT(user, TRAIT_PALLID) || HAS_TRAIT(user, TRAIT_ORGAN_EATER) || HAS_TRAIT(user, TRAIT_NASTY_EATER))
-		. += span_warning("TIP: You could drink this instead of applying it. Aim for your mouth and use it on yourself.")
+		. += span_warning("Your traits allow you to drink this to restore some energy and relieve some stress. Aim for your mouth and use it on yourself.")
 
 /obj/item/alchserum/matthios_kingsblood/attack(mob/living/carbon/human/target, mob/living/user)
 	if(!istype(target))
@@ -1565,6 +1564,7 @@ var/global/list/da_bubbles = list('sound/foley/bubb (1).ogg','sound/foley/bubb (
 			if(is_vampire)
 				to_chat(target, span_notice("It tastes like very old wine... Rich, deep, and impossibly satisfying~"))
 				target.bloodpool += 75
+				target.apply_status_effect(/datum/status_effect/buff/)
 				target.apply_status_effect(/datum/status_effect/buff/vitae)
 			else
 				to_chat(target, span_notice("It tastes like old wine... Strange, but not entirely unpleasant."))
