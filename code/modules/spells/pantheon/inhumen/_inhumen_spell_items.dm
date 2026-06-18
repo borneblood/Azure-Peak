@@ -1550,7 +1550,7 @@ var/global/list/da_bubbles = list('sound/foley/bubb (1).ogg','sound/foley/bubb (
 /obj/item/alchserum/matthios_kingsblood/examine(mob/user)
 	. = ..()
 
-	if(user?.mind?.has_antag_datum(/datum/antagonist/vampire) || HAS_TRAIT(user, TRAIT_PALLID) || HAS_TRAIT(user, TRAIT_ORGAN_EATER))
+	if(user?.mind?.has_antag_datum(/datum/antagonist/vampire) || HAS_TRAIT(user, TRAIT_PALLID) || HAS_TRAIT(user, TRAIT_ORGAN_EATER) || HAS_TRAIT(user, TRAIT_NASTY_EATER))
 		. += span_warning("TIP: You could drink this instead of applying it. Aim for your mouth and use it on yourself.")
 
 /obj/item/alchserum/matthios_kingsblood/attack(mob/living/carbon/human/target, mob/living/user)
@@ -1558,7 +1558,7 @@ var/global/list/da_bubbles = list('sound/foley/bubb (1).ogg','sound/foley/bubb (
 		return ..()
 
 	var/is_vampire = target.mind?.has_antag_datum(/datum/antagonist/vampire)
-	var/is_blood_drinker = is_vampire || HAS_TRAIT(target, TRAIT_PALLID) || HAS_TRAIT(target, TRAIT_ORGAN_EATER)
+	var/is_blood_drinker = is_vampire || HAS_TRAIT(target, TRAIT_PALLID) || HAS_TRAIT(target, TRAIT_ORGAN_EATER || HAS_TRAIT(user, TRAIT_NASTY_EATER))
 
 	if(target == user && user.zone_selected == BODY_ZONE_PRECISE_MOUTH && is_blood_drinker)
 		if(do_after(user, 2 SECONDS, target = target))

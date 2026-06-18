@@ -16,7 +16,7 @@
 		return
 	if(human_owner.stat >= DEAD) //forget it
 		return
-	if(HAS_TRAIT(src, TRAIT_PALLID) && prob(20))
+	if(HAS_TRAIT(src, TRAIT_DARKBLOOD) && prob(20))
 		to_chat(human_owner, span_danger("You feel the rageborne saliva mixing in with your impure blood, narrowly saving you from an infection-- Don't test your luck!"))
 		addtimer(CALLBACK(human_owner, TYPE_PROC_REF(/mob/living/carbon, vomit), 0, TRUE), rand(8 SECONDS, 15 SECONDS))		
 		return 

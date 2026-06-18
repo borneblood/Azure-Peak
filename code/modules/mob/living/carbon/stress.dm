@@ -89,7 +89,16 @@ GLOBAL_LIST_INIT(stress_messages, world.file2list("strings/rt/stress_messages.tx
 		remove_stress(/datum/stressevent/bleeding)
 
 	// Pallid gets sunlight sensitivity, just a moodnuke while the sun is at the highest.
-	if(HAS_TRAIT(src, TRAIT_PALLID) && GLOB.tod == "day")
+	if(HAS_TRAIT(src, TRAIT_BLACKBLOOD) && GLOB.tod == "day")
+		var/area/A = get_area(src)
+		if(A?.outdoors)
+			add_stress(/datum/stressevent/blackblood_outdoors)
+		else
+			remove_stress(/datum/stressevent/blackblood_outdoors)
+	else
+		remove_stress(/datum/stressevent/blackblood_outdoors)
+
+	if(HAS_TRAIT(src, TRAIT_PALLID))
 		var/area/A = get_area(src)
 		if(A?.outdoors)
 			add_stress(/datum/stressevent/pallid_outdoors)
@@ -97,7 +106,7 @@ GLOBAL_LIST_INIT(stress_messages, world.file2list("strings/rt/stress_messages.tx
 			remove_stress(/datum/stressevent/pallid_outdoors)
 	else
 		remove_stress(/datum/stressevent/pallid_outdoors)
-
+	
 	if(HAS_TRAIT(src, TRAIT_AGORAPHOBIC))
 		var/area/A = get_area(src)
 		if(A?.outdoors)

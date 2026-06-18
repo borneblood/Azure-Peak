@@ -97,7 +97,7 @@
 			nodmg = TRUE
 			next_attack_msg += VISMSG_ARMOR_BLOCKED
 		else if(!nodmg && (HAS_TRAIT(user, TRAIT_VAMPBITE)))
-			if(!HAS_TRAIT(src, TRAIT_PALLID)) // pallid is guaranteed to make vamp scenes not sexy
+			if(!HAS_TRAIT(src, TRAIT_DARKBLOOD)) // pallid is guaranteed to make vamp scenes not sexy
 				var/ramount = 15
 				var/rid = /datum/reagent/vampsolution
 				reagents.add_reagent(rid, ramount)
