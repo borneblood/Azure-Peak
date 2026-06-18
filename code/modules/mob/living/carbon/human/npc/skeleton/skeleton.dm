@@ -1,3 +1,14 @@
+GLOBAL_LIST_INIT(skeleton_aggro, list(
+	",w Kill...",
+	",w Fight...",
+	",w Destroy...",
+	"*laugh",
+	"*laugh",
+	"*rage",
+	"*rage",
+	"*rage",
+)) //Single Words or noises, feral and empty of mind.
+
 /mob/living/carbon/human/species/skeleton
 	name = "skeleton"
 
@@ -5,7 +16,7 @@
 	gender = MALE
 	bodyparts = list(/obj/item/bodypart/chest, /obj/item/bodypart/head, /obj/item/bodypart/l_arm,
 					 /obj/item/bodypart/r_arm, /obj/item/bodypart/r_leg, /obj/item/bodypart/l_leg)
-	faction = list("undead")
+	faction = list(FACTION_UNDEAD)
 	var/skel_outfit = /datum/outfit/job/roguetown/npc/skeleton
 	var/skel_fragile = FALSE
 	ambushable = FALSE
@@ -20,6 +31,16 @@
 	ambush_faction = "undead"
 	ai_controller = /datum/ai_controller/human_npc
 	skel_fragile = TRUE
+	blood_toll_bucket = STATS_KILLED_DEADITES
+
+/mob/living/carbon/human/species/skeleton/npc/after_creation()
+	..()
+	gender = pick(MALE, FEMALE)
+	dna.species.handle_body(src)
+	update_body()
+	src.grant_language(/datum/language/undead)
+	SEND_SIGNAL(src, COMSIG_MOB_MODIFY_AGGRO_LINES, GLOB.skeleton_aggro, TRUE)
+	src.regenerate_icons() //Fixes the weird body with random genders for NPCs.
 
 /mob/living/carbon/human/species/skeleton/npc/ambush
 	threat_point = THREAT_MODERATE
@@ -34,6 +55,7 @@
 	..()
 	if(ai_controller)
 		AddComponent(/datum/component/ai_aggro_system)
+		ADD_TRAIT(src, TRAIT_NPC_EXAMINE, TRAIT_GENERIC)
 	if(dna && dna.species)
 		dna.species.species_traits |= NOBLOOD
 		dna.species.soundpack_m = new /datum/voicepack/skeleton()
@@ -51,6 +73,7 @@
 	ADD_TRAIT(src, TRAIT_NOBREATH, TRAIT_GENERIC)
 	ADD_TRAIT(src, TRAIT_DEATHLESS, TRAIT_GENERIC)
 	ADD_TRAIT(src, TRAIT_NOPAIN, TRAIT_GENERIC)
+	ADD_TRAIT(src, TRAIT_NOBURN_RESIST, TRAIT_GENERIC)
 	ADD_TRAIT(src, TRAIT_TOXIMMUNE, TRAIT_GENERIC)
 	ADD_TRAIT(src, TRAIT_LEECHIMMUNE, INNATE_TRAIT)
 	ADD_TRAIT(src, TRAIT_LIMBATTACHMENT, TRAIT_GENERIC)
@@ -95,6 +118,10 @@
 
 /mob/living/carbon/human/species/skeleton/npc/no_equipment
 	skel_outfit = null
+
+/mob/living/carbon/human/species/skeleton/npc/no_equipment/after_creation()
+	..()
+	STAINT = 1
 
 /mob/living/carbon/human/species/skeleton/no_equipment
 	skel_outfit = null

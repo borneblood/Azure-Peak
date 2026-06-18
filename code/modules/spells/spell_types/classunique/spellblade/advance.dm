@@ -47,7 +47,7 @@
 		to_chat(H, span_warning("I need my bound weapon in hand!"))
 		return FALSE
 
-	H.say("Procede!", forced = "spell")
+	H.say("Procede!", forced = "spell", language = /datum/language/common)
 
 	var/turf/target_turf = get_turf(cast_on)
 	var/turf/start = get_turf(H)
@@ -101,8 +101,8 @@
 				break
 		if(blocked)
 			break
-
-		step(H, facing)
+		if(!step(H, facing))
+			break
 		steps_taken++
 
 		if(i < leap_range)
@@ -115,6 +115,10 @@
 
 	H.pass_flags = old_pass
 	H.throwing = old_throwing
+
+	var/turf/landing_turf = get_turf(H)
+	if(landing_turf?.zFall(H))
+		return TRUE
 
 	if(steps_taken == 0)
 		to_chat(H, span_warning("My leap is blocked!"))

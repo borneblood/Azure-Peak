@@ -1,4 +1,5 @@
 /mob/living/simple_animal/hostile/retaliate/rogue/infernal/watcher
+	threat_point = 70
 	icon = 'icons/mob/summonable/32x32.dmi'
 	name = "infernal watcher"
 	icon_state = "watcher"
@@ -18,7 +19,7 @@
 	base_intents = list(/datum/intent/simple/bite)
 	butcher_results = list()
 	death_loot = list(/obj/item/magic/infernal/core = 1)
-	faction = list("infernal")
+	faction = list(FACTION_INFERNAL)
 	mob_biotypes = MOB_ORGANIC|MOB_BEAST
 	health = 600
 	maxHealth = 600
@@ -48,7 +49,7 @@
 	aggressive = 1
 //	stat_attack = UNCONSCIOUS
 	ranged = TRUE
-	ranged_cooldown = 40
+	ranged_cooldown_time = 80
 	projectiletype = /obj/projectile/magic/aoe/fireball/rogue
 	ranged_message = "stares"
 

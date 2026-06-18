@@ -6,7 +6,7 @@
 	total_positions = 1
 	spawn_positions = 1
 
-	allowed_races = RACES_SHUNNED_UP	//No noble constructs.
+	forbidden_races = list(RACES_CONSTRUCT RACES_DESPISED RACES_OOZE)	//No noble constructs.
 	allowed_sexes = list(MALE, FEMALE)
 	outfit = /datum/outfit/job/roguetown/hand
 	advclass_cat_rolls = list(CTAG_HAND = 20)
@@ -20,7 +20,7 @@
 	max_pq = null
 	round_contrib_points = 3
 	cmode_music = 'sound/music/cmode/nobility/combat_spymaster.ogg'
-	job_traits = list(TRAIT_NOBLE)
+	job_traits = list(TRAIT_NOBLE, TRAIT_EXPERT_HUNTER)
 	vice_restrictions = list(/datum/charflaw/mute, /datum/charflaw/unintelligible) //Needs to use the throat - sometimes
 	job_subclasses = list(
 		/datum/advclass/hand/blademaster,
@@ -34,12 +34,13 @@
 	shirt = /obj/item/clothing/suit/roguetown/armor/chainmail/light //regular
 	wrists = /obj/item/clothing/wrists/roguetown/bracers/hand
 	belt = /obj/item/storage/belt/rogue/leather/steel
+	neck = /obj/item/storage/belt/rogue/pouch/coins/mid
 	id = /obj/item/scomstone/garrison/hand
 	job_bitflag = BITFLAG_ROYALTY
 
 /datum/outfit/job/roguetown/hand/pre_equip(mob/living/carbon/human/H)
 	H.mind.AddSpell(new /obj/effect/proc_holder/spell/self/convertrole/agent)
-	H.verbs |= /datum/job/roguetown/hand/proc/remember_agents
+	add_verb(H, /datum/job/roguetown/hand/proc/remember_agents)
 
 /datum/job/roguetown/hand/after_spawn(mob/living/L, mob/M, latejoin = TRUE)
 	. = ..()
@@ -48,7 +49,6 @@
 		if(ishuman(L))
 			var/mob/living/carbon/human/H = L
 			GLOB.court_spymaster += H.real_name
-			..()
 
 ///////////
 //CLASSES//
@@ -84,6 +84,7 @@
 		/datum/skill/misc/reading = SKILL_LEVEL_EXPERT,
 		/datum/skill/misc/riding = SKILL_LEVEL_APPRENTICE,
 		/datum/skill/misc/tracking = SKILL_LEVEL_NOVICE,
+		/datum/skill/misc/hunting = SKILL_LEVEL_APPRENTICE,
 	)
 
 /datum/outfit/job/roguetown/hand/blademaster/pre_equip(mob/living/carbon/human/H)
@@ -96,10 +97,11 @@
 		/obj/item/rogueweapon/huntingknife/idagger/dtace = 1,
 		/obj/item/rogueweapon/scabbard/sheath/royal = 1,
 		/obj/item/storage/keyring/lord = 1,
-		/obj/item/roguekey/skeleton = 1
+		/obj/item/roguekey/skeleton = 1,
+		/obj/item/hunting_map/white_stag = 1,
 	)
 	if(H.mind)
-		SStreasury.give_money_account(ECONOMIC_RICH, H, "Savings.")
+		SStreasury.grant_savings(ECONOMIC_RICH, H)
 
 
 //Spymaster start
@@ -134,6 +136,7 @@
 		/datum/skill/misc/sneaking = SKILL_LEVEL_MASTER,
 		/datum/skill/misc/stealing = SKILL_LEVEL_MASTER,
 		/datum/skill/misc/lockpicking = SKILL_LEVEL_MASTER, // not like they're gonna break into the vault.
+		/datum/skill/misc/hunting = SKILL_LEVEL_APPRENTICE,
 	)
 
 /datum/outfit/job/roguetown/hand/spymaster
@@ -159,7 +162,7 @@
 		backr = /obj/item/storage/backpack/rogue/satchel/black
 		pants = /obj/item/clothing/under/roguetown/tights/black
 	if(H.mind)
-		SStreasury.give_money_account(ECONOMIC_RICH, H, "Savings.")
+		SStreasury.grant_savings(ECONOMIC_RICH, H)
 
 //Advisor Start
 /datum/advclass/hand/advisor
@@ -194,6 +197,7 @@
 		/datum/skill/misc/medicine = SKILL_LEVEL_EXPERT,
 		/datum/skill/misc/lockpicking = SKILL_LEVEL_EXPERT,
 		/datum/skill/magic/arcane = SKILL_LEVEL_APPRENTICE,
+		/datum/skill/misc/hunting = SKILL_LEVEL_APPRENTICE,
 	)
 /datum/outfit/job/roguetown/hand/advisor
 	armor = /obj/item/clothing/suit/roguetown/armor/gambeson/heavy/hand/advisor
@@ -214,7 +218,7 @@
 		/obj/item/book/spellbook = 1,
 	)
 	if(H.mind)
-		SStreasury.give_money_account(ECONOMIC_RICH, H, "Savings.")
+		SStreasury.grant_savings(ECONOMIC_RICH, H)
 
 ////////////////////
 ///SPELLS & VERBS///
@@ -230,7 +234,7 @@
 
 /datum/job/roguetown/hand/proc/remember_agents()
 	set name = "Remember Agents"
-	set category = "Voice of Command"
+	set category = "RoleUnique.Voice of Command"
 
 	to_chat(usr, span_boldnotice("I have these agents present:"))
 	for(var/name in GLOB.court_agents)
@@ -252,4 +256,4 @@
 	if(!.)
 		return
 	GLOB.court_agents += recruit.real_name
-	recruit.verbs |= /datum/job/roguetown/adventurer/courtagent/proc/remember_employer
+	add_verb(recruit, /datum/job/roguetown/adventurer/courtagent/proc/remember_employer)

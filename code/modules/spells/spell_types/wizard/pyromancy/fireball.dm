@@ -32,6 +32,8 @@
 	associated_skill = /datum/skill/magic/arcane
 	spell_tier = 3
 
+	spell_requirements = SPELL_REQUIRES_NO_ANTIMAGIC | SPELL_REQUIRES_HUMAN
+
 /obj/projectile/magic/aoe/fireball/rogue
 	name = "fireball"
 	speed = MAGE_PROJ_VERY_SLOW
@@ -59,7 +61,7 @@
 
 /obj/projectile/magic/aoe/fireball/rogue/arc
 	name = "arced fireball"
-	damage = 45 // 25% damage penalty
+	damage = 53 // 25% damage penalty
 	arcshot = TRUE
 
 /obj/projectile/magic/aoe/fireball/rogue/on_hit(target)

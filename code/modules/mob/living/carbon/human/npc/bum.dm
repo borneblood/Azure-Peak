@@ -4,7 +4,7 @@ GLOBAL_LIST_INIT(bum_aggro, world.file2list("strings/rt/bumaggrolines.txt"))
 /mob/living/carbon/human/species/human/northern/bum
 	ai_controller = /datum/ai_controller/human_npc
 	d_intent = INTENT_PARRY
-	faction = list("bums", "station")
+	faction = list(FACTION_BUMS, FACTION_STATION)
 	ambushable = FALSE
 	dodgetime = 30
 
@@ -26,6 +26,7 @@ GLOBAL_LIST_INIT(bum_aggro, world.file2list("strings/rt/bumaggrolines.txt"))
 	ADD_TRAIT(src, TRAIT_NOHUNGER, TRAIT_GENERIC)
 	ADD_TRAIT(src, TRAIT_LEECHIMMUNE, INNATE_TRAIT)
 	ADD_TRAIT(src, TRAIT_BREADY, TRAIT_GENERIC)
+	ADD_TRAIT(src, TRAIT_NPC_EXAMINE, TRAIT_GENERIC)
 	equipOutfit(new /datum/outfit/job/roguetown/vagabond)
 	STACON = 4
 	STAWIL = 4

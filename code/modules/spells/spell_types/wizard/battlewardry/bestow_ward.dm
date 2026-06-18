@@ -1,7 +1,7 @@
 /datum/action/cooldown/spell/bestow_ward
 	name = "Bestow Ward"
 	desc = "Channel arcyne energy to wrap an ally in a protective ward. The ward covers their entire body with light armor, \
-	yielding coverage to any real armor they wear. The ward lasts for 2.5 minutes or until destroyed. \
+	yielding coverage to any real armor they wear. The ward lasts for 5 minutes or until destroyed. \
 	Cannot override an existing ward of equal or greater strength, and will never override non-arcyne protections."
 	button_icon = 'icons/mob/actions/mage_battlewardry.dmi'
 	button_icon_state = "bestow_ward"
@@ -11,7 +11,7 @@
 	attunement_school = ASPECT_NAME_BATTLEWARDRY
 
 	click_to_activate = TRUE
-	cast_range = 2
+	cast_range = 4
 	self_cast_possible = FALSE
 
 	primary_resource_type = SPELL_COST_STAMINA
@@ -25,7 +25,7 @@
 	charge_drain = 1
 	charge_slowdown = CHARGING_SLOWDOWN_MEDIUM
 	charge_sound = 'sound/magic/charging.ogg'
-	cooldown_time = 2 MINUTES
+	cooldown_time = 1 MINUTES
 
 	associated_skill = /datum/skill/magic/arcane
 	spell_tier = 2
@@ -33,11 +33,12 @@
 
 	spell_requirements = SPELL_REQUIRES_NO_ANTIMAGIC | SPELL_REQUIRES_HUMAN | SPELL_REQUIRES_SAME_Z
 
-	var/ward_type = /obj/item/clothing/suit/roguetown/armor/regenerating/skin/arcyne_ward/bestowed
-	var/ward_duration = 2.5 MINUTES
+	var/ward_type = /obj/item/clothing/suit/roguetown/armor/manual/arcyne_ward/bestowed
+	var/ward_duration = 5 MINUTES
 
 /datum/action/cooldown/spell/bestow_ward/cast(atom/cast_on)
 	. = ..()
+
 	var/mob/living/carbon/human/caster = owner
 	if(!istype(caster))
 		return FALSE
@@ -51,24 +52,58 @@
 		to_chat(caster, span_warning("I cannot bestow a ward upon myself."))
 		return FALSE
 
-	// Safety: NEVER override non-arcyne skin armor (werewolf hide, etc)
 	if(target.skin_armor)
-		if(!istype(target.skin_armor, /obj/item/clothing/suit/roguetown/armor/regenerating/skin/arcyne_ward))
+		if(!istype(target.skin_armor, /obj/item/clothing/suit/roguetown/armor/manual/arcyne_ward))
 			to_chat(caster, span_warning("[target] is already protected by something beyond my power to overcome."))
 			return FALSE
-		var/obj/item/clothing/suit/roguetown/armor/regenerating/skin/arcyne_ward/existing = target.skin_armor
-		if(existing.arcyne_armor_tier >= ARCYNE_WARD_TIER_OTHER)
-			// Refresh duration if same tier bestowed ward
-			if(istype(existing, /obj/item/clothing/suit/roguetown/armor/regenerating/skin/arcyne_ward/bestowed))
-				var/obj/item/clothing/suit/roguetown/armor/regenerating/skin/arcyne_ward/bestowed/bestowed = existing
-				bestowed.refresh_duration(ward_duration)
-				to_chat(caster, span_notice("I refresh [target]'s ward."))
-				target.visible_message(span_notice("[target]'s arcyne ward shimmers brightly as it is renewed!"))
-				return TRUE
-			to_chat(caster, span_warning("[target] already bears a ward of equal or greater strength."))
+
+		var/obj/item/clothing/suit/roguetown/armor/manual/arcyne_ward/existing = target.skin_armor
+
+		if(existing.arcyne_armor_tier > ARCYNE_WARD_TIER_OTHER)
+			to_chat(caster, span_warning("[target] already bears a ward of greater strength."))
 			return FALSE
 
-	var/obj/item/clothing/suit/roguetown/armor/regenerating/skin/arcyne_ward/bestowed/ward = new ward_type(target)
+		if(istype(existing, /obj/item/clothing/suit/roguetown/armor/manual/arcyne_ward/bestowed))
+			var/obj/item/clothing/suit/roguetown/armor/manual/arcyne_ward/bestowed/B = existing
+
+			// Damaged ward: restore it, consuming duration based on repaired durability.
+			if(B.obj_integrity < B.max_integrity)
+				var/restored = B.max_integrity - B.obj_integrity
+
+				var/time_remaining = max(0, B.expires_at - world.time)
+				var/time_penalty = restored * 5 SECONDS
+
+				qdel(B)
+
+				var/obj/item/clothing/suit/roguetown/armor/manual/arcyne_ward/bestowed/newward = new ward_type(target)
+				target.skin_armor = newward
+				newward.setup_ward(target)
+
+				// If repairing would consume over half the remaining duration,
+				// rebuild the ward from scratch with a fresh timer.
+				if(time_penalty > (time_remaining / 2))
+					newward.set_duration(ward_duration)
+
+					target.visible_message(span_notice("[target]'s arcyne ward is completely rebuilt in a surge of arcyne power!"))
+					to_chat(caster, span_notice("I rebuild [target]'s ward from scratch."))
+				else
+					var/new_duration = max(10 SECONDS, time_remaining - time_penalty)
+
+					newward.set_duration(new_duration)
+
+					target.visible_message(span_notice("[target]'s damaged arcyne ward is restored to full strength!"))
+					to_chat(caster, span_notice("I restore [target]'s ward at the cost of some of its remaining duration."))
+
+				return TRUE
+
+			// Undamaged ward: extend duration.
+			B.extend_duration(ward_duration)
+
+			target.visible_message(span_notice("[target]'s arcyne ward brightens as its duration is extended!"))
+			to_chat(caster, span_notice("I reinforce [target]'s ward."))
+			return TRUE
+
+	var/obj/item/clothing/suit/roguetown/armor/manual/arcyne_ward/bestowed/ward = new ward_type(target)
 	target.skin_armor = ward
 	ward.setup_ward(target)
 	ward.set_duration(ward_duration)
@@ -77,48 +112,61 @@
 	to_chat(caster, span_notice("I bestow an arcyne ward upon [target]."))
 	return TRUE
 
-/obj/item/clothing/suit/roguetown/armor/regenerating/skin/arcyne_ward/bestowed
+/obj/item/clothing/suit/roguetown/armor/manual/arcyne_ward/bestowed
 	name = "bestowed ward"
 	desc = "An arcyne ward placed by another mage. It cannot be dismissed - it must be weathered or destroyed."
 	max_integrity = 200
 	arcyne_armor_tier = ARCYNE_WARD_TIER_OTHER
 	ward_color = GLOW_COLOR_WARD
-
-	// Bestowed wards do not regenerate
-	auto_repair_mode = FALSE
-	repair_time = 0
-
+	armor = ARMOR_BRIGANDINE
 	var/duration_timer
+	var/expires_at = 0
 
-/obj/item/clothing/suit/roguetown/armor/regenerating/skin/arcyne_ward/bestowed/armour_regen()
-	return
 
-/obj/item/clothing/suit/roguetown/armor/regenerating/skin/arcyne_ward/bestowed/proc/set_duration(duration)
+/obj/item/clothing/suit/roguetown/armor/manual/arcyne_ward/bestowed/proc/set_duration(duration)
 	if(duration_timer)
 		deltimer(duration_timer)
+	expires_at = world.time + duration
 	duration_timer = QDEL_IN(src, duration)
 
-/obj/item/clothing/suit/roguetown/armor/regenerating/skin/arcyne_ward/bestowed/proc/refresh_duration(duration)
+
+/obj/item/clothing/suit/roguetown/armor/manual/arcyne_ward/bestowed/proc/extend_duration(duration)
+	var/time_remaining = max(0, expires_at - world.time)
 	if(duration_timer)
 		deltimer(duration_timer)
-	duration_timer = QDEL_IN(src, duration)
-	obj_integrity = min(obj_integrity + 50, max_integrity)
+	expires_at = world.time + time_remaining + duration
+	duration_timer = QDEL_IN(src, time_remaining + duration)
 
-/obj/item/clothing/suit/roguetown/armor/regenerating/skin/arcyne_ward/bestowed/Destroy()
+
+/obj/item/clothing/suit/roguetown/armor/manual/arcyne_ward/bestowed/Destroy()
 	if(duration_timer)
 		deltimer(duration_timer)
 		duration_timer = null
 	return ..()
 
-/obj/item/clothing/suit/roguetown/armor/regenerating/skin/arcyne_ward/bestowed/setup_ward(mob/living/carbon/human/H)
+
+/obj/item/clothing/suit/roguetown/armor/manual/arcyne_ward/bestowed/obj_break(damage_flag)
+	if(obj_broken)
+		return
+	obj_broken = TRUE
+	if(ward_owner)
+		ward_owner.visible_message(span_yellow("<i>[ward_owner]'s bestowed ward shatters to dust!</i>"))
+	if(break_sound)
+		playsound(get_turf(src), break_sound, 120, TRUE)
+	addtimer(CALLBACK(src, PROC_REF(shatter_delete)), 0)
+
+/obj/item/clothing/suit/roguetown/armor/manual/arcyne_ward/bestowed/proc/shatter_delete()
+	qdel(src)
+
+/obj/item/clothing/suit/roguetown/armor/manual/arcyne_ward/bestowed/setup_ward(mob/living/carbon/human/H)
 	ward_owner = H
 	RegisterSignal(H, COMSIG_MOB_EQUIPPED_ITEM, PROC_REF(on_owner_equip_change))
 	RegisterSignal(H, COMSIG_MOB_DROPITEM, PROC_REF(on_owner_equip_change))
 	recalculate_coverage()
-	// Very visible glow so everyone can see the warded person
-	H.add_filter("bestowed_ward_glow", 2, list("type" = "outline", "color" = ward_color, "alpha" = 150, "size" = 2))
+	H.add_filter("bestowed_ward_glow", 2, list("type" = "outline", "color" = ward_color, "alpha" = 200, "size" = 1))
 
-/obj/item/clothing/suit/roguetown/armor/regenerating/skin/arcyne_ward/bestowed/cleanup_ward()
+
+/obj/item/clothing/suit/roguetown/armor/manual/arcyne_ward/bestowed/cleanup_ward()
 	if(ward_owner)
 		ward_owner.remove_filter("bestowed_ward_glow")
 	..()

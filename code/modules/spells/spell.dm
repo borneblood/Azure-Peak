@@ -211,6 +211,7 @@ GLOBAL_LIST_INIT(spells, typesof(/obj/effect/proc_holder/spell)) //needed for th
 	var/miracle = FALSE
 	var/devotion_cost = 0
 	var/ignore_cockblock = FALSE //whether or not to ignore TRAIT_SPELLCOCKBLOCK
+	var/ignore_stealth_reveal = FALSE
 	action_icon_state = "spell0"
 	action_icon = 'icons/mob/actions/roguespells.dmi'
 	action_background_icon_state = ""
@@ -468,14 +469,14 @@ GLOBAL_LIST_INIT(spells, typesof(/obj/effect/proc_holder/spell)) //needed for th
 	switch(invocation_type)
 		if("shout")
 			if(prob(50))//Auto-mute? Fuck that noise
-				user.say(chosen_invocation, forced = "spell")
+				user.say(chosen_invocation, forced = "spell", language = /datum/language/common)
 			else
-				user.say(chosen_invocation, forced = "spell")
+				user.say(chosen_invocation, forced = "spell", language = /datum/language/common)
 		if("whisper")
 			if(prob(50))
-				user.whisper(chosen_invocation)
+				user.whisper(chosen_invocation, language = /datum/language/common)
 			else
-				user.whisper(chosen_invocation)
+				user.whisper(chosen_invocation, language = /datum/language/common)
 		if("emote")
 			var/emote_incantation = "<b>[usr.real_name]</b> [chosen_invocation]"
 			user.visible_message(emote_incantation, emote_incantation) //this is stupid, but it works.
@@ -604,6 +605,9 @@ GLOBAL_LIST_INIT(spells, typesof(/obj/effect/proc_holder/spell)) //needed for th
 			if(L.has_status_effect(/datum/status_effect/buff/clash))
 				var/mob/living/carbon/human/H = user
 				H.bad_guard(span_warning("I can't focus while casting spells!"), cheesy = TRUE)
+			if(!ignore_stealth_reveal)
+				if(L.get_skill_level(/datum/skill/misc/sneaking) >= SKILL_LEVEL_JOURNEYMAN || HAS_TRAIT(L, TRAIT_LIGHT_STEP))
+					L.apply_status_effect(/datum/status_effect/stealth_revealed)
 		if(action)
 			action.build_all_button_icons()
 		return TRUE
@@ -923,7 +927,8 @@ GLOBAL_LIST_INIT(spells, typesof(/obj/effect/proc_holder/spell)) //needed for th
 			else
 				playsound(get_turf(target), pick(target.parry_sound), 100)
 		target.apply_status_effect(/datum/status_effect/buff/parry_buffer)
-		target.apply_status_effect(/datum/status_effect/buff/adrenaline_rush)
+		if(attacker != target)
+			target.apply_status_effect(/datum/status_effect/buff/adrenaline_rush/ranged)
 		guard.deflected_spell = TRUE
 		target.remove_status_effect(/datum/status_effect/buff/clash)
 		// Pseudo-melee punishment: expose the attacker if provided

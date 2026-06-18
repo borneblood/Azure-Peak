@@ -37,6 +37,7 @@ GLOBAL_LIST_INIT(mockery_insults, list(
 
 	invocation_type = INVOCATION_SHOUT
 	charge_required = TRUE
+	weapon_cast_penalized = FALSE
 	charge_time = CHARGETIME_POKE
 	charge_slowdown = CHARGING_SLOWDOWN_NONE
 	cooldown_time = MOCKERY_COOLDOWN
@@ -48,7 +49,7 @@ GLOBAL_LIST_INIT(mockery_insults, list(
 	var/mob/living/carbon/human/H = owner
 	if(!ishuman(H))
 		return
-	H.say(pick(GLOB.mockery_insults), forced = "spell")
+	H.say(pick(GLOB.mockery_insults), forced = "spell", language = /datum/language/common)
 	. = ..()
 
 // ---- Mockery Projectile ----

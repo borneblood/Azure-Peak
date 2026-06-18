@@ -19,7 +19,7 @@
 	base_intents = list(/datum/intent/unarmed/claw)
 	butcher_results = list()
 	death_loot = list(/obj/item/magic/fae/fairydust = 4)
-	faction = list("fae")
+	faction = list(FACTION_FAE)
 	mob_biotypes = MOB_ORGANIC|MOB_BEAST
 	health = 50
 	maxHealth = 50
@@ -61,8 +61,8 @@
 /mob/living/simple_animal/hostile/retaliate/rogue/fae/sprite/death(gibbed)
 	..()
 	update_icon()
-	sleep(1)
-	qdel(src)
+	spawn(1)
+		qdel(src)
 
 /mob/living/simple_animal/hostile/retaliate/rogue/fae/sprite/taunted(mob/user)
 	emote("aggro")

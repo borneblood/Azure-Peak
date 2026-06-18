@@ -72,7 +72,7 @@
 #endif
 
 /mob/living/carbon/human/Initialize()
-	verbs += /mob/living/proc/lay_down
+	add_verb(src, /mob/living/proc/lay_down)
 	icon_state = "" //Remove the inherent human icon that is visible on the map editor. We're rendering ourselves limb by limb, having it still be there results in a bug where the basic human icon appears below as south in all directions and generally looks nasty.
 
 	//initialize limbs first
@@ -96,11 +96,6 @@
 	AddComponent(/datum/component/footstep, footstep_type, 1, 2)
 	GLOB.human_list += src
 	unarmed_special = new /datum/special_intent/upper_cut()
-
-	max_breath = 10
-	breath_remaining = 10
-	addtimer(CALLBACK(src, PROC_REF(update_breath_hud)), 1)
-
 
 /mob/living/carbon/human/ZImpactDamage(turf/T, levels)
 	var/obj/item/bodypart/affecting
@@ -141,24 +136,34 @@
 	randomize_human(src)
 	dna.initialize_dna()
 
+/mob/living/carbon/human/get_status_tab_items()
+	. = ..()
+	if(devotion)
+		. += "DEVOTION: [devotion.devotion]/[devotion.max_devotion]"
+	if(mind)
+		var/datum/antagonist/vampire/vampire_datum = mind.has_antag_datum(/datum/antagonist/vampire)
+		if(vampire_datum)
+			. += "VITAE: [bloodpool]"
+
 /mob/living/carbon/human/Destroy()
+	if(SScity_assembly?.is_alderman(src))
+		var/departing_name = real_name
+		var/departing_job = job
+		SScity_assembly.demote_alderman("Alderman's mob was deleted")
+		SScity_assembly.notify_alderman_lost_ref(departing_name, departing_job, "disconnected")
 	QDEL_NULL(physiology)
 	QDEL_NULL(sunder_light_obj)
 	GLOB.human_list -= src
+	if(current_fellowship)
+		current_fellowship.remove_member(src, reason = FELLOWSHIP_REASON_DESTROYED)
+		current_fellowship = null
+	if(length(incoming_fellowship_invites))
+		for(var/datum/weakref/W as anything in incoming_fellowship_invites)
+			var/datum/fellowship/F = W.resolve()
+			if(F)
+				F.remove_pending_invite(real_name)
+		incoming_fellowship_invites.Cut()
 	return ..()
-
-/mob/living/carbon/human/Stat()
-	..()
-	if(mind)
-		var/datum/antagonist/vampire/VD = mind.has_antag_datum(/datum/antagonist/vampire)
-		if(VD)
-			if(statpanel("Stats"))
-				stat("Vitae:", bloodpool)
-		if((mind.assigned_role == "Shepherd") || (mind.assigned_role == "Inquisitor"))
-			if(statpanel("Status"))
-				stat("Confessions sent: [GLOB.confessors.len]")
-
-	return //RTchange
 
 /mob/living/carbon/human/show_inv(mob/user)
 	user.set_machine(src)
@@ -1106,3 +1111,43 @@
 ///This is used to allow the thrown item "deflect". Minor and mostly just for aurafarming. Hooks into do_attack_animation because it's the most reliable access to a "valid" attack.
 /mob/living/carbon/human/proc/update_proj_parry_timer()
 	projectile_parry_timer = (world.time + PROJ_PARRY_TIMER)
+
+/mob/living/carbon/human/proc/reapply_live_preferences()
+	if(!client?.prefs)
+		return FALSE
+
+	var/datum/language_holder/language_holder = get_language_holder()
+	var/list/preserved_languages = language_holder?.languages?.Copy()
+	var/selected_default_language = language_holder?.selected_default_language
+
+	client.prefs.copy_to(src, TRUE, FALSE)
+	refresh_live_vocal_preferences()
+
+	if(language_holder && length(preserved_languages))
+		for(var/language_type in preserved_languages)
+			grant_language(language_type)
+		language_holder.selected_default_language = selected_default_language
+
+	return TRUE
+
+/mob/living/carbon/human/proc/refresh_live_vocal_preferences()
+	if(!client?.prefs)
+		return FALSE
+
+	if(dna?.species)
+		var/default_soundpack_m = initial(dna.species.soundpack_m)
+		var/default_soundpack_f = initial(dna.species.soundpack_f)
+		if(default_soundpack_m)
+			dna.species.soundpack_m = new default_soundpack_m()
+		if(default_soundpack_f)
+			dna.species.soundpack_f = new default_soundpack_f()
+
+	voice_color = client.prefs.voice_color
+	voice_pitch = client.prefs.voice_pitch
+	voice_type = client.prefs.voice_type
+	set_bark(client.prefs.bark_id)
+	vocal_speed = client.prefs.bark_speed
+	vocal_pitch = client.prefs.bark_pitch
+	vocal_pitch_range = client.prefs.bark_variance
+	apply_voicepacks(src, client)
+	return TRUE

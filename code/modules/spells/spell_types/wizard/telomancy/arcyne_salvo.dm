@@ -27,13 +27,14 @@
 	charge_slowdown = CHARGING_SLOWDOWN_NONE
 	charge_sound = 'sound/magic/charging.ogg'
 	cooldown_time = 12 SECONDS
-	is_implement_scaled_spell = TRUE
 	attunement_school = ASPECT_NAME_TELOMANCY
 	var/spread_step = 15
 
 	associated_skill = /datum/skill/magic/arcane
 	spell_tier = 3
 	spell_impact_intensity = SPELL_IMPACT_MEDIUM
+
+	spell_requirements = SPELL_REQUIRES_NO_ANTIMAGIC | SPELL_REQUIRES_HUMAN
 
 /datum/action/cooldown/spell/projectile/arcyne_salvo/ready_projectile(obj/projectile/to_fire, atom/target, mob/user, iteration)
 	. = ..()
@@ -72,7 +73,7 @@
 
 /obj/projectile/magic/arcyne_salvo/arc
 	name = "arced arcyne bolt"
-	damage = 22
+	damage = 23
 	arcshot = TRUE
 
 /obj/projectile/magic/arcyne_salvo/on_hit(target)

@@ -5,11 +5,11 @@
 	faction = "Station"
 	total_positions = 4
 	spawn_positions = 4
-	allowed_races = ACCEPTED_RACES
+	forbidden_races = list(RACES_DESPISED)
 	allowed_sexes = list(MALE, FEMALE)
 	allowed_ages = list(AGE_ADULT)
 	advclass_cat_rolls = list(CTAG_SQUIRE = 20)
-	job_traits = list(TRAIT_SQUIRE_REPAIR)
+	job_traits = list(TRAIT_SQUIRE_REPAIR, TRAIT_EXPERT_HUNTER)
 
 	tutorial = "Your folks said you were going to be something, they had better aspirations for you than the life of a peasant. You practiced the basics \
 		in the field alongside your friends, swordfighting with sticks, chasing rabbits with grain flail, and helping around the house lifting heavy \
@@ -79,11 +79,12 @@
 		/datum/skill/misc/athletics = SKILL_LEVEL_JOURNEYMAN,
 		/datum/skill/misc/reading = SKILL_LEVEL_NOVICE,
 		/datum/skill/misc/riding = SKILL_LEVEL_JOURNEYMAN,
+		/datum/skill/misc/hunting = SKILL_LEVEL_NOVICE,
 	)
 
 /datum/outfit/job/roguetown/squire/lancer/pre_equip(mob/living/carbon/human/H)
 	. = ..()
-	H.verbs |= /mob/proc/haltyell_exhausting
+	add_verb(H, /mob/proc/haltyell_exhausting)
 	r_hand = /obj/item/rogueweapon/spear/trainer
 	armor = /obj/item/clothing/suit/roguetown/armor/chainmail/iron
 	gloves = /obj/item/clothing/gloves/roguetown/leather
@@ -99,7 +100,7 @@
 		/obj/item/repair_kit,
 	)
 	if(H.mind)
-		SStreasury.give_money_account(ECONOMIC_WORKING_CLASS, H, "Savings.")
+		SStreasury.grant_savings(ECONOMIC_WORKING_CLASS, H)
 
 /datum/advclass/squire/footman
 	name = "Squire at Arms"
@@ -128,11 +129,12 @@
 		/datum/skill/misc/climbing = SKILL_LEVEL_JOURNEYMAN,
 		/datum/skill/misc/athletics = SKILL_LEVEL_JOURNEYMAN,
 		/datum/skill/misc/reading = SKILL_LEVEL_NOVICE,
+		/datum/skill/misc/hunting = SKILL_LEVEL_NOVICE,
 	)
 
 /datum/outfit/job/roguetown/squire/footman/pre_equip(mob/living/carbon/human/H)
 	. = ..()
-	H.verbs |= /mob/proc/haltyell_exhausting
+	add_verb(H, /mob/proc/haltyell_exhausting)
 	armor = /obj/item/clothing/suit/roguetown/armor/chainmail/iron
 	gloves = /obj/item/clothing/gloves/roguetown/leather
 	wrists = /obj/item/clothing/wrists/roguetown/bracers/leather
@@ -157,7 +159,7 @@
 			if("Club")
 				beltr = /obj/item/rogueweapon/mace/woodclub
 	if(H.mind)
-		SStreasury.give_money_account(ECONOMIC_WORKING_CLASS, H, "Savings.")
+		SStreasury.grant_savings(ECONOMIC_WORKING_CLASS, H)
 
 /datum/advclass/squire/skirmisher
 	name = "Irregular Squire"
@@ -186,11 +188,12 @@
 		/datum/skill/misc/athletics = SKILL_LEVEL_JOURNEYMAN,
 		/datum/skill/misc/reading = SKILL_LEVEL_NOVICE,
 		/datum/skill/misc/riding = SKILL_LEVEL_NOVICE,
+		/datum/skill/misc/hunting = SKILL_LEVEL_NOVICE,
 	)
 
 /datum/outfit/job/roguetown/squire/skirmisher/pre_equip(mob/living/carbon/human/H)
 	. = ..()
-	H.verbs |= /mob/proc/haltyell_exhausting
+	add_verb(H, /mob/proc/haltyell_exhausting)
 	beltr = /obj/item/quiver/sling/iron
 	beltl = /obj/item/gun/ballistic/revolver/grenadelauncher/sling
 	armor = /obj/item/clothing/suit/roguetown/armor/leather/heavy
@@ -208,4 +211,4 @@
 		/obj/item/repair_kit,
 		)
 	if(H.mind)
-		SStreasury.give_money_account(ECONOMIC_WORKING_CLASS, H, "Savings.")
+		SStreasury.grant_savings(ECONOMIC_WORKING_CLASS, H)

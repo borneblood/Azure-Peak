@@ -8,6 +8,8 @@ GLOBAL_LIST_EMPTY(roundstart_races)
 	var/clothes_id //id for clothes
 	var/name	// this is the fluff name. these will be left generic (such as 'Lizardperson' for the lizard race) so servers can change them to whatever
 	var/desc
+	var/desc_title
+	var/list/mechanics_explanations // if this species has unique mechanics, explain each of them here. try to keep separate mechanics separated as individual list items
 	var/default_color = "#FFF"	// if alien colors are disabled, this is the color that will be used by that race
 	var/limbs_icon_m
 	var/limbs_icon_f
@@ -53,6 +55,7 @@ GLOBAL_LIST_EMPTY(roundstart_races)
 	var/use_skintones = FALSE	// does it use skintones or not? (spoiler alert this is only used by humans)
 	var/exotic_blood = ""	// If my race wants to bleed something other than bog standard blood, change this to reagent id.
 	var/exotic_bloodtype = "" //If my race uses a non standard bloodtype (A+, O-, AB-, etc)
+	var/blood_color = BLOOD_COLOR_RED // Hex color used to tint blood decals this species leaves behind.
 	var/meat = /obj/item/reagent_containers/food/snacks/rogue/meat/steak //What the species drops on gibbing
 	var/skinned_type
 	var/liked_food = NONE
@@ -154,7 +157,6 @@ GLOBAL_LIST_EMPTY(roundstart_races)
 
 	// Associative list of stat (STAT_STRENGTH, etc) bonuses used to differentiate each race. They should ALWAYS be positive.
 	var/list/race_bonus = list()
-	var/construct = 0
 	var/gibs_on_shapeshift = FALSE
 
 	var/obj/item/mutanthands
@@ -482,9 +484,6 @@ GLOBAL_LIST_EMPTY(roundstart_races)
 	if(TRAIT_NOMETABOLISM in inherent_traits)
 		C.reagents.end_metabolization(C, keep_liverless = TRUE)
 
-	if(construct)
-		C.construct = 1 //for constructs? Duh.
-
 	if(inherent_factions)
 		for(var/i in inherent_factions)
 			C.faction += i //Using +=/-= for this in case you also gain the faction from a different source.
@@ -789,7 +788,8 @@ GLOBAL_LIST_EMPTY(roundstart_races)
 					return FALSE
 			if(H.wear_armor)
 				if(istype(H.wear_armor, I.type))
-					return FALSE
+					if(!(I.blocking_behavior & SAMEWEAR))
+						return FALSE
 				if(I.blocksound)
 					if(I.blocksound == H.wear_armor.blocksound)
 						return FALSE
@@ -1197,6 +1197,10 @@ GLOBAL_LIST_EMPTY(roundstart_races)
 	if(HAS_TRAIT(user, TRAIT_PACIFISM))
 		to_chat(user, span_warning("I don't want to harm [target]!"))
 		return FALSE
+	if(user.has_status_effect(/datum/status_effect/debuff/deadite_grace) && target.mind)
+		to_chat(user, span_warning("Ah, Lux... I calm down considerably, but my hunger only increases."))
+		user.remove_status_effect(/datum/status_effect/debuff/deadite_grace)
+
 	if(user.rogue_sneaking)
 		user.mob_timers[MT_FOUNDSNEAK] = world.time
 		user.update_sneak_invis(reset = TRUE)
@@ -1243,6 +1247,9 @@ GLOBAL_LIST_EMPTY(roundstart_races)
 			target.process_skd(user, IM)
 			return
 
+		var/mob/living/carbon/human/H = target
+		H.process_golgatha_rebuke(user)
+
 		if(user.mob_biotypes & MOB_UNDEAD)
 			if(target.has_status_effect(/datum/status_effect/buff/necras_vow))
 				if(isnull(user.mind))
@@ -1270,7 +1277,6 @@ GLOBAL_LIST_EMPTY(roundstart_races)
 			return FALSE
 */
 		var/selzone = melee_accuracy_check(user.zone_selected, user, target, /datum/skill/combat/unarmed, user.used_intent)
-		var/selzone_real = user.zone_selected
 
 		var/obj/item/bodypart/affecting = target.get_bodypart(check_zone(selzone))
 
@@ -1304,8 +1310,7 @@ GLOBAL_LIST_EMPTY(roundstart_races)
 				SEND_SIGNAL(user, COMSIG_HEAD_PUNCHED, target)
 		log_combat(user, target, "punched")
 		if(ishuman(user))
-			var/text = "[bodyzone2readablezone(selzone_real)]..."
-			user.filtered_balloon_alert(TRAIT_COMBAT_AWARE, text, show_self = FALSE)
+			user.resolve_combataware(target, "[bodyzone2readablezone(selzone)]...", "[bodyzone2readablezone(user.zone_selected)]...")
 
 		if(!nodmg)
 			if(user.limb_destroyer)
@@ -1538,6 +1543,10 @@ GLOBAL_LIST_EMPTY(roundstart_races)
 	if(HAS_TRAIT(user, TRAIT_PACIFISM))
 		to_chat(user, span_warning("I don't want to harm [target]!"))
 		return FALSE
+	if(user.has_status_effect(/datum/status_effect/debuff/deadite_grace) && target.mind)
+		to_chat(user, span_warning("Ah, Lux... I calm down considerably, but my hunger only increases."))
+		user.remove_status_effect(/datum/status_effect/debuff/deadite_grace)
+
 	if(user.IsKnockdown())
 		return FALSE
 	if(user == target)
@@ -1577,8 +1586,7 @@ GLOBAL_LIST_EMPTY(roundstart_races)
 			log_combat(user, target, "kicked")
 
 			if(ishuman(user))
-				var/text = "[bodyzone2readablezone(user.zone_selected)]..."
-				user.filtered_balloon_alert(TRAIT_COMBAT_AWARE, text, show_self = FALSE)
+				user.resolve_combataware(target, "[bodyzone2readablezone(selzone)]...", "[bodyzone2readablezone(user.zone_selected)]...")
 
 			user.do_attack_animation_simple(target, ATTACK_EFFECT_KICK, TRUE)
 			if(!nodmg)
@@ -1757,7 +1765,6 @@ GLOBAL_LIST_EMPTY(roundstart_races)
 		return 0
 
 	var/hit_area
-	var/selzone_real = user.zone_selected
 
 	selzone = melee_accuracy_check(user.zone_selected, user, H, I.associated_skill, user.used_intent, I)
 	affecting = H.get_bodypart(check_zone(selzone))
@@ -1820,6 +1827,9 @@ GLOBAL_LIST_EMPTY(roundstart_races)
 			pen = PEN_NONE
 			Iforce *= 0.5
 
+	if(H == user && bladec == BCLASS_DISARM)
+		bladec = BCLASS_BLUNT
+
 	var/higher_intfactor = max(user.used_intent.masteritem?.intdamage_factor, user.used_intent.intent_intdamage_factor)
 	var/lowest_intfactor = min(user.used_intent.masteritem?.intdamage_factor, user.used_intent.intent_intdamage_factor)
 	var/used_intfactor = 1
@@ -1829,14 +1839,10 @@ GLOBAL_LIST_EMPTY(roundstart_races)
 		used_intfactor = higher_intfactor
 
 	if(ishuman(user) && user != H)
-		var/text = "[bodyzone2readablezone(selzone_real)]..."
+		var/aim_text = "[bodyzone2readablezone(user.zone_selected)]..."
 		if(HAS_TRAIT(user, TRAIT_DECEIVING_MEEKNESS))
-			if(prob(10))
-				text = "<i>I can't tell...</i>"
-			else
-				text = null
-		if(text)
-			user.filtered_balloon_alert(TRAIT_COMBAT_AWARE, text, show_self = FALSE)
+			aim_text = prob(10) ? "<i>I can't tell...</i>" : null
+		user.resolve_combataware(H, "[bodyzone2readablezone(selzone)]...", aim_text)
 
 	if(H.client?.prefs.combat_toggles & HITZONE_TEXT)
 		H.balloon_alert(H, "[bodyzone2readablezone(selzone)]...") 
@@ -1866,6 +1872,7 @@ GLOBAL_LIST_EMPTY(roundstart_races)
 			if(I)
 				I.remove_bintegrity(1)
 				I.take_damage(1, BRUTE, I.d_type)
+			
 			if(user.mind && user.goodluck(4) && user.d_intent == INTENT_DODGE)
 				user.changeNext_def(clamp(user.dodgetime - 1, 0, CLICK_CD_DODGE))
 				user.changeMaxDodge(1)
@@ -1901,6 +1908,9 @@ GLOBAL_LIST_EMPTY(roundstart_races)
 //			var/turf/target_shove_turf = get_step(H.loc, get_dir(user.loc,H.loc))
 //			H.throw_at(target_shove_turf, 1, 1, H, spin = FALSE)
 
+	if(bladec == BCLASS_DISARM)
+		H.attempt_disarm(user, I)
+
 	I.funny_attack_effects(H, user, nodmg)
 	H.send_item_attack_message(I, user, selzone, affecting, bladec)
 
@@ -1924,7 +1934,8 @@ GLOBAL_LIST_EMPTY(roundstart_races)
 				bloody = 1
 				var/turf/location = H.loc
 				var/splatter_dir = get_dir(H, user)
-				new /obj/effect/temp_visual/dir_setting/bloodsplatter(H.loc, splatter_dir)
+				var/obj/effect/temp_visual/dir_setting/bloodsplatter/splatter = new(H.loc, splatter_dir)
+				splatter.set_blood_color(H.get_blood_color())
 				if(istype(location))
 					H.add_splatter_floor(location)
 					H.add_splatter_wall(location, force = I.force)
@@ -2152,10 +2163,12 @@ GLOBAL_LIST_EMPTY(roundstart_races)
 		var/datum/status_effect/fire_handler/fire_stacks/pure_stacks = H.has_status_effect(/datum/status_effect/fire_handler/fire_stacks)
 		var/firemodifier = pure_stacks?.stacks / 50
 		if(pure_stacks?.on_fire)
-			burn_damage = 10 + pure_stacks?.stacks * 3 // Minimum of 10 damage if you are on fire. Applies 3 additional per stack.
+			burn_damage = 5 + round(sqrt(pure_stacks?.stacks) * 10) // sqrt curve - diminishing returns at high stacks
 		else
 			firemodifier = min(firemodifier, 0)
 			burn_damage = round(max(log(2-firemodifier,(H.bodytemperature-BODYTEMP_NORMAL))-5,0)) // this can go below 5 at log 2.5
+		if(HAS_TRAIT(H, TRAIT_FIRE_RESIST))
+			burn_damage *= 0.5
 		if (burn_damage)
 			switch(burn_damage)
 				if(0 to 2)
@@ -2205,10 +2218,12 @@ GLOBAL_LIST_EMPTY(roundstart_races)
 	if(thermal_protection >= FIRE_IMMUNITY_MAX_TEMP_PROTECT && !no_protection)
 		return
 
+	var/fire_resist_mult = HAS_TRAIT(H, TRAIT_FIRE_RESIST) ? 0.5 : 1
+
 	if(thermal_protection >= FIRE_SUIT_MAX_TEMP_PROTECT && !no_protection)
-		H.adjust_bodytemperature(11)
+		H.adjust_bodytemperature(11 * fire_resist_mult)
 	else
-		H.adjust_bodytemperature(BODYTEMP_HEATING_MAX + (H.fire_stacks * 12))
+		H.adjust_bodytemperature((BODYTEMP_HEATING_MAX + (H.fire_stacks * 12)) * fire_resist_mult)
 
 /datum/species/proc/Canignite_mob(mob/living/carbon/human/H)
 	if(HAS_TRAIT(H, TRAIT_NOFIRE))
@@ -2448,3 +2463,48 @@ GLOBAL_LIST_EMPTY(roundstart_races)
 
 /datum/species/proc/get_types_to_preload()
 	return get_organs(FALSE)
+
+/** Gets a string listing off all the stat changes made by a race.
+*
+* - `return_null_if_no_stats` : If no bonus stats are found, returns null instead of "No racial stat bonuses."
+* - `end_with_glue` : If any bonus stats are found, returns this string with the jointext glue string appended (`" | "`)."
+*/
+/datum/species/proc/get_string_bonus_stats(return_null_if_no_stats = FALSE, end_with_glue = FALSE)
+	var/list/stats_to_abbreviations = list(
+		STAT_STRENGTH = "STR",
+		STAT_PERCEPTION = "PER",
+		STAT_INTELLIGENCE = "INT",
+		STAT_CONSTITUTION = "CON",
+		STAT_WILLPOWER = "WIL",
+		STAT_SPEED = "SPD",
+		STAT_FORTUNE = "FOR"
+	)
+	var/list/bonuses = list()
+	for (var/stat in race_bonus)
+		var/amt = race_bonus[stat]
+		var/abbrev = stats_to_abbreviations[stat]
+		bonuses.Add("[abbrev] [amt < 0 ? "-" : "+"][abs(amt)]")
+	if(length(bonuses))
+		return jointext(bonuses, " | ") + (end_with_glue ? " | " : null)
+	else
+		return return_null_if_no_stats ? null : "No racial stat changes"
+
+/datum/species/proc/get_string_mechanics_explanations()
+	if(!mechanics_explanations)
+		return null
+	var/ret = ""
+	for(var/tutorial in mechanics_explanations)
+		ret += "<br>- [tutorial]"
+	return ret
+
+/datum/species/proc/get_string_bonus_traits()
+	var/list/bonuses = list()
+	for (var/trait in inherent_traits)
+		// THIS is how we avoid showing hidden traits? Really?? Surely there's a better way than this?!
+		if(!(trait in GLOB.roguetraits))
+			continue
+		bonuses.Add(SPAN_TOOLTIP_DANGEROUS_HTML(GLOB.roguetraits[trait], "\[<u>[trait]</u>\]"))
+	if(length(bonuses))
+		return jointext(bonuses, " | ")
+	else
+		return null

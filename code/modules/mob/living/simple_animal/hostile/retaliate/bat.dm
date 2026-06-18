@@ -22,7 +22,7 @@
 	attack_verb_simple = "bite"
 	butcher_results = list(/obj/item/reagent_containers/food/snacks/rogue/meat/steak = 1)
 	pass_flags = PASSTABLE
-	faction = list("hostile")
+	faction = list(FACTION_HOSTILE)
 	attack_sound = 'sound/blank.ogg'
 	obj_damage = 0
 	environment_smash = ENVIRONMENT_SMASH_NONE
@@ -50,8 +50,8 @@
 
 /mob/living/simple_animal/hostile/retaliate/bat/Initialize()
 	. = ..()
-	verbs += list(/mob/living/simple_animal/proc/fly_up,
-	/mob/living/simple_animal/proc/fly_down) 
+	add_verb(src, list(/mob/living/simple_animal/proc/fly_up,
+	/mob/living/simple_animal/proc/fly_down)) 
 
 /mob/living/simple_animal/hostile/retaliate/bat/crow
 	name = "zad"

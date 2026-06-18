@@ -248,9 +248,7 @@ GLOBAL_LIST_INIT(department_radio_keys, list(
 
 	// autopunctuation
 	if(!client?.prefs?.no_autopunctuate)
-		var/ending = copytext(message, length(message), (length(message) + 1))
-		if(ending && !GLOB.correct_punctuation[ending])
-			message += "."
+		message = autopunct_bare(message)
 
 	if(D.flags & SIGNLANG)
 		send_speech_sign(message, message_range, src, bubble_type, spans, language, message_mode, original_message)
@@ -333,6 +331,8 @@ GLOBAL_LIST_INIT(department_radio_keys, list(
 	if(ishuman(src))
 		var/mob/living/carbon/human/H = src
 		mob_color = H.voice_color
+		if(H.voicecolor_override)
+			mob_color = H.voicecolor_override
 	var/chatmsg = "<font color = #[mob_color]><b>[src]</b></font> " + sign_verb + "."
 	visible_message(chatmsg, runechat_message = sign_verb, log_seen = SEEN_LOG_EMOTE, ignored_mobs = understanders)
 
@@ -547,6 +547,23 @@ GLOBAL_LIST_INIT(department_radio_keys, list(
 	var/image/I = image('icons/mob/talk.dmi', src, "[bubble_type][say_test(message)]", FLY_LAYER)
 	I.appearance_flags = APPEARANCE_UI_IGNORE_ALPHA
 	INVOKE_ASYNC(GLOBAL_PROC, GLOBAL_PROC_REF(flick_overlay), I, speech_bubble_recipients, 30)
+
+	//Listening gets trimmed here if a vocal bark's present. If anyone ever makes this proc return listening, make sure to instead initialize a copy of listening in here to avoid wonkiness
+	if(SEND_SIGNAL(src, COMSIG_MOVABLE_QUEUE_BARK, listening, args) || vocal_bark || vocal_bark_id)
+		for(var/mob/M in listening)
+			if(!M.client)
+				continue
+			if((M.client.prefs.mute_barks))
+				listening -= M
+		var/is_yell = Zs_yell || Zs_all
+		var/barks = min(round((LAZYLEN(message) / vocal_speed)) + 1, BARK_MAX_BARKS)
+		var/total_delay = 0
+		vocal_current_bark = world.time
+		for(var/i in 1 to barks)
+			if(total_delay > BARK_MAX_TIME)
+				break
+			addtimer(CALLBACK(src, TYPE_PROC_REF(/atom/movable, bark), listening, message_range, (vocal_volume * (is_yell ? 1.5 : 1)), BARK_DO_VARY(vocal_pitch, vocal_pitch_range), vocal_current_bark), total_delay)
+			total_delay += rand(DS2TICKS(vocal_speed / BARK_SPEED_BASELINE), DS2TICKS(vocal_speed / BARK_SPEED_BASELINE) + DS2TICKS((vocal_speed / BARK_SPEED_BASELINE) * (is_yell ? 0.5 : 1))) TICKS
 
 /mob/proc/binarycheck()
 	return FALSE

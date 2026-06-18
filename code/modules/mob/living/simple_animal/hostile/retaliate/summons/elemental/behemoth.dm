@@ -19,10 +19,11 @@
 	base_intents = list(/datum/intent/simple/elementalt2_unarmed)
 	butcher_results = list()
 	death_loot = list(/obj/item/magic/elemental/fragment = 1)
-	faction = list("elemental")
+	faction = list(FACTION_ELEMENTAL)
 	mob_biotypes = MOB_ORGANIC|MOB_BEAST
 	health = 800
 	maxHealth = 800
+	threat_point = 80
 	melee_damage_lower = 55
 	melee_damage_upper = 80
 	vision_range = 7

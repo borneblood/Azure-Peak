@@ -1,6 +1,6 @@
 /mob/living/carbon/human/species/human/northern/heretical_fiend_no_gear
 	ai_controller = /datum/ai_controller/human_npc
-	faction = list("Heretical_Fiend", "dundead")
+	faction = list(FACTION_HERETICAL_FIEND, FACTION_DUNDEAD)
 	ambushable = FALSE
 	cmode = 1
 	setparrytime = 30
@@ -52,7 +52,7 @@
 
 /mob/living/carbon/human/species/human/northern/heretical_fiend_no_gear/zizo_cultist
 	ai_controller = /datum/ai_controller/human_npc
-	faction = list("Heretical Fiend", "dundead")
+	faction = list(FACTION_HERETICAL_FIEND, FACTION_DUNDEAD)
 	ambushable = FALSE
 	cmode = 1
 	dodgetime = 30
@@ -71,6 +71,7 @@
 	ADD_TRAIT(src, TRAIT_LEECHIMMUNE, INNATE_TRAIT)
 	ADD_TRAIT(src, TRAIT_BREADY, TRAIT_GENERIC)
 	ADD_TRAIT(src, TRAIT_MEDIUMARMOR, TRAIT_GENERIC)
+	ADD_TRAIT(src, TRAIT_NPC_EXAMINE, TRAIT_GENERIC)
 	equipOutfit(new /datum/outfit/job/roguetown/human/northern/heretical_fiend_no_gear/zizo_cultist)
 	var/obj/item/organ/eyes/organ_eyes = getorgan(/obj/item/organ/eyes)
 	if(organ_eyes)
@@ -79,7 +80,35 @@
 	update_hair()
 	update_body()
 	var/obj/item/bodypart/head/head = get_bodypart(BODY_ZONE_HEAD)
-	head.sellprice = 15 // Not much
+	head.sellprice = HEAD_BOUNTY_HERETICAL_FIEND
+	src.grant_language(/datum/language/undead) //So they can speak Zizocant if we give them lines
+
+	var/voice_choice = rand(1, 12)
+	switch(voice_choice)
+		if(1)
+			src.voice_color = "0bb1e4"
+		if(2)
+			src.voice_color = "d30c0c"
+		if(3)
+			src.voice_color = "4d4afc"
+		if(4)
+			src.voice_color = "da40c0"
+		if(5)
+			src.voice_color = "51e251"
+		if(6)
+			src.voice_color = "a059cf"
+		if(7)
+			src.voice_color = "8700c5"
+		if(8)
+			src.voice_color = "cfc886"
+		if(9)
+			src.voice_color = "ff9100"
+		if(10)
+			src.voice_color = "a0a0a0"
+		if(11)
+			src.voice_color = "797979"
+		if(12)
+			src.voice_color = "ff5e00"
 
 /datum/outfit/job/roguetown/human/northern/heretical_fiend_no_gear/zizo_cultist/pre_equip(mob/living/carbon/human/H) //Intended to be super easy to kill
 	..()
@@ -90,6 +119,7 @@
 	H.adjust_skillrank(/datum/skill/combat/wrestling, 3, TRUE)
 	H.adjust_skillrank(/datum/skill/combat/unarmed, 3, TRUE)
 	H.adjust_skillrank(/datum/skill/combat/staves, 2, TRUE)
+	ADD_TRAIT(H, TRAIT_ALCHEMY_EXPERT, TRAIT_GENERIC)
 	H.adjust_skillrank(/datum/skill/misc/medicine, 3, TRUE)
 	H.adjust_skillrank(/datum/skill/craft/alchemy, 2, TRUE)
 	H.adjust_skillrank(/datum/skill/misc/reading, 3, TRUE)
