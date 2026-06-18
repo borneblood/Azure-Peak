@@ -46,6 +46,10 @@ GLOBAL_LIST_EMPTY(personal_objective_minds)
 	var/datum/job/assigned_role
 	var/special_role
 	var/list/restricted_roles = list()
+	/// Persisted advclass datum, set when a class-picker resolves. Used by systems that
+	/// need to discriminate within a job's subclasses (e.g. the contract townie gate
+	/// distinguishing Pilgrim/Hunter from Pilgrim/Blacksmith).
+	var/datum/advclass/picked_advclass
 
 	/// Wizard mode & "Give Spell" badmin button.
 	var/list/spell_list = list()
@@ -132,6 +136,7 @@ GLOBAL_LIST_EMPTY(personal_objective_minds)
 	var/list/personal_objectives = list()
 
 	var/has_bomb = FALSE
+	var/has_drug_delivery = FALSE
 
 /datum/mind/New(key)
 	key = key
@@ -147,6 +152,7 @@ GLOBAL_LIST_EMPTY(personal_objective_minds)
 		current.mind = null
 		current = null
 	enslaved_to = null
+	picked_advclass = null
 	QDEL_NULL(sleep_adv)
 	if(islist(antag_datums))
 		QDEL_LIST(antag_datums)
@@ -597,7 +603,7 @@ GLOBAL_LIST_EMPTY(personal_objective_minds)
 /datum/mind/proc/recall_targets(mob/recipient, window=1)
 	var/output = "<B>[recipient.real_name]'s Hitlist:</B><br>"
 	for(var/mob/living/carbon in GLOB.mob_living_list) // Iterate through all mobs in the world
-		if((carbon.real_name != recipient.real_name) && ((carbon.has_flaw(/datum/charflaw/hunted)) && (!istype(carbon, /mob/living/carbon/human/dummy))))//To be on the list they must be hunted, not be the user and not be a dummy (There is a dummy that has all vices for some reason)
+		if((carbon.real_name != recipient.real_name) && (carbon.has_flaw(/datum/charflaw/targeted) && (!istype(carbon, /mob/living/carbon/human/dummy)))) //To be on the list they must be targeted, not the user and not a dummy (There is a dummy that has all vices for some reason)
 			output += "<br>[carbon.real_name]"
 			output += "<br>[carbon.real_name]"
 			if (carbon.job)
@@ -860,6 +866,12 @@ GLOBAL_LIST_EMPTY(personal_objective_minds)
 	// New action-based spell system
 	if(istype(spell_or_action, /datum/action/cooldown/spell))
 		var/datum/action/cooldown/spell/new_spell = spell_or_action
+
+		// check exclusivity
+		for(var/datum/action/cooldown/spell/S in spell_list)
+			if(S.exclusive_group && S.exclusive_group == new_spell.exclusive_group)
+				return // already have one of this group
+
 		for(var/datum/action/cooldown/spell/present in spell_list)
 			if(present.name == new_spell.name && present.type == new_spell.type)
 				return
@@ -887,8 +899,9 @@ GLOBAL_LIST_EMPTY(personal_objective_minds)
 	if(!current || !HAS_TRAIT(current, TRAIT_ARCYNE))
 		return
 
-	// Arcyne Ward - only granted if mage_aspect_config has "ward" = TRUE
-	if(mage_aspect_config && mage_aspect_config["ward"])
+	// Arcyne Ward - only granted to classes whose aspect config explicitly enables it
+	var/allow_ward = mage_aspect_config && mage_aspect_config["ward"]
+	if(allow_ward)
 		var/datum/action/cooldown/spell/conjure_arcyne_ward/base_ward
 		var/datum/action/cooldown/spell/conjure_arcyne_ward/variant_ward
 		for(var/datum/action/cooldown/spell/conjure_arcyne_ward/ward in spell_list)
@@ -900,7 +913,7 @@ GLOBAL_LIST_EMPTY(personal_objective_minds)
 			if(base_ward)
 				RemoveSpell(base_ward)
 		else if(base_ward)
-			var/obj/item/clothing/suit/roguetown/armor/regenerating/skin/arcyne_ward/active_ward = base_ward.conjured_ward
+			var/obj/item/clothing/suit/roguetown/armor/manual/arcyne_ward/active_ward = base_ward.conjured_ward
 			if(active_ward)
 				base_ward.conjured_ward = null
 				active_ward.linked_spell = null
@@ -910,8 +923,17 @@ GLOBAL_LIST_EMPTY(personal_objective_minds)
 			if(active_ward && !QDELETED(active_ward))
 				new_ward_spell.conjured_ward = active_ward
 				active_ward.linked_spell = new_ward_spell
+				new_ward_spell.regen_action?.build_all_button_icons()
 		else
 			AddSpell(new /datum/action/cooldown/spell/conjure_arcyne_ward)
+	else
+		// Strip any base arcyne ward the mage no longer qualifies for (e.g. attuned a major aspect)
+		for(var/datum/action/cooldown/spell/conjure_arcyne_ward/ward in spell_list)
+			if(ward.type != /datum/action/cooldown/spell/conjure_arcyne_ward)
+				continue
+			if(ward.conjured_ward && !QDELETED(ward.conjured_ward))
+				qdel(ward.conjured_ward)
+			RemoveSpell(ward)
 
 	// Prestidigitation - always last
 	var/datum/presto = get_spell(/datum/action/cooldown/spell/touch/prestidigitation)
@@ -1059,6 +1081,8 @@ GLOBAL_LIST_EMPTY(personal_objective_minds)
 /datum/mind/proc/RemoveAllSpells()
 	for(var/datum/S in spell_list)
 		RemoveSpell(S)
+	for(var/datum/SP in current.actions)
+		RemoveSpell(SP)
 
 /datum/mind/proc/transfer_martial_arts(mob/living/new_character)
 	if(!ishuman(new_character))

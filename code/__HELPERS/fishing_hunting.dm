@@ -51,6 +51,7 @@
 		/obj/item/reagent_containers/food/snacks/fish/creepy_eel = 1*rareMod + 10*ceruleanMod,
 		/obj/item/reagent_containers/food/snacks/fish/creepy_squid = 5*rareMod + 10*ceruleanMod,
 		/obj/item/reagent_containers/food/snacks/fish/creepy_shark = 1*rareMod + 10*ceruleanMod,
+		/obj/item/clothing/head/roguetown/octopus = 15*rareMod,
 		/obj/item/reagent_containers/food/snacks/fish/salmon/black_headed = 40 * rareMod,
 		/obj/item/reagent_containers/food/snacks/fish/flounder = 200 * commonMod,
 		/obj/item/reagent_containers/food/snacks/fish/mackerel = 210 * commonMod,
@@ -85,6 +86,7 @@
 		/obj/item/reagent_containers/food/snacks/fish/creepy_eel = 2*rareMod + 10*ceruleanMod,
 		/obj/item/reagent_containers/food/snacks/fish/creepy_squid = 7*rareMod + 10*ceruleanMod,
 		/obj/item/reagent_containers/food/snacks/fish/creepy_shark = 2*rareMod + 10*ceruleanMod,
+		/obj/item/clothing/head/roguetown/octopus = 21*rareMod,
 		/obj/item/reagent_containers/glass/bottle/rogue/wine = 1*treasureMod + 30*ceruleanMod,
 		/obj/item/clothing/ring/gold = 1*treasureMod + 30*ceruleanMod,
 		/obj/item/storage/belt/rogue/pouch/coins/poor = 1*treasureMod + 75*ceruleanMod,
@@ -125,6 +127,7 @@
 			/obj/item/reagent_containers/food/snacks/fish/shrimp = 250*commonMod,
 			/obj/item/reagent_containers/food/snacks/fish/crab = 250*rareMod,
 			/obj/item/reagent_containers/food/snacks/fish/lobster = 250*commonMod,
+			/obj/item/roguegem/oyster = 50*rareMod,
 			/obj/item/reagent_containers/food/snacks/smallrat = 1 + 15*cheeseMod, //Oh for fucks sake!
 			/mob/living/simple_animal/hostile/retaliate/rogue/bigrat = 1*cheeseMod,
 			/obj/item/grown/log/tree/stick =  100*trashMod,

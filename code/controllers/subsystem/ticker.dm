@@ -34,6 +34,8 @@ SUBSYSTEM_DEF(ticker)
 
 	var/timeLeft						//pregame timer
 	var/start_at
+	/// world.time the lobby/pregame began; anchor for the gamemode-vote admin window (set once on entering PREGAME).
+	var/lobby_start = 0
 	//576000 dusk
 	//376000 day
 	// 8 AM
@@ -190,7 +192,7 @@ SUBSYSTEM_DEF(ticker)
 			for(var/client/C in GLOB.clients)
 				window_flash(C, ignorepref = TRUE) //let them know lobby has opened up.
 //			to_chat(world, span_boldnotice("Welcome to [station_name()]!"))
-			send2chat(new /datum/tgs_message_content("New round starting on [SSmapping.config.map_name]!"), CONFIG_GET(string/chat_announce_new_game))
+			send2chat(new /datum/tgs_message_content("New round starting on [SSmapping.config.map_name]! (Round ID: [GLOB.round_id])"), CONFIG_GET(string/chat_announce_new_game))
 			current_state = GAME_STATE_PREGAME
 			//Everyone who wants to be an observer is now spawned
 			create_observers()
@@ -206,9 +208,20 @@ SUBSYSTEM_DEF(ticker)
 				if(player.ready == PLAYER_READY_TO_PLAY)
 					++totalPlayersReady
 
-			if(!gamemode_voted)
-				SSvote.initiate_vote("storyteller", "Psydon", timeLeft/2)
+			if(!lobby_start)
+				lobby_start = world.time
+
+			var/admin_window = min(GAMEMODE_VOTE_ADMIN_WINDOW, max(0, (start_at - lobby_start) - GAMEMODE_VOTE_END_BUFFER - GAMEMODE_VOTE_MIN_PERIOD))
+			if(!gamemode_voted && world.time >= (lobby_start + admin_window))
 				gamemode_voted = TRUE
+				if(SSgamemode.allow_vote)
+					// Display period only; the lobby countdown force-closes this vote at the end buffer (below).
+					var/vote_period = max(GAMEMODE_VOTE_MIN_PERIOD, timeLeft - GAMEMODE_VOTE_END_BUFFER)
+					SSvote.initiate_vote("storyteller", "Gamemode", vote_period)
+				else
+					message_admins("Gamemode player vote suppressed (Allow Player Vote = No); using the admin-configured gamemode.")
+					log_admin("Gamemode player vote suppressed (Allow Player Vote = No).")
+					SSgamemode.announce_admin_gamemode()
 
 			if(start_immediately)
 				timeLeft = 0
@@ -217,6 +230,11 @@ SUBSYSTEM_DEF(ticker)
 			if(timeLeft < 0)
 				return
 			timeLeft -= wait
+
+			// Single clock: the lobby countdown owns the vote's lifetime. Once only the end buffer remains, close
+			// the gamemode vote here so the round still starts on time (at timeLeft <= 0) with a guaranteed gap after.
+			if(SSvote?.mode == STORYTELLER_VOTE && timeLeft <= GAMEMODE_VOTE_END_BUFFER)
+				SSvote.end_vote()
 
 			if(timeLeft <= 300 && !tipped)
 #ifdef MATURESERVER
@@ -415,6 +433,7 @@ SUBSYSTEM_DEF(ticker)
 			C.mob.playsound_local(C.mob, 'sound/misc/roundstart.ogg', 100, FALSE)
 
 	SSgamemode.roll_roundstart_antag()
+	SSgamemode.spawn_extra_antags()
 
 //	SEND_SOUND(world, sound('sound/misc/roundstart.ogg'))
 	current_state = GAME_STATE_PLAYING
@@ -798,24 +817,25 @@ SUBSYSTEM_DEF(ticker)
 /datum/controller/subsystem/ticker/proc/on_sunsteal()
 	GLOB.todoverride = "night"
 	settod()
-	priority_announce("The Sun is torn from the sky!", "Terrible Omen", 'sound/misc/astratascream.ogg')
+	priority_announce("The Sun is torn from the sky, the world is bleeding!", "Terrible Omen", 'sound/music/wolfintro.ogg') //THE WORLD IS DYING, YOU SHOULD BE SCARED
 	addomen(OMEN_SUNSTEAL)
 	SSParticleWeather.run_weather(/datum/particle_weather/fog/blood, TRUE)
 	for(var/mob/living/carbon/human/astrater as anything in GLOB.human_list)
 		if(!istype(astrater.patron, /datum/patron/divine/astrata))
 			continue
 		to_chat(astrater, span_userdanger("You feel the pain of [astrater.patron]!"))
+		astrater.playsound_local(get_turf(astrater), 'sound/misc/astratascream.ogg', 60, FALSE, pressure_affected = FALSE) //Only Astratians can hear their godess scream in agony.
 		astrater.emote("painscream", intentional = FALSE)
 
 	for(var/turf/open/water/W in world)
 		W.water_reagent = /datum/reagent/blood
-		W.water_color = "#C80000"
+		W.water_color = BLOOD_COLOR_RED
 		W.mapped = FALSE
 		W.update_icon()
 		CHECK_TICK
 
 	for(var/obj/machinery/light/light in GLOB.machines)
-		if(prob(40))
+		if(prob(70)) //Almost every light on the server, pitch blackness
 			light.extinguish()
 		else
 			light.flicker(rand(2, 5))
@@ -846,10 +866,11 @@ SUBSYSTEM_DEF(ticker)
 				if(isfloorturf(_T))
 					new /mob/living/carbon/human/species/skeleton/npc(_T)
 
-/// Returns universe state to normal after the sunstealer has been slain
+/// Returns universe state to normal (minus the water) after the sunstealer has been slain, some neat flavor to show its finally over.
 /datum/controller/subsystem/ticker/proc/on_sunstealer_death()
 	GLOB.todoverride = null
 	sunstolen = FALSE
+	priority_announce("The air remains unnaturally cold as a wounded sun rises once more.", "A long night comes to an end", 'sound/misc/otavanlament.ogg') //THE WORLD IS TORN OPEN, THE ROT TO SEE. WHY DO YOU STILL ENDURE?
 	settod()
 	SSParticleWeather.run_weather(/datum/particle_weather/rain_gentle, TRUE)
 

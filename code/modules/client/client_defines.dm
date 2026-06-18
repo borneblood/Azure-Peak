@@ -42,6 +42,8 @@
 		///////////////
 		//SOUND STUFF//
 		///////////////
+	///Active balloon alert count, used to vertically stack concurrent balloons so they don't overlap.
+	var/active_balloon_count = 0
 	///Currently playing ambience sound
 	var/ambience_playing = null
 	///Whether an ambience sound has been played and one shouldn't be played again, unset by a callback
@@ -136,6 +138,15 @@
 
 	var/list/current_weathers = list()
 	var/last_lighting_update = 0
+	/// our current tab
+	var/stat_tab
+
+	/// list of all tabs
+	var/list/panel_tabs = list()
+	/// Signature of the last listed-turf contents sent, to skip redundant rebuilds.
+	var/listedturf_sig
+	/// Whether the living-only Stats tab is currently shown in the statbrowser.
+	var/statbrowser_stats_shown = FALSE
 
 	var/list/open_popups = list()
 

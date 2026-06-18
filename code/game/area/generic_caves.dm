@@ -3,6 +3,7 @@
 	name = "cave"
 	warden_area = TRUE
 	icon_state = "cave"
+	loot_budget = LOOT_BUDGET_CAVE_DEFAULT
 	ambientsounds = AMB_GENCAVE
 	ambientnight = AMB_GENCAVE
 	spookysounds = SPOOKY_CAVE
@@ -17,7 +18,8 @@
 				/mob/living/carbon/human/species/skeleton/npc/ambush = 10,
 				/mob/living/carbon/human/species/human/northern/highwayman/ambush = 5,
 				/mob/living/simple_animal/hostile/retaliate/rogue/direbear = 5,
-				/mob/living/simple_animal/hostile/retaliate/rogue/minotaur = 5)
+				/mob/living/simple_animal/hostile/retaliate/rogue/minotaur = 5,
+				/mob/living/simple_animal/hostile/retaliate/rogue/ooze_blob = 10)
 	converted_type = /area/rogue/outdoors/caves
 
 /area/rogue/under/cave/peace
@@ -41,6 +43,7 @@
 	droning_sound_dusk = null
 	droning_sound_night = null
 	converted_type = /area/rogue/outdoors/spidercave
+	loot_budget = LOOT_BUDGET_ARAIGNEE
 
 /area/rogue/outdoors/spidercave
 	icon_state = "spidercave"

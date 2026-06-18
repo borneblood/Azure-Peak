@@ -1,6 +1,7 @@
 // Actual coastal coastal area - this is for the harbour, which has no ambushes.
 /area/rogue/outdoors/beach
 	name = "City Harbor"
+	loot_budget = LOOT_BUDGET_AZURE_COAST
 	icon_state = "beach"
 	warden_area = TRUE
 	ambientsounds = AMB_BEACH
@@ -24,6 +25,7 @@
 		new /datum/ambush_config/deepone_party = 20,
 	)
 	first_time_text = "CENTRAL COAST"
+	threat_region = THREAT_REGION_AZURE_GROVE
 
 /area/rogue/outdoors/beach/north
 	name = "Northern Coast"
@@ -34,6 +36,7 @@
 		/mob/living/simple_animal/hostile/retaliate/rogue/mossback = 40
 	)
 	first_time_text = "NORTHERN COAST"
+	threat_region = THREAT_REGION_AZUREAN_COAST
 
 /area/rogue/outdoors/beach/south
 	name = "Southern Coast"
@@ -47,3 +50,4 @@
 	)
 	first_time_text = "SOUTHERN COAST"
 	detail_text = DETAIL_TEXT_CITY_COAST
+	threat_region = THREAT_REGION_AZURE_BASIN

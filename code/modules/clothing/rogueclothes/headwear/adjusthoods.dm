@@ -3,7 +3,7 @@
 
 /obj/item/clothing/head/roguetown/roguehood
 	name = "hood"
-	desc = ""
+	desc = "A head's best friend."
 	color = CLOTHING_BROWN
 	icon_state = "basichood"
 	item_state = "basichood"
@@ -40,6 +40,9 @@
 	user.update_inv_head()
 
 /obj/item/clothing/head/roguetown/roguehood/AltRightClick(mob/user)
+	. = ..()
+	if(!istype(loc, /mob/living/carbon))
+		return
 	overarmor = !overarmor
 	to_chat(user, span_info("I wear \the [src] [overarmor ? "under" : "over"] my hair."))
 	if(overarmor)
@@ -116,6 +119,9 @@
 	hidesnoutADJ = FALSE
 	flags_inv = HIDEEARS|HIDEHAIR|HIDEFACIALHAIR	//Does not hide face.
 	block2add = null
+
+/obj/item/clothing/head/roguetown/roguehood/shalal/hijab/white
+	color = CLOTHING_WHITE
 
 /obj/item/clothing/head/roguetown/roguehood/shalal/hijab/raneshen
 	name = "padded headscarf"
@@ -267,6 +273,30 @@
 	salvage_result = /obj/item/natural/cloth
 	salvage_amount = 1
 
+/obj/item/clothing/head/roguetown/roguehood/eora
+	name = "eoran hood"
+	desc = "A hood of devotees of Eora, coupled with her silver cabbit mask. Does not pacify the wearer for every rose has it's thorns."
+	color = null
+	icon = 'icons/roguetown/clothing/head.dmi'
+	mob_overlay_icon = 'icons/roguetown/clothing/onmob/64x64/head.dmi'
+	bloody_icon = 'icons/effects/blood64.dmi'
+	worn_x_dimension = 64
+	worn_y_dimension = 64
+	icon_state = "eoramonk"//Stonekeep sprite
+	item_state = "eoramonk"
+	body_parts_covered = NECK
+	slot_flags = ITEM_SLOT_HEAD|ITEM_SLOT_MASK
+	hidesnoutADJ = FALSE
+	flags_inv = HIDEEARS|HIDEHAIR|HIDEFACIALHAIR	//Does not hide face.
+	block2add = null
+	dynamic_hair_suffix = ""
+	edelay_type = 1
+	adjustable = CAN_CADJUST
+	toggle_icon_state = TRUE
+	max_integrity = 180
+	salvage_result = /obj/item/natural/cloth
+	salvage_amount = 1
+
 /obj/item/clothing/head/roguetown/roguehood/ravox
 	name = "ravox hood"
 	desc = "A hood of those devoted to upholding Justicar's will. Justice might be blind but not it's servants."
@@ -305,7 +335,6 @@
 /obj/item/clothing/head/roguetown/roguehood/unholy/enchanted
 	name = "ominously enchanted hood"
 	desc = "An otherworldly veil, amythortz-woven and crackling with the unignorable truths of a runic enigma. She watches over you; and Her grin is crooked into one of eternal malice."
-	max_integrity = ARMOR_INT_HELMET_ANTAG
 	armor = ARMOR_LEATHER
 	item_state = "ewarlockhood"
 	icon_state = "ewarlockhood"
@@ -371,7 +400,7 @@
 
 /obj/item/clothing/head/roguetown/roguehood/psydon
 	name = "psydonian hood"
-	desc = "A hood worn by Psydon's disciples, oft-worn in conjunction with its matching tabard. Made with spell-laced fabric to provide some protection."
+	desc = "A hood worn by the adherents of the Holy Psydonic Inquisition, oft-donned in conjunction with its matching tabard. Made with spell-laced fabric to provide some protection."
 	icon_state = "psydonhood"
 	item_state = "psydonhood"
 	color = null
@@ -386,9 +415,15 @@
 	edelay_type = 1
 	adjustable = CAN_CADJUST
 	toggle_icon_state = TRUE
-	max_integrity = 200
+	max_integrity = ARMOR_INT_HELMET_LEATHER
 	salvage_result = /obj/item/natural/cloth
 	salvage_amount = 1
+
+/obj/item/clothing/head/roguetown/roguehood/psydon/black
+	name = "blessed hood"
+	desc = "A hood worn by the worshippers of Psydon, oft-donned in conjunction with its matching tabard. Mourn, but do not despair; for even the smallest spark of faith might yet reignite the hearth of this dying world."
+	icon_state = "blackpsydonhood"
+	item_state = "blackpsydonhood"
 
 /obj/item/clothing/head/roguetown/roguehood/psydon/confessor
 	name = "confessional hood"
@@ -404,14 +439,14 @@
 	edelay_type = 1
 	adjustable = CAN_CADJUST
 	toggle_icon_state = TRUE
-	max_integrity = 200
+	max_integrity = ARMOR_INT_HELMET_LEATHER
 	salvage_result = /obj/item/natural/cloth
 	salvage_amount = 1
 
 /obj/item/clothing/head/roguetown/roguehood/hierophant
 	name = "hierophant's pashmina"
 	desc = "A thick hood that covers one's entire head, should they desire, or merely acts as a scarf otherwise. Made with spell-laced fabric to provide some protection against daemons and mortals alike."
-	max_integrity = 100
+	max_integrity = ARMOR_INT_HELMET_LEATHER
 	armor = ARMOR_LEATHER
 	icon_state = "hijab"
 	item_state = "hijab"
@@ -422,7 +457,7 @@
 /obj/item/clothing/head/roguetown/roguehood/pontifex
 	name = "pontifex's pashmina"
 	desc = "A slim hood with thin, yet dense fabric. Stretchy and malleable, allowing for full flexibility and mobility. Made with spell-laced fabric to provide some protection against daemons and mortals alike."
-	max_integrity = 100
+	max_integrity = ARMOR_INT_HELMET_LEATHER
 	armor = ARMOR_LEATHER
 	icon_state = "monkhood"
 	item_state = "monkhood"

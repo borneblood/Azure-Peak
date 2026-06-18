@@ -45,12 +45,15 @@
 	sex_locks |= new /datum/sex_session_lock(target, BODY_ZONE_PRECISE_MOUTH)
 	sex_locks |= new /datum/sex_session_lock(user, ORGAN_SLOT_ANUS)
 
-/datum/sex_action/miscellaneous/facesitting_anal/on_perform(mob/living/carbon/human/user, mob/living/carbon/human/target)
+/datum/sex_action/miscellaneous/facesitting_anal/on_perform_message(mob/living/carbon/human/user, mob/living/carbon/human/target)
 	var/datum/sex_session/sex_session = get_sex_session(user, target)
 	var/verbstring = pick(list("rubs", "smushes", "forces"))
 	user.visible_message(sex_session.spanify_force("[user] [sex_session.get_generic_force_adjective()] [verbstring] [user.p_their()] butt against [target] face."))
+
+/datum/sex_action/miscellaneous/facesitting_anal/on_perform(mob/living/carbon/human/user, mob/living/carbon/human/target)
+	var/datum/sex_session/sex_session = get_sex_session(user, target)
 	target.make_sucking_noise()
-	do_thrust_animate(user, target, sex_session)
+	do_thrust_animate(user, target)
 
 	sex_session.perform_sex_action(user, 1, 3, TRUE)
 	sex_session.handle_passive_ejaculation()

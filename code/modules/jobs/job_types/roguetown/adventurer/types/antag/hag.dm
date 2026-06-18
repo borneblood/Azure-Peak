@@ -6,7 +6,7 @@
 	faction = "Station"
 	total_positions = 1
 	spawn_positions = 1
-	allowed_races = RACES_SHUNNED_UP_NO_AASIMAR
+	forbidden_races = list(RACES_CONSTRUCT RACES_DESPISED RACES_AASIMAR)
 	tutorial = "You are ancient, malevolent evil. None of the known gods claim to have brought you into this world. All you know is hatred, how to sift through the grains of this land with your calloused hands, picking those who prove themselves useful."
 	outfit = null
 	outfit_female = null
@@ -30,16 +30,49 @@
 	same_job_respawn_delay = 1 MINUTES
 	virtue_restrictions = list(
 		/datum/virtue/utility/noble,
-		/datum/virtue/combat/dualwielder, //Claws are too powerful, abusable
+		/datum/virtue/combat/dualwielder, //Hags are too powerful, abusable
 		/datum/virtue/combat/combat_virtue, //They do not need shield skills or anything in here
-		/datum/virtue/utility/notable, //No resident (????) or free-money-stash gnolls
+		/datum/virtue/utility/notable, //No resident (????) or free-money-stash hags
 		/datum/virtue/utility/bronzelimbs, //They should feel pain in their limbs given their state
 		/datum/virtue/movement/acrobatic, //This should be given to them when they are actually after a Hunted
 		/datum/virtue/utility/woodwalker, //This should be given to them when they are actually after a Hunted
 		/datum/virtue/combat/crossbowman,	//Absolutely not on a class like this
-		/datum/virtue/combat/bowman,
-		/datum/virtue/utility/feytouched
+		/datum/virtue/combat/bowman, // I'd rather not see combat Hags
+		/datum/virtue/utility/feytouched, // They are already FAE
+		/datum/virtue/utility/riding, // Hags literally get a teleportation mechanic, it doesn't make much sense.
 		)
+	vice_restrictions = list(/datum/charflaw/hunted, /datum/charflaw/targeted) // could you fucking imagine
 	job_subclasses = list(
 		/datum/advclass/hag,
 	)
+
+/datum/job/roguetown/hag/special_job_check(mob/dead/new_player/player)
+	if(!hag_slots_open())
+		return FALSE
+	return ..()
+
+/datum/job/roguetown/hag/special_check_latejoin(client/C)
+	if(!hag_slots_open())
+		return FALSE
+	return ..()
+
+/proc/hag_slots_open()
+	var/admin_slot = !SSgamemode.allow_vote ? SSgamemode.admin_slots["Hag"] : null
+	if(!isnull(admin_slot))
+		return admin_slot > 0
+	return (SSgamemode.current_storyteller?.hag_slots || 0) > 0
+
+/proc/enforce_hag_slots()
+	var/datum/job/hag_job = SSjob.GetJob("Hag")
+	if(!hag_job)
+		return
+	if(hag_job.admin_slot_override)
+		return
+	var/slots
+	var/admin_slot = !SSgamemode.allow_vote ? SSgamemode.admin_slots["Hag"] : null
+	if(!isnull(admin_slot))
+		slots = max(0, admin_slot)
+	else
+		slots = SSgamemode.current_storyteller?.hag_slots || 0
+	hag_job.total_positions = max(hag_job.current_positions, slots)
+	hag_job.spawn_positions = max(hag_job.current_positions, slots)

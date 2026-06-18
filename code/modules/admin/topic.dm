@@ -219,6 +219,7 @@
 				"Puncture" = /datum/wound/puncture,
 				"Bruise" = /datum/wound/bruise,
 				"Artery" = /datum/wound/artery,
+				"Integrity" = /datum/wound/integrity,
 				"Bite" = /datum/wound/bite,
 				"Dislocation" = /datum/wound/dislocation
 			)
@@ -226,16 +227,25 @@
 			if(wound_choice)
 				var/wound_path = wound_types[wound_choice]
 				// Apply body-part-specific wound variants
+				
 				if(wound_choice == "Fracture")
 					if(BP.body_zone == BODY_ZONE_HEAD)
 						wound_path = /datum/wound/fracture/head
 					else if(BP.body_zone == BODY_ZONE_CHEST)
 						wound_path = /datum/wound/fracture/chest
+				
 				else if(wound_choice == "Artery")
 					if(BP.body_zone == BODY_ZONE_HEAD)
 						wound_path = /datum/wound/artery/neck
 					else if(BP.body_zone == BODY_ZONE_CHEST)
 						wound_path = /datum/wound/artery/chest
+				
+				else if(wound_choice == "Integrity")
+					if(BP.body_zone == BODY_ZONE_HEAD)
+						wound_path = /datum/wound/integrity/neck
+					else if(BP.body_zone == BODY_ZONE_CHEST)
+						wound_path = /datum/wound/integrity/chest
+				
 				else if(wound_choice == "Dislocation")
 					if(BP.body_zone == BODY_ZONE_HEAD)
 						wound_path = /datum/wound/dislocation/neck
@@ -350,7 +360,7 @@
 		if(!M)
 			to_chat(usr, span_danger("ERROR: Mob not found."))
 			return
-		cmd_show_exp_panel(M.client)
+		show_exp_panel(M.client)
 
 	else if(href_list["toggleexempt"])
 		if(!check_rights(R_ADMIN))
@@ -791,7 +801,7 @@
 		if(!M.client)
 			to_chat(usr, span_warning("[M] doesn't seem to have an active client."))
 			return
-		var/datum/job/mob_job = SSjob.GetJob(M.mind.assigned_role)
+		var/datum/job/mob_job
 		var/target_job = SSrole_class_handler.get_advclass_by_name(M.advjob)
 		if(M.mind)
 			mob_job = SSjob.GetJob(M.mind.assigned_role)
@@ -1236,6 +1246,17 @@
 			return
 
 		show_individual_logging_panel(M, href_list["log_src"], href_list["log_type"])
+	else if(href_list["examine_player"])
+		if(!check_rights(R_ADMIN))
+			return
+
+		var/mob/living/target = locate(href_list["examine_player"]) in GLOB.mob_list
+		if(!isliving(target))
+			return
+
+		var/datum/examine_panel/mob_examine_panel = new(target)
+		mob_examine_panel.viewing = usr
+		mob_examine_panel.ui_interact(usr)
 	else if(href_list["languagemenu"])
 		if(!check_rights(R_ADMIN))
 			return
@@ -1338,12 +1359,30 @@
 		if(obj_dir && !(obj_dir in list(1,2,4,8,5,6,9,10)))
 			obj_dir = null
 		var/obj_name = sanitize(href_list["object_name"])
+		var/quality_raw = href_list["object_quality"]
+		var/obj_quality = null
+		var/obj_quality_set = FALSE
+		if(length(quality_raw))
+			obj_quality = text2num(quality_raw)
+			if(obj_quality != null && obj_quality >= ITEM_QUALITY_RUINED && obj_quality <= ITEM_QUALITY_MASTERWORK)
+				obj_quality_set = TRUE
+			else
+				obj_quality = null
 
 
 		var/atom/target //Where the object will be spawned
 		var/where = href_list["object_where"]
 		if (!( where in list("onfloor","frompod","inhand","inmarked") ))
 			where = "onfloor"
+
+		var/faction_override
+		var/faction_preset = href_list["faction_preset"]
+		if(faction_preset == "__custom__")
+			var/custom = trim(href_list["faction_custom"])
+			if(length(custom))
+				faction_override = sanitize(custom)
+		else if(length(faction_preset))
+			faction_override = faction_preset
 
 
 		switch(where)
@@ -1393,6 +1432,15 @@
 							O.flags_1 |= ADMIN_SPAWNED_1
 							if(obj_dir)
 								O.setDir(obj_dir)
+							if(obj_quality_set && istype(O, /obj/item))
+								var/obj/item/spawned_item = O
+								if(istype(spawned_item, /obj/item/ingot))
+									var/obj/item/ingot/ING = spawned_item
+									ING.apply_smelt_quality(obj_quality)
+								else if(spawned_item.has_item_quality)
+									spawned_item.item_quality = obj_quality
+									if(initial(spawned_item.sellprice) > 0)
+										spawned_item.sellprice = max(1, round(initial(spawned_item.sellprice) * ITEM_QUALITY_MULT(obj_quality)))
 							if(obj_name)
 								O.name = obj_name
 								if(ismob(O))
@@ -1406,6 +1454,22 @@
 									SA.can_have_ai = FALSE
 								if(spawned_mob.ai_controller)
 									QDEL_NULL(spawned_mob.ai_controller)
+							if(faction_override && ismob(O))
+								var/mob/spawned_mob = O
+								spawned_mob.faction = list(faction_override)
+							if((href_list["dust_on_death"] || href_list["dust_leave_head"] || href_list["dust_delete_gear"]) && isliving(O))
+								var/mob/living/living_mob = O
+								ADD_TRAIT(living_mob, TRAIT_DUSTABLE, TRAIT_GENERIC)
+								if(href_list["dust_leave_head"])
+									ADD_TRAIT(living_mob, TRAIT_DUST_LEAVE_HEAD, TRAIT_GENERIC)
+								if(href_list["dust_delete_gear"])
+									ADD_TRAIT(living_mob, TRAIT_DUST_DELETE_GEAR, TRAIT_GENERIC)
+							if(ishuman(O))
+								var/mob/living/carbon/human/spawned_human = O
+								spawned_human.taints_loot = !!href_list["taints_loot"]
+								if(!spawned_human.taints_loot)
+									for(var/obj/item/I in spawned_human.get_equipped_items(TRUE) + spawned_human.held_items)
+										I.unmark_as_looted()
 							if(where == "inhand" && isliving(usr) && isitem(O))
 								var/mob/living/L = usr
 								var/obj/item/I = O
@@ -1414,12 +1478,13 @@
 		if(pod)
 			new /obj/effect/DPtarget(target, pod)
 
+		var/faction_suffix = faction_override ? " with faction [faction_override]" : ""
 		if (number == 1)
-			log_admin("[key_name(usr)] created a [english_list(paths)]")
-			spawn_message_admins("[key_name_admin(usr)] created a [english_list(paths)]")
+			log_admin("[key_name(usr)] created a [english_list(paths)][faction_suffix]")
+			spawn_message_admins("[key_name_admin(usr)] created a [english_list(paths)][faction_suffix]")
 		else
-			log_admin("[key_name(usr)] created [number]ea [english_list(paths)]")
-			spawn_message_admins("[key_name_admin(usr)] created [number]ea [english_list(paths)]")
+			log_admin("[key_name(usr)] created [number]ea [english_list(paths)][faction_suffix]")
+			spawn_message_admins("[key_name_admin(usr)] created [number]ea [english_list(paths)][faction_suffix]")
 		return
 
 	else if(href_list["secrets"])
