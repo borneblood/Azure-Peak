@@ -283,6 +283,10 @@
 	max_integrity = 200
 	smeltresult = /obj/item/ingot/steel
 
+/obj/item/clothing/mask/rogue/facemask/steel/confessor/immolator
+	name = "smoke mask"
+	desc = "A heavy mask worn by the Immolators of the Inquisition. Once devout followers of Saint Astrata. Its narrow vents permit breath while turning aside smoke and cinders, allowing its bearer to walk unharmed through sacred flames.<br><br>Many find the constant scent of soot unpleasant. The Immolators disagree. Ash is proof that the impure has been consumed, and every breath serves as a reminder that even if the TEN end up not proving as eternal, the Allfather will still endure."
+
 /obj/item/clothing/mask/rogue/facemask/steel/confessor
 	name = "strange mask"
 	desc = "It is said that the original version of this mask was used for obscure rituals prior to the fall of the Empire of the Holy Celestia, and now it has been repurposed as a veil for the cunning hand of the Otavan Orthodoxy.<br> <br>Others say it is a piece of heresy, a necessary evil, capable of keeping its user safe from left-handed magicks. You can taste copper whenever you draw breath."
