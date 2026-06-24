@@ -1,6 +1,6 @@
 /datum/advclass/immolator
 	name = "Immolator"
-	tutorial = "The flames reveal all. Where others see impurity, heresy, and weakness, you see fuel. Immolators are wandering zealots of Saint Astrata, carrying sacred fire across Grenzelhoft and beyond. Though they reject the Ten and their temples, they do not reject civilization; they seek to cleanse it. Through flame, suffering, and unwavering conviction, they believe mankind may yet be made pure."
+	tutorial = "Whether they were Astratan extremists or simple arsonists matters little. What united them was a love of fire. While others feared what they might become, Otavan's Inquisition saw what they could be. Reforged as Immolators, they turn their passion into a holy weapon, cleansing the world of heresy, monsters, and corruption through righteous flame."
 	allowed_sexes = list(MALE, FEMALE)
 	
 	outfit = /datum/outfit/job/roguetown/immolator
