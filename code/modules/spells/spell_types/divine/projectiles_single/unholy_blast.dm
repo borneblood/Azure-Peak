@@ -3,8 +3,8 @@
 	button_icon = 'icons/mob/actions/genericmiracles.dmi'
 	button_icon_state = "ublast"
 	name = "Profane Blast"
-	desc = "Release a blast of sheer divine energy at your enemies. Deals more damage to conformists, undead, and simple-minded creatures. Toggle firing mode (Shift+G): Focus or Arc."
-	fluff_desc = "Among the first miracles bestowed upon the faithful is the ability to channel their patron's essence into a focused blast of divine power. Though simple in execution, it is a versatile expression of a deity's will, carrying forth a fragment of the patron's true nature."
+	desc = "Release a blast of sheer divine energy at your enemies. Deals more damage to conformists, undead, and simple-minded creatures. Every so often, the blast may call down a devastating smite upon its victim, leaving them vulnerable.<br><br>Toggle firing mode (Shift+G): Focus or Arc."
+	fluff_desc = "Among the first miracles bestowed upon the faithful is the ability to channel their patron's essence into a focused blast of divine power. Though simple in execution, it is a versatile expression of a deity's will, carrying forth a fragment of the patron's nature and allegiances."
 	sound = 'sound/magic/vlightning.ogg'
 	spell_color = GLOW_COLOR_LIGHTNING
 	glow_intensity = GLOW_INTENSITY_LOW
@@ -78,9 +78,6 @@
 				apply_divine_damage(L)
 				var/datum/action/cooldown/spell/projectile/unholy_blast/S = source_spell
 				if(S && S.can_apply_god_bonus())
-					var/turf/target_turf = get_turf(L)
-					new /obj/effect/temp_visual/thunderstrike_actual(target_turf)
-					playsound(target_turf, 'sound/magic/lightning.ogg', 80)
 					apply_god_bonus(L)
 					S.consume_god_bonus()
 	qdel(src)
@@ -89,12 +86,15 @@
 	return world.time >= next_bonus_time
 
 /datum/action/cooldown/spell/projectile/unholy_blast/proc/consume_god_bonus()
-	next_bonus_time = world.time + 45 SECONDS // same CD as stuff like lightning bolt
+	var/unreliable = rand(25,45)
+	next_bonus_time = world.time + unreliable SECONDS
 
 /obj/projectile/energy/unholyblast/proc/apply_divine_damage(mob/living/L)
 	var/damage_to_do = damage
 	if((L.patron?.type in ALL_DIVINE_PATRONS) || (L.patron?.type in OLD_GOD_PATRON) || (L.mob_biotypes & MOB_UNDEAD))
 		damage_to_do += 30
+	if(HAS_TRAIT(L, TRAIT_SILVER_WEAK))
+		damage_to_do += 15
 	if(!L.mind)
 		damage_to_do += 60
 	var/mob/living/carbon/human/caster = firer
@@ -104,52 +104,29 @@
 		arcyne_strike(caster, L, null, damage_to_do, def_zone, BCLASS_BURN, PEN_MEDIUM, spell_name = "Divine Blast", damage_type = BURN, npc_simple_damage_mult = 1, skip_animation = TRUE)
 	else
 		L.apply_damage(damage_to_do, BURN)
+	L.adjust_fire_stacks(1, /datum/status_effect/fire_handler/fire_stacks/divine) // at this point its mostly for vfx lmao
+	L.ignite_mob()
+	if(!L.mind && !L.stat) // execute dying NPCs with this, might help doing annoying blockades on a time limit D:
+		apply_god_bonus(L)
+		L.gib()
 
 /obj/projectile/energy/unholyblast/proc/apply_god_bonus(mob/living/L) // mostly to skip on all these meaningless scans for now, since we going with an universal smite now instead of snowflake effects for each god
-	var/mob/living/carbon/human/caster = firer
-	if(!istype(caster))
-		return
 	L.visible_message("<font color='#a50000'>--Divine Smite!!</font>")
+	var/fire_stacks = 5 // jakk here, stack amt
+	var/CC_timer = 4 // jokk here, this is in seconds
+	if(!L.mind) // godless scuuummmm
+		fire_stacks = 10
+		CC_timer = 8
+		L.emote("superagony")
 	var/turf/target_turf = get_turf(L)
 	new /obj/effect/temp_visual/thunderstrike_actual(target_turf)
 	playsound(target_turf, 'sound/magic/lightning.ogg', 80)
-	L.adjust_fire_stacks(6, /datum/status_effect/fire_handler/fire_stacks/divine)
+	L.adjust_fire_stacks(fire_stacks, /datum/status_effect/fire_handler/fire_stacks/divine)
 	L.ignite_mob()
-	L.apply_status_effect(/datum/status_effect/debuff/exposed, 4 SECONDS)
-	L.apply_status_effect(/datum/status_effect/debuff/clickcd, 4 SECONDS)
-	L.Slowdown(4 SECONDS)
-/*
-/obj/projectile/energy/unholyblast/proc/apply_god_bonus_special_snowflake(mob/living/L)
-	var/mob/living/carbon/human/caster = firer
-	if(!istype(caster))
-		return
+	L.apply_status_effect(/datum/status_effect/debuff/exposed, CC_timer SECONDS)
+	L.apply_status_effect(/datum/status_effect/debuff/clickcd, CC_timer SECONDS)
+	L.Slowdown(CC_timer)
 
-	switch(caster.patron?.type)
-		if(/datum/patron/inhumen/zizo)
-			L.adjust_fire_stacks(4, /datum/status_effect/fire_handler/fire_stacks/divine)
-			L.ignite_mob()
-			L.apply_status_effect(/datum/status_effect/debuff/exposed, 2 SECONDS)
-			L.apply_status_effect(/datum/status_effect/debuff/clickcd, 4 SECONDS)
-			L.Slowdown(4 SECONDS)
-		if(/datum/patron/inhumen/graggar)
-			L.adjust_fire_stacks(4, /datum/status_effect/fire_handler/fire_stacks/divine)
-			L.ignite_mob()
-			L.apply_status_effect(/datum/status_effect/debuff/exposed, 2 SECONDS)
-			L.apply_status_effect(/datum/status_effect/debuff/clickcd, 4 SECONDS)
-			L.Slowdown(4 SECONDS)
-		if(/datum/patron/inhumen/matthios)
-			L.adjust_fire_stacks(4, /datum/status_effect/fire_handler/fire_stacks/divine)
-			L.ignite_mob()
-			L.apply_status_effect(/datum/status_effect/debuff/exposed, 2 SECONDS)
-			L.apply_status_effect(/datum/status_effect/debuff/clickcd, 4 SECONDS)
-			L.Slowdown(4 SECONDS)
-		if(/datum/patron/inhumen/baotha)
-			L.adjust_fire_stacks(4, /datum/status_effect/fire_handler/fire_stacks/divine)
-			L.ignite_mob()
-			L.apply_status_effect(/datum/status_effect/debuff/exposed, 4 SECONDS)
-			L.apply_status_effect(/datum/status_effect/debuff/clickcd, 4 SECONDS)
-			L.Slowdown(4 SECONDS)
-*/
 /datum/action/cooldown/spell/projectile/unholy_blast/Grant(mob/grant_to)
 	. = ..()
 	apply_mode(current_mode)
