@@ -15,7 +15,7 @@
 	primary_resource_cost = 25
 	invocation_type = INVOCATION_SHOUT
 	charge_required = TRUE
-	charge_time = CHARGETIME_MAJOR
+	charge_time = CHARGETIME_MINOR
 	hold_drain = 1
 	charge_slowdown = CHARGING_SLOWDOWN_SMALL
 	charge_swingdelay_type = SWINGDELAY_PENALTY
@@ -34,13 +34,13 @@
 
 /obj/projectile/energy/divineblast
 	name = "divine blast"
-	tracer_type = /obj/effect/projectile/tracer/wormhole
+	tracer_type = /obj/effect/projectile/tracer/tracer/beam_rifle
 	muzzle_type = null
 	impact_type = null
 	hitscan = TRUE
 	movement_type = UNSTOPPABLE
 	light_color = LIGHT_COLOR_WHITE
-	damage = 52
+	damage = 32
 	max_range = MAGE_LONG_PROJ_RANGE
 	damage_type = BURN
 	guard_deflectable = TRUE
@@ -48,18 +48,18 @@
 	speed = 0.3
 	flag = "fire"
 	light_outer_range = 4
-	color = "#00a3d4"
+	color = "#49d5ff"
 
 /obj/projectile/energy/divineblast/arc
 	name = "arced divine blast"
-	damage = 32
+	damage = 22
 	arcshot = TRUE
 
 /obj/projectile/energy/divineblast/on_hit(target, blocked = FALSE)
 	. = ..()
 	if(ismob(target))
 		var/mob/M = target
-		if(M.anti_magic_check())
+		if(M.anti_magic_check() || M.job in GLOB.church_positions)
 			visible_message(span_warning("[src] dissipates harmlessly against [target]!"))
 			playsound(get_turf(target), 'sound/magic/magic_nulled.ogg', 100)
 			qdel(src)
@@ -72,11 +72,13 @@
 			if(blocked < 100)
 				if(HAS_TRAIT(L, TRAIT_SILVER_WEAK) && !L.has_status_effect(STATUS_EFFECT_ANTIMAGIC))
 					L.visible_message("<font color='white'>Divine power rebukes [L]!</font>")
-					L.adjust_fire_stacks(2, /datum/status_effect/fire_handler/fire_stacks/divine)
+					L.Immobilize(1.5 SECONDS)
+					L.adjust_fire_stacks(3, /datum/status_effect/fire_handler/fire_stacks/divine)
 					L.ignite_mob()
 				apply_divine_damage(L)
 				var/datum/action/cooldown/spell/projectile/divine_blast/S = source_spell
 				if(S && S.can_apply_god_bonus())
+					L.visible_message("<font color='#00ccff'>Divine Intervention!!</font>")
 					apply_god_bonus(L)
 					S.consume_god_bonus()
 	qdel(src)
@@ -89,14 +91,10 @@
 
 /obj/projectile/energy/divineblast/proc/apply_divine_damage(mob/living/L)
 	var/damage_to_do = damage
-	if(L.patron?.type in ALL_INHUMEN_PATRONS)
+	if(L.patron?.type in ALL_INHUMEN_PATRONS || L.patron?.type in OLD_GOD_PATRON || L.mob_biotypes & MOB_UNDEAD)
 		damage_to_do += 30
-	if(L.patron?.type in OLD_GOD_PATRON)
-		damage_to_do += 25
-	if(L.mob_biotypes & MOB_UNDEAD)
-		damage_to_do += 50
 	if(!L.mind)
-		damage_to_do += 50
+		damage_to_do += 60
 	var/mob/living/carbon/human/caster = firer
 	if(L.guard_deflect_spell("Divine Blast", TRUE, caster))
 		return
@@ -112,49 +110,60 @@
 
 	switch(caster.patron?.type)
 		if(/datum/patron/divine/undivided)
-			L.adjust_fire_stacks(4, /datum/status_effect/fire_handler/fire_stacks/divine)
+			L.adjust_fire_stacks(3, /datum/status_effect/fire_handler/fire_stacks/divine)
 			L.ignite_mob()
 			L.apply_status_effect(/datum/status_effect/debuff/exposed, 3 SECONDS)
+			L.Slowdown(3 SECONDS)
 		if(/datum/patron/divine/astrata)
-			L.adjust_fire_stacks(4, /datum/status_effect/fire_handler/fire_stacks/divine)
+			L.adjust_fire_stacks(3, /datum/status_effect/fire_handler/fire_stacks/divine)
 			L.ignite_mob()
 			L.apply_status_effect(/datum/status_effect/debuff/exposed, 3 SECONDS)
+			L.Slowdown(3 SECONDS)
 		if(/datum/patron/divine/noc)
-			L.adjust_fire_stacks(4, /datum/status_effect/fire_handler/fire_stacks/divine)
+			L.adjust_fire_stacks(3, /datum/status_effect/fire_handler/fire_stacks/divine)
 			L.ignite_mob()
 			L.apply_status_effect(/datum/status_effect/debuff/exposed, 3 SECONDS)
+			L.Slowdown(3 SECONDS)
 		if(/datum/patron/divine/dendor)
-			L.adjust_fire_stacks(4, /datum/status_effect/fire_handler/fire_stacks/divine)
+			L.adjust_fire_stacks(3, /datum/status_effect/fire_handler/fire_stacks/divine)
 			L.ignite_mob()
 			L.apply_status_effect(/datum/status_effect/debuff/exposed, 3 SECONDS)
+			L.Slowdown(3 SECONDS)
 		if(/datum/patron/divine/abyssor)
-			L.adjust_fire_stacks(4, /datum/status_effect/fire_handler/fire_stacks/divine)
+			L.adjust_fire_stacks(3, /datum/status_effect/fire_handler/fire_stacks/divine)
 			L.ignite_mob()
 			L.apply_status_effect(/datum/status_effect/debuff/exposed, 3 SECONDS)
+			L.Slowdown(3 SECONDS)
 		if(/datum/patron/divine/ravox)
-			L.adjust_fire_stacks(4, /datum/status_effect/fire_handler/fire_stacks/divine)
+			L.adjust_fire_stacks(3, /datum/status_effect/fire_handler/fire_stacks/divine)
 			L.ignite_mob()
 			L.apply_status_effect(/datum/status_effect/debuff/exposed, 3 SECONDS)
+			L.Slowdown(3 SECONDS)
 		if(/datum/patron/divine/necra)
-			L.adjust_fire_stacks(4, /datum/status_effect/fire_handler/fire_stacks/divine)
+			L.adjust_fire_stacks(3, /datum/status_effect/fire_handler/fire_stacks/divine)
 			L.ignite_mob()
 			L.apply_status_effect(/datum/status_effect/debuff/exposed, 3 SECONDS)
+			L.Slowdown(3 SECONDS)
 		if(/datum/patron/divine/xylix)
-			L.adjust_fire_stacks(4, /datum/status_effect/fire_handler/fire_stacks/divine)
+			L.adjust_fire_stacks(3, /datum/status_effect/fire_handler/fire_stacks/divine)
 			L.ignite_mob()
 			L.apply_status_effect(/datum/status_effect/debuff/exposed, 3 SECONDS)
+			L.Slowdown(3 SECONDS)
 		if(/datum/patron/divine/pestra)
-			L.adjust_fire_stacks(4, /datum/status_effect/fire_handler/fire_stacks/divine)
+			L.adjust_fire_stacks(3, /datum/status_effect/fire_handler/fire_stacks/divine)
 			L.ignite_mob()
 			L.apply_status_effect(/datum/status_effect/debuff/exposed, 3 SECONDS)
+			L.Slowdown(3 SECONDS)
 		if(/datum/patron/divine/malum)
-			L.adjust_fire_stacks(4, /datum/status_effect/fire_handler/fire_stacks/divine)
+			L.adjust_fire_stacks(3, /datum/status_effect/fire_handler/fire_stacks/divine)
 			L.ignite_mob()
 			L.apply_status_effect(/datum/status_effect/debuff/exposed, 3 SECONDS)
+			L.Slowdown(3 SECONDS)
 		if(/datum/patron/divine/eora)
-			L.adjust_fire_stacks(4, /datum/status_effect/fire_handler/fire_stacks/divine)
+			L.adjust_fire_stacks(3, /datum/status_effect/fire_handler/fire_stacks/divine)
 			L.ignite_mob()
 			L.apply_status_effect(/datum/status_effect/debuff/exposed, 3 SECONDS)
+			L.Slowdown(3 SECONDS)
 
 /datum/action/cooldown/spell/projectile/divine_blast/Grant(mob/grant_to)
 	. = ..()
