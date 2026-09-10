@@ -21,7 +21,7 @@
 	set hidden = 1
 	var/discordurl = CONFIG_GET(string/discordurl)
 	if(discordurl)
-		if(alert("This will open the discord. Are you sure?",,"Yes","No")!="Yes")
+		if(alert(usr, "This will open the discord. Are you sure?",,"Yes","No")!="Yes")
 			return
 		src << link(discordurl)
 	else
@@ -35,7 +35,7 @@
 	set hidden = 1
 	var/rulesurl = CONFIG_GET(string/rulesurl)
 	if(rulesurl)
-		if(alert("This will open the rules in your browser. Are you sure?",,"Yes","No")!="Yes")
+		if(alert(usr, "This will open the rules in your browser. Are you sure?",,"Yes","No")!="Yes")
 			return
 		src << link(rulesurl)
 	else
@@ -49,7 +49,7 @@
 	set hidden = 1
 	var/githuburl = CONFIG_GET(string/githuburl)
 	if(githuburl)
-		if(alert("This will open the Github repository in your browser. Are you sure?",,"Yes","No")!="Yes")
+		if(alert(usr, "This will open the Github repository in your browser. Are you sure?",,"Yes","No")!="Yes")
 			return
 		src << link(githuburl)
 	else
@@ -59,9 +59,9 @@
 /client/verb/mentorhelp()
 	set name = "Mentorhelp"
 	set desc = ""
-	set category = "ADMIN"
+	set category = "Admin.Admin"
 	if(mob)
-		var/msg = input("Submit your question to the Voices:", "Mentorhelp Input") as text|null
+		var/msg = input(src, "Submit your question to the Voices:", "Mentorhelp Input") as text|null
 		if(msg)
 			mob.schizohelp(msg)
 	else
@@ -149,7 +149,7 @@ Hotkey-Mode: (hotkey-mode must be on)
 
 /client/verb/set_fixed()
 	set name = "IconSize"
-	set category = "Options"
+	set category = "Preferences.Options"
 
 	if(winget(src, "mapwindow.map", "icon-size") == "64")
 		to_chat(src, "Stretch-to-fit... OK")
@@ -160,7 +160,7 @@ Hotkey-Mode: (hotkey-mode must be on)
 
 /client/verb/set_stretch()
 	set name = "IconScaling"
-	set category = "Options"
+	set category = "Preferences.Options"
 	if(prefs)
 		if(prefs.crt == TRUE)
 			to_chat(src, "CRT mode is on.")
@@ -174,7 +174,7 @@ Hotkey-Mode: (hotkey-mode must be on)
 		winset(src, "mapwindow.map", "zoom-mode=normal")
 
 /client/verb/crtmode()
-	set category = "Options"
+	set category = "Preferences.Options"
 	set name = "ToggleCRT"
 	if(!prefs)
 		return
@@ -194,7 +194,7 @@ Hotkey-Mode: (hotkey-mode must be on)
 			S.alpha = 70
 
 /client/verb/grainfilter()
-	set category = "Options"
+	set category = "Preferences.Options"
 	set name = "ToggleGrain"
 	if(!prefs)
 		return
@@ -216,37 +216,8 @@ Hotkey-Mode: (hotkey-mode must be on)
 	set name = "Commend Someone"
 	commendsomeone()
 
-/client/verb/roleplay_ad_view()
-	set category = "OOC"
-	set name = "Roleplay Ad (View)"
-	view_roleplay_ads()
-
-/client/verb/roleplay_ad_set()
-	set category = "OOC"
-	set name = "Roleplay Ad (Set)"
-	if(mob)
-		if(!ishuman(mob))
-			return
-		var/mob/living/carbon/human/C = mob
-		var/has_old_ad = FALSE
-		if(LAZYACCESS(GLOB.roleplay_ads,C.mobid))
-			to_chat(C, span_info(LAZYACCESS(GLOB.roleplay_ads,C.mobid)))
-			has_old_ad = TRUE
-		var/msg = input("Set an advertisement for what kind of roleplay you are looking to engage in. Others will be able to see it with the Roleplay Ad (View) command. Do not abuse this. Leave empty and press OK to remove your roleplay ad.", "I LOVE TO ROLEPLAY") as message|null
-		if(msg)
-			LAZYSET(GLOB.roleplay_ads,C.mobid,"<b>[C.real_name]</b> - [msg]<BR>")
-			to_chat(C, span_info("Roleplay ad set."))
-			log_game("[C] has set their Roleplay Ad to '[msg]'.")
-			for(var/client/advertisee in (GLOB.clients - src))
-				if(!(advertisee.prefs.toggles & ROLEPLAY_ADS))
-					continue
-				to_chat(advertisee, span_info("[C.real_name] has set a roleplay ad."))
-		else if(has_old_ad)
-			LAZYREMOVE(GLOB.roleplay_ads,C.mobid)
-			to_chat(C, span_info("Roleplay ad removed."))
-
 /client/verb/changefps()
-	set category = "Options"
+	set category = "Preferences.Options"
 	set name = "ChangeFPS"
 	if(!prefs)
 		return
@@ -258,7 +229,7 @@ Hotkey-Mode: (hotkey-mode must be on)
 
 /client/verb/set_picinchat()
 	set name = "Headshot in Chat"
-	set category = "Options"
+	set category = "Preferences.Options"
 
 	if(prefs)
 		prefs.chatheadshot = !prefs.chatheadshot
@@ -271,12 +242,12 @@ Hotkey-Mode: (hotkey-mode must be on)
 /*
 /client/verb/set_blur()
 	set name = "AAOn"
-	set category = "Options"
+	set category = "Preferences.Options"
 
 	winset(src, "mapwindow.map", "zoom-mode=blur")
 
 /client/verb/set_normal()
 	set name = "AAOff"
-	set category = "Options"
+	set category = "Preferences.Options"
 
 	winset(src, "mapwindow.map", "zoom-mode=normal")*/

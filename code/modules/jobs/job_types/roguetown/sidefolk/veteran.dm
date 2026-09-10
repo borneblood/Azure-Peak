@@ -101,7 +101,7 @@
 		/obj/item/rogueweapon/huntingknife/idagger/steel/special = 1,
 		/obj/item/rogueweapon/scabbard/sheath = 1
 		)
-	H.verbs |= /mob/proc/haltyell
+	add_verb(H, /mob/proc/haltyell)
 	if(H.mind)
 		SStreasury.give_money_account(ECONOMIC_RICH, H, "Retirement.")
 
@@ -202,7 +202,7 @@
 	neck = /obj/item/clothing/neck/roguetown/gorget
 	armor = /obj/item/clothing/suit/roguetown/armor/plate/cuirass // Meant to be better than man-at-arms, but worse than knight. No heavy armor!! This is a cuirass, not half-plate.
 	shirt = /obj/item/clothing/suit/roguetown/armor/gambeson/heavy
-	head = /obj/item/clothing/head/roguetown/helmet/sallet/visored
+	head = snouthelm_pick(H, /obj/item/clothing/head/roguetown/helmet/sallet/visored, /obj/item/clothing/head/roguetown/helmet/sallet/visored/snouted)
 	pants = /obj/item/clothing/under/roguetown/chainlegs
 	gloves = /obj/item/clothing/gloves/roguetown/plate
 	wrists = /obj/item/clothing/wrists/roguetown/bracers
@@ -221,7 +221,7 @@
 		/obj/item/rope/chain = 1,
 		/obj/item/rogueweapon/scabbard/sheath = 1
 		)
-	H.verbs |= /mob/proc/haltyell
+	add_verb(H, /mob/proc/haltyell)
 	if(H.mind)
 		SStreasury.give_money_account(ECONOMIC_RICH, H, "Retirement.")
 	H.adjust_blindness(-3)
@@ -326,21 +326,21 @@
 		/obj/item/rogueweapon/scabbard/sheath = 1,
 		/obj/item/roguekey/veteran = 1
 		)
-	H.verbs |= /mob/proc/haltyell
+	add_verb(H, /mob/proc/haltyell)
 	if(H.mind)
 		SStreasury.give_money_account(ECONOMIC_RICH, H, "Retirement.")
 
 	H.adjust_blindness(-3)
 	if(H.mind)
-		var/weapons = list("Sword + Recurve Bow","Axe + Crossbow","Spear + Shield")
+		var/weapons = list("Sword + Bow","Axe + Crossbow","Spear + Shield")
 		var/weapon_choice = input(H, "Choose your weapon.", "TAKE UP ARMS") as anything in weapons
 		H.set_blindness(0)
 		switch(weapon_choice)
-			if("Sword + Recurve Bow")
+			if("Sword + Bow")
 				r_hand = /obj/item/rogueweapon/sword/long
 				beltl = /obj/item/quiver/arrows
 				beltr = /obj/item/rogueweapon/scabbard/sword
-				backl = /obj/item/gun/ballistic/revolver/grenadelauncher/bow/recurve
+				backl = /obj/item/gun/ballistic/revolver/grenadelauncher/bow
 
 			if("Axe + Crossbow")
 				r_hand = /obj/item/rogueweapon/stoneaxe/woodcut/steel
@@ -441,7 +441,7 @@
 	saiga_shoes = /obj/item/clothing/shoes/roguetown/horseshoes/steel
 	gloves = /obj/item/clothing/gloves/roguetown/angle/grenzelgloves
 	beltl = /obj/item/rogueweapon/sword/short
-	beltr = /obj/item/roguekey/veteran //So they can get into their house. 
+	beltr = /obj/item/roguekey/veteran //So they can get into their house.
 	backr = /obj/item/storage/backpack/rogue/satchel/black
 	belt = /obj/item/storage/belt/rogue/leather/black
 	cloak = /obj/item/clothing/cloak/half/vet
@@ -449,7 +449,7 @@
 		/obj/item/rogueweapon/huntingknife/idagger/steel/special = 1,
 		/obj/item/rogueweapon/scabbard/sheath = 1
 		)
-	H.verbs |= /mob/proc/haltyell
+	add_verb(H, /mob/proc/haltyell)
 	if(H.mind)
 		SStreasury.give_money_account(ECONOMIC_RICH, H, "Retirement.")
 
@@ -556,13 +556,13 @@
 	wrists = /obj/item/clothing/wrists/roguetown/bracers/leather
 	shoes = /obj/item/clothing/shoes/roguetown/boots/leather
 	saiga_shoes = /obj/item/clothing/shoes/roguetown/horseshoes
-	var/weapons = list("Recurve Bow", "Slurbow", "Crossbow")
+	var/weapons = list("Long Bow", "Slurbow", "Crossbow")
 	var/weapon_choice = input(H, "Choose your weapon.", "TAKE UP ARMS") as anything in weapons
 	H.set_blindness(0)
 	switch(weapon_choice)
-		if("Recurve Bow")
+		if("Long Bow")
 			beltl = /obj/item/quiver/arrows
-			beltr = /obj/item/gun/ballistic/revolver/grenadelauncher/bow/recurve
+			beltr = /obj/item/gun/ballistic/revolver/grenadelauncher/bow/longbow
 		if("Slurbow")
 			beltr = /obj/item/gun/ballistic/revolver/grenadelauncher/crossbow/slurbow
 			beltl = /obj/item/quiver/bolt/light
@@ -578,7 +578,7 @@
 		/obj/item/roguekey/veteran = 1,
 		/obj/item/rogueweapon/scabbard/sheath = 1
 		)
-	H.verbs |= /mob/proc/haltyell
+	add_verb(H, /mob/proc/haltyell)
 	H.cmode_music = 'sound/music/cmode/antag/combat_deadlyshadows.ogg' // so apparently this works for veteran, but not for advents. i dont know why.
 	if(H.mind)
 		SStreasury.give_money_account(ECONOMIC_RICH, H, "Retirement.")
@@ -631,6 +631,7 @@
 	subclass_languages = list(/datum/language/thievescant)
 	cmode_music = 'sound/music/cmode/nobility/combat_spymaster.ogg'
 	category_tags = list(CTAG_VETERAN)
+	vice_limits = list(/datum/charflaw/silverweakness)
 	traits_applied = list(TRAIT_DODGEEXPERT, TRAIT_CICERONE, TRAIT_STEELHEARTED)
 	subclass_stats = list(
 		STATKEY_INT = 3,// you are int-maxxing, especially if you go old.
@@ -686,7 +687,7 @@
 		/obj/item/reagent_containers/glass/bottle/rogue/poison = 1,
 		/obj/item/lockpickring/mundane,
 		)
-	H.verbs |= /mob/proc/haltyell
+	add_verb(H, /mob/proc/haltyell)
 	if(H.mind)
 		SStreasury.give_money_account(ECONOMIC_RICH, H, "Retirement.")
 	H.adjust_blindness(-3)

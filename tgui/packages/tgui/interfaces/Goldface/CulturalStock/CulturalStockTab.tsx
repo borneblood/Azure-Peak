@@ -11,12 +11,12 @@ import {
   FONT_TITLE,
   INK,
   INK_SOFT,
-  pageStyle,
   PriceTag,
+  pageStyle,
   SEAL_GREEN,
   SEAL_RED,
-  sectionHeaderStyle,
   SERIF,
+  sectionHeaderStyle,
   titleStyle,
 } from '../../common/parchment';
 import type {
@@ -193,7 +193,9 @@ const CatalogStockCard = (props: {
   const hasTariff = entry.price_tariff > 0;
   const hasKin = entry.price_base_pre_kin > entry.price_base;
   const kinSaving = hasKin ? entry.price_base_pre_kin - entry.price_base : 0;
-  const preKinPrice = hasKin ? entry.price_base_pre_kin + entry.price_tariff : 0;
+  const preKinPrice = hasKin
+    ? entry.price_base_pre_kin + entry.price_tariff
+    : 0;
   const priceTitle = hasKin
     ? `${entry.price_base}m + ${entry.price_tariff}m Crown duty = ${entry.price}m (Kinship -${kinSaving}m)`
     : hasTariff
@@ -236,7 +238,9 @@ const CatalogStockCard = (props: {
           type="button"
           style={compactButtonStyle({ disabled })}
           disabled={disabled}
-          onClick={() => act('catalog_buy', { catalog: catalogId, pack: entry.pack })}
+          onClick={() =>
+            act('catalog_buy', { catalog: catalogId, pack: entry.pack })
+          }
           title={
             soldOut
               ? `${entry.name} is out of stock - the caravan restocks to full each day`
@@ -370,6 +374,11 @@ const KinshipBanner = (props: { children: React.ReactNode }) => (
 export const CulturalStockTab = (props: Props) => {
   const { stock, catalogs = [], kinship, budget, isAgent, act } = props;
 
+  const companyKinCatalogs = catalogs.filter(
+    (c) => c.access_basis === 'kinship',
+  );
+  const agentKinCatalogs = catalogs.filter((c) => c.access_basis === 'agent');
+
   const catalogSections = catalogs.length > 0 && (
     <>
       <div
@@ -445,6 +454,42 @@ export const CulturalStockTab = (props: Props) => {
           </span>
         </KinshipBanner>
       )}
+      {companyKinCatalogs.map((c) => (
+        <KinshipBanner key={`mk-${c.id}`}>
+          <span
+            style={{
+              color: SEAL_GREEN,
+              fontVariant: 'small-caps',
+              fontWeight: 'bold',
+              marginRight: '6px',
+            }}
+          >
+            Merchant Kinship: {c.home_realm_name}
+          </span>
+          <span style={{ color: INK_SOFT }}>
+            The {c.name} is open to the Company — wares cost {c.discount_pct}%
+            less.
+          </span>
+        </KinshipBanner>
+      ))}
+      {agentKinCatalogs.map((c) => (
+        <KinshipBanner key={`ak-${c.id}`}>
+          <span
+            style={{
+              color: SEAL_GREEN,
+              fontVariant: 'small-caps',
+              fontWeight: 'bold',
+              marginRight: '6px',
+            }}
+          >
+            Agent Kinship: {c.home_realm_name}
+          </span>
+          <span style={{ color: INK_SOFT }}>
+            As kin, the {c.name} is open to you — wares cost {c.discount_pct}%
+            less.
+          </span>
+        </KinshipBanner>
+      ))}
     </>
   );
 
@@ -469,7 +514,10 @@ export const CulturalStockTab = (props: Props) => {
     );
   }
 
-  const byShip = new Map<string, { name: string; entries: CulturalStockEntry[] }>();
+  const byShip = new Map<
+    string,
+    { name: string; entries: CulturalStockEntry[] }
+  >();
   for (const entry of stock) {
     const existing = byShip.get(entry.ship_id);
     if (existing) {

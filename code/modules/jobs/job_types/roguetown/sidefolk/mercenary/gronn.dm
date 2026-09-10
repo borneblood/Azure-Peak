@@ -5,7 +5,7 @@
 	
 	outfit = /datum/outfit/job/roguetown/mercenary/gronn
 	class_select_category = CLASS_CAT_GRONN
-	category_tags = list(CTAG_MERCENARY)
+	category_tags = list(CTAG_MERCENARY, CTAG_MERCPARTY_VANGUARD)
 	cmode_music = 'sound/music/combat_vagarian.ogg'
 	subclass_languages = list(/datum/language/gronnic)
 	extra_context = "This subclass has 2 loadouts with various stats, skills & equipment."
@@ -87,7 +87,7 @@
 				H.change_stat(STATKEY_CON, 2)
 				H.change_stat(STATKEY_INT, -1) //Unga swordsman.
 				ADD_TRAIT(H, TRAIT_MEDIUMARMOR, TRAIT_GENERIC)
-				H.dna.species.soundpack_m = new /datum/voicepack/male/warrior()
+				H.dna.species.soundpack_m = GLOB.voice_packs[/datum/voicepack/male/warrior]
 			if("Skemmdarvargur - Ravager")	//Light armor, beast claws or dual handaxes. 
 				H.set_blindness(0)
 				to_chat(H, span_warning("The Skemmdarvargur are famously known to hail from the northern city of Skugge, the first line of defense for the Northern Empty. Although highly superstitious with their various carved armaments, they lack the mystical miracles of the Iskarn Shamans."))
@@ -111,7 +111,7 @@
 				H.change_stat(STATKEY_SPD, 2)
 				H.change_stat(STATKEY_PER, 2)
 				ADD_TRAIT(H, TRAIT_DODGEEXPERT, TRAIT_GENERIC)
-				H.dna.species.soundpack_m = new /datum/voicepack/male/evil() //Dodge builds are evil
+				H.dna.species.soundpack_m = GLOB.voice_packs[/datum/voicepack/male/evil] //Dodge builds are evil
 				var/weapons = list("Handclaws","Dual Handaxes")
 				var/weapon_choice = input(H, "Choose your weapon.", "TAKE UP ARMS") as anything in weapons
 				if(H.mind)
@@ -134,7 +134,7 @@
 	maximum_possible_slots = 1 //Hopefully this works.
 	outfit = /datum/outfit/job/roguetown/mercenary/gronn_heavy
 	class_select_category = CLASS_CAT_GRONN
-	category_tags = list(CTAG_MERCENARY)
+	category_tags = list(CTAG_MERCENARY, CTAG_MERCPARTY_BULWARK)
 	traits_applied = list(TRAIT_HEAVYARMOR)
 	cmode_music = 'sound/music/combat_vagarian.ogg'
 	subclass_languages = list(/datum/language/gronnic)
@@ -167,7 +167,7 @@
 
 /datum/outfit/job/roguetown/mercenary/gronn_heavy/pre_equip(mob/living/carbon/human/H)
 	..()
-	H.dna.species.soundpack_m = new /datum/voicepack/male/evil() //It's fucking cool okay
+	H.dna.species.soundpack_m = GLOB.voice_packs[/datum/voicepack/male/evil] //It's fucking cool okay
 	shoes = /obj/item/clothing/shoes/roguetown/boots/armor/iron/gronn
 	head = /obj/item/clothing/head/roguetown/helmet/heavy/bucket/gronn
 	gloves = /obj/item/clothing/gloves/roguetown/plate/iron/gronn

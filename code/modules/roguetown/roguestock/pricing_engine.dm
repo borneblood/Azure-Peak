@@ -74,13 +74,14 @@ GLOBAL_LIST_EMPTY(bulk_trade_item_types)
 	GLOB.material_baseline_prices[/obj/item/ingot/copper] = SELLPRICE_COPPER_INGOT
 	GLOB.material_baseline_prices[/obj/item/ingot/tin] = SELLPRICE_TIN_INGOT
 	GLOB.material_baseline_prices[/obj/item/ingot/steel] = SELLPRICE_STEEL_INGOT
+	GLOB.material_baseline_prices[/obj/item/ingot/bronze] = SELLPRICE_BRONZE_INGOT
 	GLOB.material_baseline_prices[/obj/item/ingot/gold] = SELLPRICE_GOLD_INGOT
 	GLOB.material_baseline_prices[/obj/item/ingot/silver] = SELLPRICE_SILVER_INGOT
 	GLOB.material_baseline_prices[/obj/item/ingot/bronze] = round(SELLPRICE_COPPER_INGOT * INGOT_BRONZE_FROM_COPPER + SELLPRICE_TIN_INGOT * INGOT_BRONZE_FROM_TIN)
 	GLOB.material_baseline_prices[/obj/item/ingot/silverblessed] = round(SELLPRICE_SILVER_INGOT * INGOT_SILVERBLESSED_MULT)
 	GLOB.material_baseline_prices[/obj/item/ingot/silverblessed/bullion] = round(SELLPRICE_SILVER_INGOT * INGOT_SILVERBLESSED_MULT)
 	GLOB.material_baseline_prices[/obj/item/ingot/steelholy] = round(SELLPRICE_STEEL_INGOT * INGOT_STEELHOLY_MULT)
-	GLOB.material_baseline_prices[/obj/item/ingot/blacksteel] = round(SELLPRICE_STEEL_INGOT * INGOT_BLACKSTEEL_MULT)
+	GLOB.material_baseline_prices[/obj/item/ingot/blacksteel] = round(SELLPRICE_STEEL_INGOT * INGOT_BLACKSTEEL_FROM_STEEL + SELLPRICE_SILVER_INGOT * INGOT_BLACKSTEEL_FROM_SILVER)
 	GLOB.material_baseline_prices[/obj/item/ingot/lithmyc] = round(SELLPRICE_STEEL_INGOT * INGOT_LITHMYC_MULT)
 	GLOB.material_baseline_prices[/obj/item/ingot/purifiedaalloy] = round(SELLPRICE_STEEL_INGOT * INGOT_PURIFIEDAALLOY_MULT)
 	GLOB.material_baseline_prices[/obj/item/ingot/aalloy] = round(SELLPRICE_IRON_INGOT * INGOT_AALLOY_MULT)
@@ -90,6 +91,9 @@ GLOBAL_LIST_EMPTY(bulk_trade_item_types)
 	GLOB.material_baseline_prices[/obj/item/natural/wood/plank] = round(SELLPRICE_WOOD * MATERIAL_PLANK_FROM_WOOD)
 	GLOB.material_baseline_prices[/obj/item/natural/glass] = SELLPRICE_GLASS_BATCH
 	GLOB.material_baseline_prices[/obj/item/roguegear] = round(SELLPRICE_STEEL_INGOT * MATERIAL_ROGUEGEAR_FROM_STEEL)
+	GLOB.material_baseline_prices[/obj/item/reagent_containers/food/snacks/pepper] = 4
+	GLOB.material_baseline_prices[/obj/item/reagent_containers/food/snacks/pumpkinspice] = 4
+	GLOB.material_baseline_prices[/obj/item/reagent_containers/food/snacks/sugar] = 3
 
 /proc/init_derived_sellprices(force_audits = FALSE)
 	GLOB.derived_sellprices = list()
@@ -376,10 +380,11 @@ GLOBAL_LIST_EMPTY(bulk_trade_item_types)
 			for(var/m in local_missing)
 				if(!(m in missing_materials))
 					missing_materials += m
-		var/derived = derive_price_from_cost(material_cost, category, 1)
+		var/recipe_yield = recipe_result_yield(CR, result_path)
+		var/derived = derive_price_from_cost(material_cost, category, recipe_yield)
 		var/markup = GLOB.item_cat_markups[category] || PRICING_ENGINE_DEFAULT_MARKUP
 		if(audit_lines)
-			audit_lines += csv_row(list("crafting", CR.name, "[result_path]", category, cat_missing ? "MISSING" : "", "[material_cost]", "[markup]", "1", "[derived]", jointext(breakdown, " + "), jointext(local_missing, ",")))
+			audit_lines += csv_row(list("crafting", CR.name, "[result_path]", category, cat_missing ? "MISSING" : "", "[material_cost]", "[markup]", "[recipe_yield]", "[derived]", jointext(breakdown, " + "), jointext(local_missing, ",")))
 		if(derived <= 0)
 			continue
 		if(register_derived_price(result_path, derived, category))
@@ -490,6 +495,16 @@ GLOBAL_LIST_EMPTY(bulk_trade_item_types)
 		return null
 	return CR.result
 
+/proc/recipe_result_yield(datum/crafting_recipe/CR, result_path)
+	if(!islist(CR.result))
+		return 1
+	var/list/rl = CR.result
+	var/count = 0
+	for(var/path in rl)
+		if(path == result_path)
+			count++
+	return max(1, count)
+
 /proc/register_derived_price(path, price, category)
 	if(!path)
 		return FALSE
@@ -552,9 +567,9 @@ GLOBAL_LIST_EMPTY(bulk_trade_item_types)
 	var/list/parts = list()
 	var/list/source_files = list(
 		"code/modules/roguetown/roguestock/pricing_engine.dm",
-		"code/__DEFINES/pricing_defines.dm",
-		"code/__DEFINES/item_categories.dm",
-		"code/__DEFINES/trade_goods.dm",
+		"code/__DEFINES/economy/pricing_defines.dm",
+		"code/__DEFINES/economy/item_categories.dm",
+		"code/__DEFINES/economy/trade_goods.dm",
 		"code/controllers/subsystem/rogue/cooking/cooking_recipes.dm",
 	)
 	for(var/path in source_files)
@@ -602,7 +617,7 @@ GLOBAL_LIST_EMPTY(bulk_trade_item_types)
 			for(var/p in CR.reqs)
 				sorted_reqs += "[p]=[CR.reqs[p]]"
 			reqs = jointext(sortList(sorted_reqs), ",")
-		recipe_keys += "c:[result_path]|[reqs]|[CR.display_category]"
+		recipe_keys += "c:[result_path]|[reqs]|[CR.display_category]|y[recipe_result_yield(CR, result_path)]"
 	for(var/datum/food_recipe/FR as anything in subtypesof(/datum/food_recipe))
 		var/base = initial(FR.base_item)
 		var/result_path = initial(FR.result_type)

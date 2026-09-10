@@ -108,7 +108,7 @@
 	result = /obj/item/gun/ballistic/revolver/grenadelauncher/bow/longbow/warden
 	reqs = list(
 		/obj/item/gun/ballistic/revolver/grenadelauncher/bow/longbow = 1,
-		/obj/item/gun/ballistic/revolver/grenadelauncher/bow/recurve/warden = 1,
+		/obj/item/gun/ballistic/revolver/grenadelauncher/bow/warden = 1,
 	)
 	verbage_simple = "re-string"
 	verbage = "re-strings"
@@ -464,7 +464,7 @@
 	verbage_simple = "twist"
 	verbage = "twists"
 	craftdiff = 1 //you should make some ammo first!
-	
+
 /datum/crafting_recipe/roguetown/survival/slingpouchcraft
 	name = "sling bullet pouch"
 	display_category = ITEM_CAT_WEAPONS_AMMO
@@ -490,7 +490,7 @@
 	verbage_simple = "smooth"
 	verbage = "smooths"
 	craftdiff = 0
-	
+
 /datum/crafting_recipe/roguetown/survival/stonebullets10x
 	name = "sling bullets - stone (x10)"
 	display_category = ITEM_CAT_WEAPONS_AMMO
@@ -511,3 +511,61 @@
 	verbage_simple = "smooth"
 	verbage = "smooths"
 	craftdiff = 0
+
+//
+
+/datum/crafting_recipe/roguetown/survival/heattreat_silverstake
+	name = "heat-treat silver stake into silver shotstakes (x3)"
+	result = list(
+				/obj/item/ammo_casing/caseless/rogue/stake/silver,
+				/obj/item/ammo_casing/caseless/rogue/stake/silver,
+				/obj/item/ammo_casing/caseless/rogue/stake/silver,
+				)
+	reqs = list(/obj/item/rogueweapon/huntingknife/idagger/silver/stake = 1)
+	structurecraft = /obj/machinery/light/rogue
+	craftdiff = 0
+	craftsound = 'sound/misc/frying.ogg'
+	verbage_simple = "heat-treat"
+	verbage = "heat-treats"
+
+/datum/crafting_recipe/roguetown/survival/heattreat_otavanstake
+	name = "heat-treat otavan stake into silver shotstakes (x3)"
+	result = list(
+				/obj/item/ammo_casing/caseless/rogue/stake/silver,
+				/obj/item/ammo_casing/caseless/rogue/stake/silver,
+				/obj/item/ammo_casing/caseless/rogue/stake/silver,
+				)
+	reqs = list(/obj/item/rogueweapon/huntingknife/idagger/silver/stake/psy = 1)
+	structurecraft = /obj/machinery/light/rogue
+	craftdiff = 0
+	craftsound = 'sound/misc/frying.ogg'
+	verbage_simple = "heat-treat"
+	verbage = "heat-treats"
+
+/datum/crafting_recipe/roguetown/survival/heattreat_sharpstake
+	name = "heat-treat sharpened stake into shotstakes (x3)"
+	result = list(
+				/obj/item/ammo_casing/caseless/rogue/stake,
+				/obj/item/ammo_casing/caseless/rogue/stake,
+				/obj/item/ammo_casing/caseless/rogue/stake,
+				)
+	reqs = list(/obj/item/rogueweapon/huntingknife/idagger/stake = 1)
+	structurecraft = /obj/machinery/light/rogue
+	craftdiff = 0
+	craftsound = 'sound/misc/frying.ogg'
+	verbage_simple = "heat-treat"
+	verbage = "heat-treats"
+
+/datum/crafting_recipe/roguetown/survival/heattreat_stake
+	name = "heat-treat stake into shotstake"
+	result = list(
+				/obj/item/ammo_casing/caseless/rogue/stake,
+				)
+	reqs = list(/obj/item/grown/log/tree/stake = 1)
+	structurecraft = /obj/machinery/light/rogue
+	craftdiff = 0
+	craftsound = 'sound/misc/frying.ogg'
+	verbage_simple = "heat-treat"
+	verbage = "heat-treats"
+
+//

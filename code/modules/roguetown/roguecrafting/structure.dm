@@ -293,7 +293,6 @@
 	skillcraft = /datum/skill/craft/carpentry
 
 /obj/structure/fermentation_keg/crafted
-	sellprice = 6
 
 /datum/crafting_recipe/roguetown/structure/meathook
 	name = "meathook"
@@ -930,7 +929,6 @@
 
 /obj/structure/closet/crate/chest/crafted
 	keylock = FALSE
-	sellprice = 6
 
 /datum/crafting_recipe/roguetown/structure/closet
 	name = "closet"
@@ -962,7 +960,6 @@
 	craftdiff = 1
 
 /obj/structure/closet/crate/roguecloset/crafted
-	sellprice = 6
 
 /datum/crafting_recipe/roguetown/structure/campfire
 	name = "campfire"
@@ -990,6 +987,36 @@
 				/obj/item/natural/stone = 3)
 	verbage_simple = "build"
 	verbage = "builds"
+
+/datum/crafting_recipe/roguetown/structure/smoker
+	name = "smoker"
+	category = "Misc"
+	result = /obj/machinery/light/rogue/smoker
+	reqs = list(/obj/item/grown/log/tree/small = 2,
+				/obj/item/natural/stone = 1,
+				/obj/item/rope = 1)
+	craftdiff = 3
+	verbage_simple = "build"
+	verbage = "builds"
+
+/datum/crafting_recipe/roguetown/structure/smoker/carpentry
+	skillcraft = /datum/skill/craft/carpentry
+	craftdiff = 2
+
+/datum/crafting_recipe/roguetown/structure/smoker_wheeled
+	name = "smoker (wheeled)"
+	category = "Misc"
+	result = /obj/machinery/light/rogue/smoker/wheeled
+	reqs = list(/obj/item/grown/log/tree/small = 4,
+				/obj/item/natural/stone = 1,
+				/obj/item/rope = 2)
+	craftdiff = 4
+	verbage_simple = "build"
+	verbage = "builds"
+
+/datum/crafting_recipe/roguetown/structure/smoker_wheeled/carpentry
+	skillcraft = /datum/skill/craft/carpentry
+	craftdiff = 3
 
 /datum/crafting_recipe/roguetown/structure/brazier
 	name = "brazier"
@@ -1118,6 +1145,16 @@
 	verbage_simple = "construct"
 	verbage = "constructs"
 	skillcraft = /datum/skill/craft/carpentry
+
+/datum/crafting_recipe/roguetown/structure/bakers_trough
+	name = "baker's trough"
+	category = "Misc"
+	result = /obj/structure/bakers_trough
+	reqs = list(/obj/item/grown/log/tree/small = 2)
+	verbage_simple = "construct"
+	verbage = "constructs"
+	skillcraft = /datum/skill/craft/carpentry
+	craftdiff = SKILL_LEVEL_NOVICE
 
 /datum/crafting_recipe/roguetown/structure/fancytableblack
 	name = "fancy wooden table(black)"

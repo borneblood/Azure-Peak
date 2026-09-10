@@ -6,12 +6,12 @@ SUBSYSTEM_DEF(machines)
 	var/list/processing = list()
 	var/list/currentrun = list()
 
-/datum/controller/subsystem/machines/Initialize()
+/datum/controller/subsystem/machines/Initialize(mapload)
 	fire()
 	return ..()
 
 /datum/controller/subsystem/machines/stat_entry()
-	..("M:[processing.len]")
+	return ..("M:[processing.len]")
 
 
 /datum/controller/subsystem/machines/fire(resumed = 0)

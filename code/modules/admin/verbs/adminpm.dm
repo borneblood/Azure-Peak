@@ -15,7 +15,7 @@
 
 //shows a list of clients we could send PMs to, then forwards our choice to cmd_admin_pm
 /client/proc/cmd_admin_pm_panel()
-	set category = "ADMIN"
+	set category = "Admin.Admin"
 	set name = "Admin PM"
 	if(!holder)
 		to_chat(src, span_danger("Error: Admin-PM-Panel: Only administrators may use this command."))
@@ -226,7 +226,7 @@
 	var/client/C = GLOB.directory[target]
 
 	var/datum/admin_help/ticket = C ? C.current_ticket : GLOB.ahelp_tickets.CKey2ActiveTicket(target)
-	var/compliant_msg = trim(lowertext(msg))
+	var/compliant_msg = trim(LOWER_TEXT(msg))
 	var/irc_tagged = "[sender](IRC)"
 	var/list/splits = splittext(compliant_msg, " ")
 	if(splits.len && splits[1] == "ticket")

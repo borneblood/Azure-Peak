@@ -9,22 +9,22 @@ PROCESSING_SUBSYSTEM_DEF(tracks)
 	var/list/track_pool
 	var/list/structure_track_pool
 	var/list/thievescant_pool
-	var/pool_max_size 
+	var/pool_max_size
 	var/tracks_recycled
 	var/tracks_created
 
-/datum/controller/subsystem/processing/tracks/Initialize()
+/datum/controller/subsystem/processing/tracks/Initialize(mapload)
 	track_pool = list()
 	structure_track_pool = list()
 	thievescant_pool = list()
 
 	pool_max_size = 1000
 	tracks_recycled = 0
-	tracks_created = 0 
+	tracks_created = 0
 
 /datum/controller/subsystem/processing/tracks/stat_entry()
 	if(processing)
-		..("P:[length(processing)] | Pool:[length(track_pool)+length(structure_track_pool)+length(thievescant_pool)] | R:[tracks_recycled] | N:[tracks_created]")
+		return ..("P:[length(processing)] | Pool:[length(track_pool)+length(structure_track_pool)+length(thievescant_pool)] | R:[tracks_recycled] | N:[tracks_created]")
 
 /datum/controller/subsystem/processing/tracks/fire(resumed = 0)
 	if (!resumed)

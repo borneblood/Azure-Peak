@@ -1,31 +1,24 @@
 /datum/action/cooldown/spell/psydon
 	background_icon = 'icons/mob/actions/psydonmiracles.dmi'
 	button_icon = 'icons/mob/actions/psydonmiracles.dmi'
-	spell_color = GLOW_COLOR_ASTRATA
+	spell_color = GLOW_COLOR_PSYDON
 	glow_intensity = null
-
 	ignore_armor_penalty = TRUE
-
 	attunement_school = null
-
 	primary_resource_type = SPELL_COST_DEVOTION
-
 	secondary_resource_type = SPELL_COST_STAMINA
-
 	has_visual_effects = FALSE
 	spell_impact_intensity = SPELL_IMPACT_NONE
 	associated_stat = null
 	associated_skill = /datum/skill/magic/holy
 	spell_tier = 0
-
 	point_cost = 0
-
 	spell_flags = SPELL_PSYDON
 	spell_requirements = SPELL_REQUIRES_NO_ANTIMAGIC | SPELL_REQUIRES_HUMAN | SPELL_REQUIRES_SAME_Z
 	required_items = list(/obj/item/clothing/neck/roguetown/psicross) //He is dead so yeah we need something to INVOKE IT
 
 /////////////////////
-// T0 - BOOTCHECK  //
+// T0 - BOOTCHECK	//
 /////////////////////
 
 /datum/action/cooldown/spell/psydon/bootcheck
@@ -34,18 +27,13 @@
 	Scales with FORTUNE of the user."
 	button_icon_state = "BOOTCHECK"
 	sound = null
-
 	click_to_activate = FALSE
 	cast_range = SPELL_RANGE_ADJACENT
 	self_cast_possible = TRUE
-
 	primary_resource_cost = SPELLCOST_MIRACLE
-
 	secondary_resource_cost = SPELLCOST_MINOR_PROJECTILE
-
 	invocation_type = INVOCATION_NONE
 	invocations = null
-
 	charge_required = FALSE
 	cooldown_time = 10 MINUTES
 
@@ -80,6 +68,8 @@
 	/obj/item/natural/worms,
 	/obj/item/natural/worms/leech,
 	/obj/item/reagent_containers/food/snacks/rogue/psycrossbun,
+	/obj/item/reagent_containers/food/snacks/rogue/psycrossbun_jamtallowed,
+	/obj/item/reagent_containers/food/snacks/rogue/psycrossbun_marmaladed,
 	/obj/item/clothing/neck/roguetown/psicross,
 	/obj/item/clothing/neck/roguetown/psicross/wood,
 	/obj/item/rope/chain,
@@ -104,7 +94,7 @@
 	var/obj/item/found_thing
 	if(H.get_stress_amount() < 0 && H.STALUC > 10)
 		found_thing = new /obj/item/roguecoin/gold(T)
-	else if(H.STALUC == 10)
+	else if(H.STALUC >= 10)
 		found_thing = new /obj/item/roguecoin/silver(T)
 	else
 		found_thing = new /obj/item/roguecoin/copper(T)
@@ -128,32 +118,25 @@
 
 /datum/action/cooldown/spell/psydon/endure
 	name = "ENDURE"
-	desc = "Invoke an invigorating prayer for those who are faltering in body and spirit. </br>‎  </br>Provides minor wound regeneration, staunches bleeding, and eases the burden of suffocation. Healing scales with the caster's Miracle proficiency and the quality of their worn Psycross. Those who have suffered grievous injury find the prayer's strength magnified, drawing resolve from pain itself."
+	desc = "Invoke an invigorating prayer for those who are faltering in body and spirit. </br>‎  </br>Provides minor wound regeneration, staunches bleeding, and eases the burden of suffocation. Scales with the caster's Miracle skill and the quality of their worn Psycross. Those who have suffered grievous injury find the prayer's strength magnified, drawing resolve from pain itself."
 	fluff_desc = "<font color='#579aff'>THE WORLD DOES NOT OWE US MERCY. IT OFFERS ONLY SUFFERING, LOSS, AND STRIFE. SO WE SHALL MEET IT WITH CLENCHED FISTS AND BARED TEETH. WE SHALL BLEED. WE SHALL STUMBLE. WE SHALL FALL. BUT WE SHALL ALWAYS RISE AGAIN. ENDURE.</font>"
 	button_icon_state = "ENDURE"
 	sound = 'sound/magic/ENDVRE.ogg'
-
 	click_to_activate = TRUE
-	cast_range = SPELL_RANGE_ADJACENT + 1
+	cast_range = SPELL_RANGE_ADJACENT + 2
 	self_cast_possible = TRUE
-
 	primary_resource_cost = SPELLCOST_MIRACLE + 10
-
 	secondary_resource_cost = SPELLCOST_MIRACLE_MINOR
-
 	charge_required = FALSE
 	cooldown_time = 30 SECONDS
 
 /datum/action/cooldown/spell/psydon/endure/cast(atom/cast_on)
 	. = ..()
-
 	var/mob/living/carbon/human/H = owner
-
 	if(!isliving(cast_on))
 		return FALSE
 
 	var/mob/living/target = cast_on
-
 	if(!check_psydon_favor(H))
 		return FALSE
 
@@ -199,20 +182,16 @@
 
 /datum/action/cooldown/spell/psydon/persist
 	name = "PERSIST"
-	desc = "Stand firm against pain and doubt through nothing but sheer Humen grit. </br>‎  </br>While remaining still, steadily restores Brute and Burn damage over time at the cost of your Energy and Nutrition. Healing scales with Miracle skill and the quality of your worn Psycross. The more wounded you are, the more fiercely your faith compels your body to recover."
+	desc = "Stand firm against pain and doubt through nothing but sheer Humen grit. </br>‎  </br>While remaining still, steadily restores Brute and Burn damage over time at the cost of your Energy and Nutrition. Scales with Miracle skill and the quality of your worn Psycross. The more wounded you are, the more fiercely your faith compels your body to recover."
 	fluff_desc = "<font color='#579aff'>MY FAITH IS MY SHIELD, FOR FAITH IS NOT THE ABSENCE OF SUFFERING, BUT THE STRENGTH TO WEATHER IT. SO LONG AS MY DEVOTION TO HIM ENDURES, SO TOO SHALL I PERSIST!!</font>"
 	button_icon_state = "PERSIST"
 	sound = null
-
 	click_to_activate = FALSE
 	cast_range = SPELL_RANGE_ADJACENT
 	self_cast_possible = TRUE
-
 	primary_resource_type = SPELL_COST_DEVOTION
 	primary_resource_cost = 15
-
 	secondary_resource_cost = SPELLCOST_MIRACLE_MINOR
-
 	charge_required = FALSE
 	cooldown_time = 5 SECONDS
 
@@ -267,7 +246,7 @@
 	chargetime = 0
 	range = 3
 	warnie = "sydwarning"
-	desc = "Lesser lux-magicka. Endure the wounds of another, for their sake. </br>‎  </br>Siphons away lesser injuries, such as gashes and fractures, from the target. In exchange, any siphoned injuries are subsequently imposed onto you. If the target has lost any blood, they will be fully replenished through your own veins."
+	desc = "Lesser lux-magicka. Endure the wounds of another, for their sake. </br>‎	</br>Siphons away lesser injuries, such as gashes and fractures, from the target. In exchange, any siphoned injuries are subsequently imposed onto you. If the target has lost any blood, they will be fully replenished through your own veins."
 	movement_interrupt = FALSE
 	sound = 'sound/magic/psydonbleeds.ogg'
 	associated_skill = /datum/skill/magic/holy
@@ -294,7 +273,21 @@
 		to_chat(user, span_warning("[H] is irreversibly gone... There's nothing we can do to bring them back anymore!"))
 		user.emote("cry")
 		revert_cast()
-		return FALSE
+
+	if(HAS_TRAIT(H, TRAIT_UNFORGIVABLE)) //ANCIENT ENEMY, I DO NOT FEAR YOU.
+		H.visible_message(span_info("[H] stirs for a moment, the miracle is reformed into unmaking flame!"), span_notice("A dull warmth passes through your hollow husk of a body, only to be corrupted and rebuked back at its caster!"))
+		playsound(H, 'sound/magic/magic_nulled.ogg', 100, FALSE, -1)
+		user.playsound_local(user, 'sound/magic/magic_nulled.ogg', 100, FALSE, -1)
+		user.adjust_fire_stacks(15, /datum/status_effect/fire_handler/fire_stacks/vheslyn) //Unique violet firestacks, ANCIENT ENEMY
+		user.Knockdown(10)
+		user.Jitter(30)
+		user.ignite_mob()
+		if(!HAS_TRAIT(user, TRAIT_NOPAIN))
+			user.emote("agony")
+		if(!HAS_TRAIT(user, TRAIT_NOMOOD))
+			user.freak_out()
+		to_chat(user, span_userdanger("I recoil as I'm violently SMITED by profane flame as I attempt to purify their lux by the merging of-.. wait, where's THEIR LUX?!"))
+		return
 
 	if(H.stat == DEAD || HAS_TRAIT(H, TRAIT_DEADITE))
 		to_chat(user, span_warning("[H]'s Lux is extinguished... What can I do?!"))
@@ -312,6 +305,11 @@
 	var/list/BPs_to_check = list()
 
 	H.visible_message(span_blue("[user] connects their Lux with [H]'s own."))
+	if(HAS_TRAIT(H, TRAIT_NOHEAL))
+		H.visible_message(span_artery("--But their Lux is forcefully repelled for some reason!"))
+		H.playsound_local(H, 'sound/magic/PSY.ogg', 100, FALSE, -1)
+		return
+
 	if(user.cmode)
 		user.say(pick("RESPITE FOR THY WOUNDS!", "BLEED STANDING!", "I BLEED SO YOU MAY ENDURE!", "PERSIST AGAINST THE PAIN!","LET YOUR WOUNDS WEEP NO MORE!","THIS IS OUR TRIAL!"))
 		if(HAS_TRAIT(user, TRAIT_IRONMAN))
@@ -361,7 +359,7 @@
 			if(!(c_BP in BPs_to_check))
 				LAZYADD(BPs_to_check, c_BP)
 
-		if((HAS_TRAIT(C_caster, TRAIT_NOPAIN) || HAS_TRAIT(C_caster, TRAIT_NOPAINSTUN)) && HAS_TRAIT(C_caster, TRAIT_BLOODLOSS_IMMUNE))
+		if((HAS_TRAIT(C_caster, TRAIT_NOPAIN) || HAS_TRAIT(C_caster, TRAIT_NOPAINSTUN)) && HAS_TRAIT(C_caster, TRAIT_BLOODLOSS_IMMUNE) && HAS_TRAIT(C_caster, TRAIT_IRONMAN))
 			if(!(c_BP in BPs_to_check))
 				c_BP.receive_damage(targetwound.whp)
 				LAZYADD(BPs_to_check, c_BP)
@@ -445,12 +443,12 @@
 //////////////////
 // This is unique to the Absolver. No buts.
 
-/obj/effect/proc_holder/spell/invoked/psydonabsolve	
+/obj/effect/proc_holder/spell/invoked/psydonabsolve
 	name = "ABSOLVE"
 	action_icon = 'icons/mob/actions/psydonmiracles.dmi'
 	overlay_icon = 'icons/mob/actions/psydonmiracles.dmi'
 	overlay_state = "ABSOLVE" //Absolver-exclusive. Classified as 'lux-magicka', rather than a traditional miracle. Same line of thought as the Naledians.
-	desc = "Greater lux-magicka. Exchange your vitality for the sake of another. </br>‎  </br>Siphons away all injuries - be it physical damage, blood loss, or dismemberment - from the target, completely healing them. In exchange, all siphoned injuries are subsequently inflicted unto you. Using this on a target who's dead will fully resurrect them, albeit at the cost of your own lyfe."
+	desc = "Greater lux-magicka. Exchange your vitality for the sake of another. </br>‎	</br>Siphons away all injuries - be it physical damage, blood loss, or dismemberment - from the target, completely healing them. In exchange, all siphoned injuries are subsequently inflicted unto you. Using this on a target who's dead will fully resurrect them, albeit at the cost of your own lyfe."
 	releasedrain = 50
 	chargedrain = 0
 	chargetime = 0
@@ -520,6 +518,11 @@
 
 	H.visible_message(span_red("[user] <i>dangerously</i> connects their Lux with [H]'s own."))
 
+	if(HAS_TRAIT(H, TRAIT_NOHEAL))
+		H.visible_message(span_artery("--But their Lux is forcefully repelled for some reason!"))
+		H.playsound_local(H, 'sound/magic/PSY.ogg', 100, FALSE, -1)
+		return FALSE
+
 	// REVIVE PATH
 	if(H.stat >= DEAD)
 		if(!H.key && !H.get_ghost(FALSE, TRUE))
@@ -555,6 +558,9 @@
 		H.mind.remove_antag_datum(/datum/antagonist/zombie)
 		H.remove_status_effect(/datum/status_effect/debuff/rotted_zombie)
 		H.apply_status_effect(/datum/status_effect/debuff/revived)
+		if(HAS_TRAIT(H, TRAIT_IRONMAN))
+			H.apply_status_effect(/datum/status_effect/debuff/integrity_rig, 11 MINUTES)
+			H.visible_message(span_danger("[H] is looking on the verge of exploding again! Their core may need an extra whack from a hammer."))
 		return TRUE
 
 	if(user.cmode)

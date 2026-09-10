@@ -41,7 +41,7 @@
 /obj/structure/flora/newtree/obj_destruction(damage_flag)//this proc is stupidly long for a destruction proc
 	var/turf/NT = get_turf(src)
 	var/turf/UPNT = get_step_multiz(src, UP)
-	src.obj_flags = CAN_BE_HIT | BLOCK_Z_IN_UP //so the logs actually fall when pulled by zfall
+	set_is_platform(FALSE) //so the logs actually fall when pulled by zfall
 	if(burnt)
 		damage_flag = "fire"
 
@@ -57,17 +57,17 @@
 				var/turf/BI = get_step(B, DI)
 				for(var/obj/structure/flora/newbranch/bi in BI)//2 tile end branch
 					if(bi.dir == DI)
-						bi.obj_flags = CAN_BE_HIT
+						bi.set_is_platform(FALSE)
 						bi.obj_destruction(damage_flag)
 					for(var/atom/bio in BI)
 						BI.zFall(bio)
 				for(var/obj/structure/flora/newleaf/bil in BI)//2 tile end leaf
 					bil.obj_destruction(damage_flag)
-				BRANCH.obj_flags = CAN_BE_HIT 
+				BRANCH.set_is_platform(FALSE)
 				BRANCH.obj_destruction(damage_flag)
 			for(var/atom/BRA in B)//unload a sack of rocks on a branch and stand under it, it'll be funny bro
 				B.zFall(BRA)
-	
+
 	for(var/turf/DIA in block(get_step(src, SOUTHWEST), get_step(src, NORTHEAST)))
 		for(var/obj/structure/flora/newleaf/LEAF in DIA)
 			LEAF.obj_destruction(damage_flag)
@@ -106,9 +106,13 @@
 				if(CH)
 					myskill += 1
 			used_time = max(70 - (myskill * 10) - (L.STASPD * 3), (HAS_TRAIT(L, TRAIT_WOODWALKER) ? 15 : 30))
+		if(!L.start_climb())
+			return
 		playsound(user, 'sound/foley/climb.ogg', 100, TRUE)
 		user.visible_message(span_warning("[user] starts to climb [src]."), span_warning("I start to climb [src]..."))
-		if(do_after(L, used_time, target = src))
+		var/climbed = do_after(L, used_time, target = src, extra_checks = L.climb_check_callback())
+		L.end_climb()
+		if(climbed)
 			var/pulling = user.pulling
 			if(ismob(pulling))
 				user.pulling.forceMove(target)
@@ -139,7 +143,7 @@
 	M.dir = dir
 	. += M
 
-/obj/structure/flora/newtree/Initialize()
+/obj/structure/flora/newtree/Initialize(mapload)
 	. = ..()
 	tree_type = rand(1,2)
 	dir = pick(GLOB.cardinals)
@@ -158,6 +162,8 @@
 		T.update_icon()
 
 /obj/structure/flora/newtree/proc/build_branches()
+	if(istype(get_turf(src), /turf/open/floor) && prob(90)) // We only want branches in the upper layers
+		return
 	for(var/D in GLOB.cardinals)
 		var/turf/NT = get_step(src, D)
 		if(istype(NT, /turf/open/transparent/openspace))
@@ -309,7 +315,7 @@
 	M.dir = dir
 	. += M
 
-/obj/structure/flora/newbranch/Initialize()
+/obj/structure/flora/newbranch/Initialize(mapload)
 	. = ..()
 	if(base_state)
 		AddComponent(/datum/component/squeak, list('sound/foley/plantcross1.ogg','sound/foley/plantcross2.ogg','sound/foley/plantcross3.ogg','sound/foley/plantcross4.ogg'), 100)
@@ -353,7 +359,7 @@
 	icon_state = "corner-leaf1"
 
 
-/obj/structure/flora/newleaf/corner/Initialize()
+/obj/structure/flora/newleaf/corner/Initialize(mapload)
 	. = ..()
 	icon_state = "corner-leaf[rand(1,2)]"
 	update_icon()
@@ -366,7 +372,7 @@
 	density = FALSE
 	max_integrity = 10
 
-/obj/structure/flora/newleaf/Initialize()
+/obj/structure/flora/newleaf/Initialize(mapload)
 	. = ..()
 	icon_state = "center-leaf[rand(1,2)]"
 	update_icon()

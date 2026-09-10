@@ -13,7 +13,8 @@
 /datum/action/cooldown/spell/projectile
 	abstract_type = /datum/action/cooldown/spell/projectile
 	self_cast_possible = FALSE
-	spell_requirements = SPELL_REQUIRES_NO_ANTIMAGIC // Projectiles travel physically, no same-Z restriction
+	spell_requirements = SPELL_REQUIRES_NO_ANTIMAGIC
+	allow_cross_z = TRUE // Projectiles may cross Z-levels, normally.
 
 	/// What projectile we create when we shoot our spell.
 	var/obj/projectile/projectile_type = /obj/projectile/magic/teleport
@@ -23,11 +24,34 @@
 	var/projectiles_per_fire = 1
 	/// Whether this spell is currently set to fire in arc mode.
 	var/arc_mode = FALSE
+	/// If TRUE, a non-click (facing-direction) cast snaps the aim to the nearest cardinal direction.
+	var/cardinal_aim = FALSE
+	/// Where the target was when the spell was cast. Used for NPC lead aiming.
+	var/turf/aim_locked_turf
 
 /datum/action/cooldown/spell/projectile/generate_wiki_html(mob/user)
 	if(!displayed_damage && projectile_type)
 		displayed_damage = initial(projectile_type.damage)
 	return ..()
+
+/datum/action/cooldown/spell/projectile/set_ai_aim_lock(turf/locked_turf)
+	aim_locked_turf = locked_turf
+
+/datum/action/cooldown/spell/projectile/can_use(atom/target)
+	. = ..()
+	if(!. || !npc_controlled() || !isliving(owner))
+		return .
+	var/mob/living/shooter = owner
+	for(var/turf/T in getline(shooter, target))
+		for(var/mob/living/blocker in T)
+			if(blocker == shooter || blocker == target)
+				continue
+			if(shooter.faction_check_mob(blocker))
+				return FALSE
+	return TRUE
+
+/datum/action/cooldown/spell/projectile/ai_commit_time()
+	return charge_required ? charge_time : 0
 
 /// cast_on is the turf or atom we're firing at.
 /datum/action/cooldown/spell/projectile/cast(atom/cast_on)
@@ -36,11 +60,16 @@
 		return FALSE
 
 	var/atom/target = cast_on
-	// For non-click spells, resolve target in the caster's facing direction
-	if(!click_to_activate)
-		target = get_ranged_target_turf(owner, owner.dir, cast_range)
+	if(!click_to_activate && (QDELETED(cast_on) || cast_on == owner))
+		var/aim_dir = cardinal_aim ? angle2dir_cardinal(dir2angle(owner.dir)) : owner.dir
+		target = get_ranged_target_turf(owner, aim_dir, cast_range)
+	else if(aim_locked_turf && isliving(owner))
+		var/mob/living/caster = owner
+		var/obj/projectile/active_type = (arc_mode && projectile_type_arc) ? projectile_type_arc : projectile_type
+		target = caster.get_ranged_lead_turf(target, aim_locked_turf, initial(active_type.speed), caster.STAINT) || target
 
 	fire_projectile(target)
+	aim_locked_turf = null
 	return TRUE
 
 /// Fire the projectile(s) at the target.
@@ -58,17 +87,17 @@
 	to_fire.firer = user
 	to_fire.fired_from = get_turf(user)
 	to_fire.def_zone = user.zone_selected
+	to_fire.source_spell = src
 
 	// Propagate spell impact intensity to the projectile
 	if(istype(to_fire, /obj/projectile/magic))
 		var/obj/projectile/magic/M = to_fire
 		M.spell_impact_intensity = spell_impact_intensity
 
-	// Accuracy from INT and skill, matching the old proc_holder system
+	// Accuracy from PER and skill, matching the old proc_holder system
 	if(isliving(user))
 		var/mob/living/L = user
-		to_fire.accuracy += (L.STAINT - 9) * 4
-		to_fire.bonus_accuracy += (L.STAINT - 8) * 3
+		L.apply_ranged_accuracy(to_fire)
 		if(L.mind)
 			to_fire.bonus_accuracy += (L.get_skill_level(associated_skill) * 5)
 
@@ -94,7 +123,10 @@
 		to_chat(user, span_warning("[name] cannot be arced."))
 		return
 	arc_mode = !arc_mode
-	to_chat(user, span_notice("[name] arc mode [arc_mode ? "enabled" : "disabled"]."))
+	if(arc_mode)
+		to_chat(user, span_notice("[name] arc mode enabled - aim above or below to lob the shot across elevations."))
+	else
+		to_chat(user, span_notice("[name] arc mode disabled."))
 	update_arc_maptext()
 
 /// Updates the ARC maptext indicator on the spell's action button.
@@ -131,4 +163,6 @@
 			stats += span_info("Damage: [proj_damage] x[projectiles_per_fire]")
 		else
 			stats += span_info("Damage: [proj_damage]")
+	if(projectile_type_arc)
+		stats += span_info("Arc Mode (toggle with Shift+G): lobs the shot across elevations - aim at a target a level above or below, or at an opening over them.")
 	return stats

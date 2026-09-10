@@ -1,4 +1,4 @@
-#define MAMMON_PER_FORCE 1 
+#define MAMMON_PER_FORCE 1
 
 /obj/structure/roguemachine/vaultbank
 	name = "\improper JAWBANK"
@@ -33,7 +33,7 @@
 	var/knockedoffbefore = 0
 	var/drillgoal = 100
 
-/obj/structure/roguemachine/vaultbank/Initialize()
+/obj/structure/roguemachine/vaultbank/Initialize(mapload)
 	..()
 	enforce_placement()
 	if(SStreasury)
@@ -804,7 +804,7 @@
 /obj/structure/roguemachine/vaultbank/innkeeper/can_withdraw(mob/user, amount)
 	if(!user)
 		return FALSE
-	return user.job == "Innkeeper"
+	return user.job in list("Innkeeper", "Tapster", "Cook")
 
 /obj/structure/roguemachine/vaultbank/innkeeper/can_view(mob/user)
 	if(!user)
@@ -812,7 +812,7 @@
 	return user.job in list("Innkeeper", "Tapster", "Cook")
 
 /obj/structure/roguemachine/vaultbank/innkeeper/get_authority_label()
-	return "the Innkeeper"
+	return "the Innkeeper, Tapster or Cook"
 
 /obj/structure/roguemachine/vaultbank/innkeeper/enforce_placement()
 	return

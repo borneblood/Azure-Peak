@@ -32,7 +32,6 @@
 	var/frenzy_chance_boost = 10
 	var/humanity = 7
 
-	var/potence_weapon_buff = 0
 	var/last_telepathy_use = 0
 
 	/// List of covens this mob possesses
@@ -71,11 +70,9 @@
 	hud_used?.bloodpool?.name = "Bloodpool: [bloodpool]"
 	hud_used?.bloodpool?.desc = "Bloodpool: [bloodpool]/[maxbloodpool]"
 	hud_used?.bloodpool?.set_value((100 / (maxbloodpool / bloodpool)) / 100, 1 SECONDS)
-	client?.update_mobstatpanel()
 
 /mob/living/proc/adjust_bloodpool(adjust, visible = TRUE)
 	bloodpool = CLAMP(bloodpool + adjust, 0, maxbloodpool)
-	client?.update_mobstatpanel()
 	if(!visible)
 		return
 
@@ -284,34 +281,21 @@
 		if(!HAS_TRAIT(src, TRAIT_DEATHCOMA))
 			to_chat(src, span_notice("You enter the horrible slumber of deathless Torpor. You will heal until you are renewed."))
 			ADD_TRAIT(src, TRAIT_DEATHCOMA, TRAIT_VAMPIRE)
-		heal_overall_damage(10, 10)
-		adjust_bloodpool(10)
+		heal_overall_damage(20, 20)
+		//adjust_bloodpool(10)
+		heal_wounds(10)
 	if(HAS_TRAIT(src, TRAIT_DEATHCOMA) && (total_damage <= 0 || (!istype(coffin) || !(src in coffin.contents))))
 		REMOVE_TRAIT(src, TRAIT_DEATHCOMA, TRAIT_VAMPIRE)
 		to_chat(src, span_warning("You have recovered from Torpor."))
-		playsound(get_turf(src), 'sound/misc/vampirespell.ogg', 80, FALSE, pressure_affected = FALSE) //Que since it takes a bit you might go AFK briefly
+		src.playsound_local(loc, 'sound/misc/vampirespell.ogg', 50, TRUE) //Que since it takes a bit you might go AFK briefly
 
 /mob/living/carbon/human/proc/handle_bloodpool_effects()
-	// Apply thirst effects based on bloodpool levels
-	switch(bloodpool)
-		if(VITAE_LEVEL_HUNGRY to VITAE_LEVEL_FED)
-			apply_status_effect(/datum/status_effect/debuff/thirstyt1)
-			remove_status_effect(/datum/status_effect/debuff/thirstyt2)
-			remove_status_effect(/datum/status_effect/debuff/thirstyt3)
-		if(VITAE_LEVEL_STARVING to VITAE_LEVEL_HUNGRY)
-			apply_status_effect(/datum/status_effect/debuff/thirstyt2)
-			remove_status_effect(/datum/status_effect/debuff/thirstyt1)
-			remove_status_effect(/datum/status_effect/debuff/thirstyt3)
-		if(-INFINITY to VITAE_LEVEL_STARVING)
-			apply_status_effect(/datum/status_effect/debuff/thirstyt3)
-			remove_status_effect(/datum/status_effect/debuff/thirstyt1)
-			remove_status_effect(/datum/status_effect/debuff/thirstyt2)
-			if(prob(3))
-				playsound(get_turf(src), pick('sound/vo/hungry1.ogg','sound/vo/hungry2.ogg','sound/vo/hungry3.ogg'), 100, TRUE, -1)
-
+	// handled by a centralized proc now
 	if(bloodpool < 100 && prob(9))
 		if(last_frenzy_check + 5 MINUTES < world.time)
 			rollfrenzy()
+
+	dna.species.update_needs(src)
 
 /mob/living/carbon/human/proc/get_clan_hierarchy_examine(mob/living/carbon/human/examiner)
 	if(!clan || !clan_position || !examiner.clan)

@@ -35,19 +35,19 @@
 	var/is_active = FALSE
 	var/safety_count = 0
 
-/datum/component/ore_sight/Initialize()
+/datum/component/ore_sight/Initialize(mapload)
 	if(!ismob(parent))
 		return COMPONENT_INCOMPATIBLE
-	
+
 	var/mob/M = parent
 	if(!M.client)
 		return COMPONENT_INCOMPATIBLE
 
 	if(ishuman(M))
 		var/mob/living/carbon/human/H = M
-		H.verbs += /mob/living/carbon/human/proc/toggle_oresight
-		H.verbs += /mob/living/carbon/human/proc/range_oresight
-	
+		add_verb(H, /mob/living/carbon/human/proc/toggle_oresight)
+		add_verb(H, /mob/living/carbon/human/proc/range_oresight)
+
 
 /datum/component/ore_sight/process()
 	if(is_active)

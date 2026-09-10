@@ -22,7 +22,7 @@ GLOBAL_LIST_INIT(ghost_verbs, list(
 	set name = "Journey to the Underworld"
 	set category = "Spirit"
 
-	switch(alert("Descend to the Underworld?",,"Yes","No"))
+	switch(alert(usr, "Descend to the Underworld?",,"Yes","No"))
 		if("Yes")
 			if(istype(mob, /mob/living/carbon/spirit))
 				return
@@ -32,8 +32,8 @@ GLOBAL_LIST_INIT(ghost_verbs, list(
 				if(D.buried && D.funeral)
 					D.returntolobby()
 					return
-			verbs -= GLOB.ghost_verbs
-			update_browserpanel()
+			remove_verb(src, GLOB.ghost_verbs)
+			init_verbs()
 			mob.returntolobby()
 		if("No")
 			usr << "You have second thoughts."
@@ -64,7 +64,6 @@ GLOBAL_LIST_INIT(ghost_verbs, list(
 
 /mob/verb/returntolobby()
 	set name = "{RETURN TO LOBBY}"
-	set category = "Options"
 	set hidden = 1
 
 	if(key)
@@ -100,8 +99,9 @@ GLOBAL_LIST_INIT(ghost_verbs, list(
 		qdel(M)
 		return
 
-	client?.verbs -= GLOB.ghost_verbs
-	client?.update_browserpanel()
+	if(client)
+		remove_verb(client, GLOB.ghost_verbs)
+	client?.init_verbs()
 	M.key = key
 	if(istype(src, /mob/dead/observer)) //Be rid of clogging ghost shades
 		qdel(src)

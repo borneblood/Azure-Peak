@@ -214,23 +214,20 @@ GLOBAL_PROTECT(plevelfiveverbs)
 	var/plev = check_patreon_lvl(ckey)
 
 	if(plev > 1)
-		verbs |= GLOB.pleveloneverbs
+		add_verb(src, GLOB.pleveloneverbs)
 	if(plev > 2)
-		verbs |= GLOB.pleveltwoverbs
+		add_verb(src, GLOB.pleveltwoverbs)
 	if(plev > 3)
-		verbs |= GLOB.plevelthreeverbs
+		add_verb(src, GLOB.plevelthreeverbs)
 	if(plev > 4)
-		verbs |= GLOB.plevelfourverbs
+		add_verb(src, GLOB.plevelfourverbs)
 	if(plev > 5)
-		verbs |= GLOB.plevelfiveverbs
-
-GLOBAL_LIST_EMPTY(hiderole)
-
+		add_verb(src, GLOB.plevelfiveverbs)
 
 GLOBAL_LIST_EMPTY(anonymize)
 
 /mob/dead/new_player/verb/anonymize()
-	set category = "Options"
+	set category = "Preferences.Options"
 	set name = "Anonymize"
 	if(!client)
 		return
@@ -292,10 +289,10 @@ GLOBAL_LIST_EMPTY(temporary_donators)
 	if(client)
 		if(client.patreonlevel())
 			return
-	var/name = input("Enter your patreon DISPLAY NAME exactly as it appears on Patreon.","ROGUETOWN") as text|null
+	var/name = input(usr, "Enter your patreon DISPLAY NAME exactly as it appears on Patreon.","ROGUETOWN") as text|null
 	if(!name)
 		return
-	var/email = input("Enter your patreon EMAIL ADDRESS exactly as it appears on Patreon.","ROGUETOWN") as text|null
+	var/email = input(usr, "Enter your patreon EMAIL ADDRESS exactly as it appears on Patreon.","ROGUETOWN") as text|null
 	if(!email)
 		return
 	if(!patreon_lookup(name) || !patreon_lookup(email) || !findtext(email, "@"))

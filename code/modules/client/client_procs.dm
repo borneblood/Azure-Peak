@@ -1,8 +1,6 @@
 	////////////
 	//SECURITY//
 	////////////
-#define UPLOAD_LIMIT		1048576	//Restricts client uploads to the server to 1MB //Could probably do with being lower.
-
 GLOBAL_LIST_INIT(blacklisted_builds, list(
 	"1407" = "bug preventing client display overrides from working leads to clients being able to see things/mobs they shouldn't be able to see",
 	"1408" = "bug preventing client display overrides from working leads to clients being able to see things/mobs they shouldn't be able to see",
@@ -21,7 +19,7 @@ GLOBAL_LIST_EMPTY(respawncounts)
 #define ADMINSWARNED_AT	5
 	/*
 	When somebody clicks a link in game, this Topic is called first.
-	It does the stuff in this proc and  then is redirected to the Topic() proc for the src=[0xWhatever]
+	It does the stuff in this proc and	then is redirected to the Topic() proc for the src=[0xWhatever]
 	(if specified in the link). ie locate(hsrc).Topic()
 
 	Such links can be spoofed.
@@ -32,7 +30,7 @@ GLOBAL_LIST_EMPTY(respawncounts)
 		- If so, does it have checks to see if the person who called it (usr.client) is an admin?
 		- Are the processes being called by Topic() particularly laggy?
 		- If so, is there any protection against somebody spam-clicking a link?
-	If you have any  questions about this stuff feel free to ask. ~Carn
+	If you have any	questions about this stuff feel free to ask. ~Carn
 	*/
 
 /client
@@ -47,6 +45,10 @@ GLOBAL_LIST_EMPTY(respawncounts)
 	if(!maturity_prompt_whitelist && !SSmaturity_guard.age_check(usr, href_list))
 		return 0
 	// RATWOOD EDIT END
+
+	if(href_list["statbrowser_calendar"])
+		open_calendar_ui()
+		return
 
 	// asset_cache
 	var/asset_cache_job
@@ -75,7 +77,7 @@ GLOBAL_LIST_EMPTY(respawncounts)
 			return
 
 	var/stl = CONFIG_GET(number/second_topic_limit)
-	if (!holder && stl)
+	if (!holder && stl && href_list["window_id"] != "statbrowser")
 		var/second = round(world.time, 10)
 		if (!topiclimiter)
 			topiclimiter = new(LIMITER_SIZE)
@@ -92,9 +94,8 @@ GLOBAL_LIST_EMPTY(respawncounts)
 		return
 	if(href_list["reload_tguipanel"])
 		nuke_chat()
-	if(href_list["browser_stat_panel"])
-		handle_browserpanel_action(href_list)
-		return
+	if(href_list["reload_statbrowser"])
+		stat_panel.reinitialize()
 	//Logs all hrefs, except chat pings
 	if(!(href_list["_src_"] == "chat" && href_list["proc"] == "ping" && LAZYLEN(href_list) == 2))
 		log_href("[src] (usr:[usr]\[[COORD(usr)]\]) : [hsrc ? "[hsrc] " : ""][href]")
@@ -143,7 +144,7 @@ GLOBAL_LIST_EMPTY(respawncounts)
 	if(href_list["schizohelp"])
 		answer_schizohelp(locate(href_list["schizohelp"]))
 		return
-	
+
 	if(href_list["viewchronicle"])
 		var/tab = href_list["chronicletab"] || "The Realm"
 		show_chronicle(tab)
@@ -152,6 +153,11 @@ GLOBAL_LIST_EMPTY(respawncounts)
 	if(href_list["vieweconomics"])
 		var/datum/economic_chronicle/chronicle = get_economic_chronicle()
 		chronicle.ui_interact(mob)
+		return
+
+	if(href_list["open_encyclopedia"])
+		var/datum/recipe_wiki/wiki = get_recipe_wiki()
+		wiki.show_library(mob)
 		return
 
 	if(href_list["commandbar_typing"])
@@ -206,11 +212,18 @@ GLOBAL_LIST_EMPTY(respawncounts)
 	log_admin("[key_name(src)] opened the Chronicle preview.")
 	SSblackbox.record_feedback("tally", "admin_verb", 1, "View Chronicle")
 
-/client/proc/is_content_unlocked()
-	if(!prefs.unlock_content)
-		to_chat(src, "Become a BYOND member to access member-perks and features, as well as support the engine that makes this game possible. Only 10 bucks for 3 months! <a href=\"https://secure.byond.com/membership\">Click Here to find out more</a>.")
-		return 0
-	return 1
+/client/proc/cmd_admin_view_economics()
+	set category = "Debug"
+	set name = "View Economics"
+	set desc = "Open the Realm Economics panel without waiting for round end."
+
+	if(!check_rights(R_ADMIN|R_DEBUG))
+		return
+	var/datum/economic_chronicle/chronicle = get_economic_chronicle()
+	chronicle.ui_interact(mob)
+	log_admin("[key_name(src)] opened the Realm Economics preview.")
+	SSblackbox.record_feedback("tally", "admin_verb", 1, "View Economics")
+
 /*
  * Call back proc that should be checked in all paths where a client can send messages
  *
@@ -261,14 +274,20 @@ GLOBAL_LIST_EMPTY(respawncounts)
 		last_message = message
 		src.last_message_count = 0
 		return 0
-/*
-//This stops files larger than UPLOAD_LIMIT being sent from client to server via input(), client.Import() etc.
+
 /client/AllowUpload(filename, filelength)
-	if(filelength > UPLOAD_LIMIT)
-		to_chat(src, "<font color='red'>Error: AllowUpload(): File Upload too large. Upload Limit: [UPLOAD_LIMIT/1024]KiB.</font>")
-		return 0
-	return 1
-*/
+	if(isnull(upload_limit))
+		return TRUE
+	if(filelength > upload_limit)
+		to_chat(src, "<font color='red'>Error: AllowUpload(): File Upload too large. Upload Limit: [round(upload_limit / 1024)]KiB.</font>")
+		return FALSE
+	if(length(upload_exts))
+		var/dot = findlasttext(filename, ".")
+		var/extension = dot ? LOWER_TEXT(copytext(filename, dot)) : ""
+		if(!(extension in upload_exts))
+			to_chat(src, "<font color='red'>Error: AllowUpload(): Wrong file type. Expected: [jointext(upload_exts, ", ")].</font>")
+			return FALSE
+	return TRUE
 
 	///////////
 	//CONNECT//
@@ -287,6 +306,10 @@ GLOBAL_LIST_EMPTY(external_rsc_urls)
 	GLOB.clients += src
 	GLOB.directory[ckey] = src
 
+	stat_panel = new(src, "statbrowser")
+	stat_panel.subscribe(src, PROC_REF(on_stat_panel_message))
+
+	winset(src, null, "browser-options=find,refresh")
 	initialize_commandbar_spy()
 
 	GLOB.ahelp_tickets.ClientLogin(src)
@@ -299,7 +322,7 @@ GLOBAL_LIST_EMPTY(external_rsc_urls)
 		holder.owner = src
 		connecting_admin = TRUE
 	else if(GLOB.deadmins[ckey])
-		verbs += /client/proc/readmin
+		add_verb(src, /client/proc/readmin)
 		connecting_admin = TRUE
 	if(CONFIG_GET(flag/autoadmin))
 		if(!GLOB.admin_datums[ckey])
@@ -309,7 +332,7 @@ GLOBAL_LIST_EMPTY(external_rsc_urls)
 					autorank = R
 					break
 			if(!autorank)
-				to_chat(world, "Autoadmin rank not found")
+				to_world("Autoadmin rank not found")
 			else
 				new /datum/admins(autorank, ckey)
 	if(CONFIG_GET(flag/enable_localhost_rank) && !connecting_admin)
@@ -330,8 +353,6 @@ GLOBAL_LIST_EMPTY(external_rsc_urls)
 		prefs.chat_toggles &= ~CHAT_GHOSTEARS
 		prefs.chat_toggles &= ~CHAT_GHOSTWHISPER
 		prefs.save_preferences()
-	prefs.last_ip = address				//these are gonna be used for banning
-	prefs.last_id = computer_id			//these are gonna be used for banning
 	fps = prefs.clientfps
 	preferred_ui_language = sanitize_preferred_ui_language(prefs.preferred_ui_language)
 	prefs.preferred_ui_language = preferred_ui_language
@@ -340,7 +361,7 @@ GLOBAL_LIST_EMPTY(external_rsc_urls)
 	tgui_panel = new(src, "browseroutput")
 
 	if(fexists(roundend_report_file()))
-		verbs += /client/proc/show_previous_roundend_report
+		add_verb(src, /client/proc/show_previous_roundend_report)
 
 	var/full_version = "[byond_version].[byond_build ? byond_build : "xxx"]"
 	log_access("Login: [key_name(src)] from [address ? address : "localhost"]-[computer_id] || BYOND v[full_version]")
@@ -415,7 +436,13 @@ GLOBAL_LIST_EMPTY(external_rsc_urls)
 			alert(mob, "You have logged in already with another key this round, please log out of this one NOW or risk being banned!")
 
 	tgui_panel.initialize()
-	refresh_browserpanel(TRUE)
+	stat_panel.initialize(
+		inline_html = file("html/statbrowser.html"),
+		inline_js = file("html/statbrowser.js"),
+		inline_css = file("html/statbrowser.css"),
+	)
+	apply_statbrowser_theme()
+	addtimer(CALLBACK(src, PROC_REF(check_panel_loaded)), 30 SECONDS)
 
 	connection_time = world.time
 	connection_realtime = world.realtime
@@ -469,7 +496,7 @@ GLOBAL_LIST_EMPTY(external_rsc_urls)
 		to_chat(src, get_message_output("memo"))
 		adminGreet()
 	if(!BC_IsKeyAllowedToConnect(ckey))
-		src << "Sorry, but the server is currently only accepting whitelisted players.  Please see the discord to be whitelisted."
+		src << "Sorry, but the server is currently only accepting whitelisted players.	Please see the discord to be whitelisted."
 		message_admins("[ckey] was denied a connection due to not being whitelisted.")
 		log_admin("[ckey] was denied a connection due to not being whitelisted.")
 		qdel(src)
@@ -606,12 +633,12 @@ GLOBAL_LIST_EMPTY(external_rsc_urls)
 	GLOB.directory -= ckey
 	GLOB.clients -= src
 	QDEL_NULL(tgui_panel)
-	QDEL_LIST_ASSOC_VAL(char_render_holders)
 	Master.UpdateTickRate()
 	return ..()
 
 /client/Destroy()
 	SSmouse_entered.hovers -= src
+	QDEL_NULL(game_master_menu)
 	. = ..() //Even though we're going to be hard deleted there are still some things that want to know the destroy is happening
 	QDEL_NULL(droning_sound)
 	last_droning_sound = null
@@ -835,7 +862,7 @@ GLOBAL_LIST_EMPTY(external_rsc_urls)
 
 			sleep(15 SECONDS) //Longer sleep here since this would trigger if a client tries to reconnect manually because the inital reconnect failed
 
-			 //we sleep after telling the client to reconnect, so if we still exist something is up
+				//we sleep after telling the client to reconnect, so if we still exist something is up
 			log_access("Forced disconnect: [key] [computer_id] [address] - CID randomizer check")
 
 			qdel(src)
@@ -994,14 +1021,10 @@ GLOBAL_LIST_EMPTY(external_rsc_urls)
 //			to_chat(src, span_danger("My previous click was ignored because you've done too many in a second"))
 			return
 
-	if (prefs.hotkeys)
-		// If hotkey mode is enabled, then clicking the map will automatically
-		// unfocus the text bar. This removes the red color from the text bar
-		// so that the visual focus indicator matches reality.
-		winset(src, null, "command=disableInput input.background-color=[COLOR_INPUT_DISABLED] input.text-color = #ad9eb4")
-
-	else
-		winset(src, null, "input.focus=true command=activeInput input.background-color=[COLOR_INPUT_ENABLED] input.text-color = #EEEEEE")
+	// If hotkey mode is enabled, then clicking the map will automatically
+	// unfocus the text bar. This removes the red color from the text bar
+	// so that the visual focus indicator matches reality.
+	winset(src, null, "input.background-color=[COLOR_INPUT_DISABLED] input.text-color = #ad9eb4")
 
 	var/list/old_mods = mob?.click_mods
 	var/old_params = mob?.click_params
@@ -1042,12 +1065,10 @@ GLOBAL_LIST_EMPTY(external_rsc_urls)
 
 /client/proc/add_verbs_from_config()
 	if(CONFIG_GET(flag/see_own_notes))
-		verbs += /client/proc/self_notes
+		add_verb(src, /client/proc/self_notes)
 	if(CONFIG_GET(flag/use_exp_tracking))
-		verbs += /client/proc/self_playtime
+		add_verb(src, /client/proc/self_playtime)
 
-
-#undef UPLOAD_LIMIT
 
 //checks if a client is afk
 //3000 frames = 5 minutes
@@ -1124,9 +1145,6 @@ GLOBAL_LIST_EMPTY(external_rsc_urls)
 	if (isnull(new_size))
 		CRASH("change_view called without argument.")
 
-	if(prefs && !prefs.widescreenpref && new_size == CONFIG_GET(string/default_view))
-		new_size = CONFIG_GET(string/default_view_square)
-
 	view = new_size
 	apply_clickcatcher()
 	mob.reload_fullscreen()
@@ -1147,51 +1165,8 @@ GLOBAL_LIST_EMPTY(external_rsc_urls)
 	void.UpdateGreed(actualview[1],actualview[2])
 
 /client/proc/AnnouncePR(announcement)
-	if(prefs && prefs.chat_toggles & CHAT_PULLR)
+	if(prefs)
 		to_chat(src, announcement)
-
-/client/proc/show_character_previews(mutable_appearance/MA)
-	var/pos = 0
-
-	var/atom/movable/screen/char_preview/background = LAZYACCESS(char_render_holders, "bg")
-	if(background)
-		screen -= background
-		char_render_holders -= background
-		qdel(background)
-	background = new()
-	LAZYSET(char_render_holders, "bg", background)
-	screen += background
-	background.screen_loc = "character_preview_map:0,0 to 3,3"
-
-	// not cardinal anymore, makes taurs more clear
-	for(var/D in GLOB.cardinals)
-		pos++
-		var/atom/movable/screen/char_preview/O = LAZYACCESS(char_render_holders, "[D]")
-		if(O)
-			screen -= O
-			char_render_holders -= O
-			qdel(O)
-		O = new
-		LAZYSET(char_render_holders, "[D]", O)
-		screen += O
-		O.appearance = MA
-		O.dir = D
-		switch(pos)
-			if(1)
-				O.screen_loc = "character_preview_map:2,2"
-			if(2)
-				O.screen_loc = "character_preview_map:1,2"
-			if(3)
-				O.screen_loc = "character_preview_map:1,1"
-			if(4)
-				O.screen_loc = "character_preview_map:2,1"
-
-/client/proc/clear_character_previews()
-	for(var/atom/movable/screen/S in char_render_holders)
-//		var/atom/movable/screen/S = char_render_holders[index]
-		screen -= S
-		qdel(S)
-	char_render_holders = list()
 
 /client/proc/fullscreen()
 	winset(src, "mainwindow", "statusbar=false")
@@ -1199,9 +1174,6 @@ GLOBAL_LIST_EMPTY(external_rsc_urls)
 /client/New()
 	..()
 	fullscreen()
-	if(byond_version >= 516) // Enable 516 compat browser storage mechanisms
-		winset(src, null, "browser-options=find,byondstorage")
-	// byondstorage,devtools <- other options
 
 /client/proc/give_award(achievement_type, mob/user)
 	return	player_details.achievements.unlock(achievement_type, mob/user)
@@ -1227,16 +1199,6 @@ GLOBAL_LIST_EMPTY(external_rsc_urls)
 			whitelisted = 0
 		return whitelisted
 
-/client/proc/blacklisted()
-	if(blacklisted != 2)
-		return blacklisted
-	else
-		if(check_blacklist(ckey))
-			blacklisted = 1
-		else
-			blacklisted = 0
-		return blacklisted
-
 /client/proc/can_commend(silent = FALSE)
 	if(!prefs)
 		return FALSE
@@ -1246,7 +1208,7 @@ GLOBAL_LIST_EMPTY(external_rsc_urls)
 		return FALSE
 	return TRUE
 
-/client/proc/commendsomeone(var/forced = FALSE)
+/client/proc/commendsomeone(forced = FALSE)
 	if(!can_commend(forced))
 		return
 	if(alert(src,"Was there a character during this round that you would like to anonymously commend?", "Commendation", "YES", "NO") != "YES")
@@ -1279,19 +1241,19 @@ GLOBAL_LIST_EMPTY(external_rsc_urls)
 	// If admin (holder) always keep OOC for moderation.
 	if(holder)
 		if(!( /client/verb/ooc in verbs))
-			verbs += /client/verb/ooc
-		update_browserpanel()
+			add_verb(src, /client/verb/ooc)
+		init_verbs()
 		return
 
 	// Non-admins: only lobby new_player retains OOC verb.
 	if(istype(mob, /mob/dead/new_player))
 		if(!( /client/verb/ooc in verbs))
-			verbs += /client/verb/ooc
+			add_verb(src, /client/verb/ooc)
 	else
 		if(/client/verb/ooc in verbs)
-			verbs -= /client/verb/ooc
+			remove_verb(src, /client/verb/ooc)
 
-	update_browserpanel()
+	init_verbs()
 
 #undef LIMITER_SIZE
 #undef CURRENT_SECOND
@@ -1299,3 +1261,60 @@ GLOBAL_LIST_EMPTY(external_rsc_urls)
 #undef CURRENT_MINUTE
 #undef MINUTE_COUNT
 #undef ADMINSWARNED_AT
+
+/client/proc/check_panel_loaded()
+	if(stat_panel.is_ready() && !stat_panel.fatally_errored)
+		return
+	to_chat(src, span_userdanger("Statpanel failed to load, click <a href='byond://?src=[REF(src)];reload_statbrowser=1'>here</a> to reload the panel "))
+
+/client/proc/apply_statbrowser_theme()
+	if(!prefs)
+		return
+	if(stat_panel)
+		stat_panel.send_message("set_theme", prefs.statbrowser_theme)
+	if(tgui_panel)
+		tgui_panel.set_chat_theme(prefs.statbrowser_theme)
+
+/// compiles a full list of verbs and sends it to the browser
+/client/proc/init_verbs()
+	if(IsAdminAdvancedProcCall())
+		return
+	var/list/verblist = list()
+	var/list/verbstoprocess = verbs.Copy()
+	if(mob)
+		verbstoprocess += mob.verbs
+		for(var/atom/movable/thing as anything in mob.contents)
+			verbstoprocess += thing.verbs
+	panel_tabs.Cut() // panel_tabs get reset in init_verbs on JS side anyway
+	for(var/procpath/verb_to_init as anything in verbstoprocess)
+		if(!verb_to_init)
+			continue
+		if(verb_to_init.hidden)
+			continue
+		if(!istext(verb_to_init.category))
+			continue
+		panel_tabs |= verb_to_init.category
+		verblist[++verblist.len] = list(verb_to_init.category, verb_to_init.name)
+	stat_panel.send_message("init_verbs", list(panel_tabs = panel_tabs, verblist = verblist))
+
+/client/verb/fix_stat_panel()
+	set name = "Fix Stat Panel"
+	set hidden = TRUE
+	init_verbs()
+
+/**
+ * Handles incoming messages from the stat-panel TGUI.
+ */
+/client/proc/on_stat_panel_message(type, payload)
+	switch(type)
+		if("Update-Verbs")
+			init_verbs()
+		if("Remove-Tabs")
+			panel_tabs -= payload["tab"]
+		if("Send-Tabs")
+			panel_tabs |= payload["tab"]
+		if("Reset-Tabs")
+			panel_tabs = list()
+		if("Set-Tab")
+			stat_tab = payload["tab"]
+			SSstatpanels.immediate_send_stat_data(src)

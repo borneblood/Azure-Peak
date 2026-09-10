@@ -6,7 +6,7 @@
 
 /client/proc/investigate_show()
 	set name = "Investigate"
-	set category = "ADMIN"
+	set category = "Admin.Admin"
 	if(!holder)
 		return
 
@@ -24,7 +24,7 @@
 
 	var/list/combined = sortList(logs_present) + sortList(logs_missing)
 
-	var/selected = input("Investigate what?", "Investigate") as null|anything in combined
+	var/selected = input(usr, "Investigate what?", "Investigate") as null|anything in combined
 
 	if(!(selected in combined) || selected == "---")
 		return

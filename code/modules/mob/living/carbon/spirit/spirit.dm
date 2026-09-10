@@ -10,7 +10,7 @@
 	mob_biotypes = MOB_SPIRIT|MOB_HUMANOID
 	gib_type = /obj/effect/decal/cleanable/blood/gibs
 	bodyparts = list(/obj/item/bodypart/chest/spirit, /obj/item/bodypart/head/spirit, /obj/item/bodypart/l_arm/spirit,
-					 /obj/item/bodypart/r_arm/spirit, /obj/item/bodypart/r_leg/spirit, /obj/item/bodypart/l_leg/spirit)
+						/obj/item/bodypart/r_arm/spirit, /obj/item/bodypart/r_leg/spirit, /obj/item/bodypart/l_leg/spirit)
 	hud_type = /datum/hud/spirit
 	density = FALSE // ghosts can pass through other mobs
 	var/paid = FALSE
@@ -45,8 +45,8 @@
 /mob/living/carbon/spirit/Initialize(mapload, cubespawned=FALSE, mob/spawner)
 	set_light(2, 2, l_color= "#547fa4")
 	coin_upkeep()
-	verbs += /mob/living/proc/mob_sleep
-	verbs += /mob/living/proc/lay_down
+	add_verb(src, /mob/living/proc/mob_sleep)
+	add_verb(src, /mob/living/proc/lay_down)
 	ADD_TRAIT(src, TRAIT_PACIFISM, TRAIT_GENERIC)
 	var/first_part = pick("Sorrowful", "Forlorn", "Regretful", "Piteous", "Rueful", "Dejected", "Desolate", "Mournful", "Melancholic", "Woeful")
 	var/second_part = pick("Wanderer", "Traveler", "Pilgrim", "Vagabond", "Nomad", "Wayfarer", "Spirit", "Specter", "Wraith", "Phantom")
@@ -104,14 +104,7 @@
 		var/health_deficiency = (maxHealth - health)
 		if(health_deficiency >= 45)
 			slow += (health_deficiency / 25)
-	add_movespeed_modifier(MOVESPEED_ID_MONKEY_HEALTH_SPEEDMOD, TRUE, 100, override = TRUE, multiplicative_slowdown = slow)
-
-/mob/living/carbon/spirit/Stat()
-	..()
-	if(statpanel("Status"))
-		stat(null, "Intent: [a_intent]")
-		stat(null, "Move Mode: [m_intent]")
-	return
+	add_movespeed_modifier(MOVESPEED_ID_SPIRIT_HEALTH_SPEEDMOD, TRUE, 100, override = TRUE, multiplicative_slowdown = slow)
 
 /mob/living/carbon/spirit/toggle_move_intent(mob/user) // Override so they can't run.
 	return
@@ -124,7 +117,7 @@
 
 /mob/living/carbon/spirit/returntolobby()
 	set name = "{RETURN TO LOBBY}"
-	set category = "Options"
+	set category = "Preferences.Options"
 	set hidden = 1
 
 	if(key)

@@ -17,6 +17,20 @@
 	source_region_id = TRADE_REGION_KINGSFIELD
 	item_type = /obj/item/reagent_containers/food/snacks/rogue/meat/fatty
 
+/datum/trade_good/animal_fresh/ham
+	id = TRADE_GOOD_HAM
+	name = "Ham"
+	base_price = SELLPRICE_HAM
+	source_region_id = TRADE_REGION_KINGSFIELD
+	item_type = /obj/item/reagent_containers/food/snacks/rogue/meat/ham
+
+/datum/trade_good/animal_fresh/pork_belly
+	id = TRADE_GOOD_PORK_BELLY
+	name = "Pork Belly"
+	base_price = SELLPRICE_PORK_BELLY
+	source_region_id = TRADE_REGION_KINGSFIELD
+	item_type = /obj/item/reagent_containers/food/snacks/rogue/meat/pork_belly
+
 /datum/trade_good/animal_fresh/poultry
 	id = TRADE_GOOD_POULTRY
 	name = "Bird Meat"
@@ -36,7 +50,7 @@
 	name = "Egg"
 	base_price = SELLPRICE_EGG
 	source_region_id = TRADE_REGION_KINGSFIELD
-	item_type = /obj/item/reagent_containers/food/snacks/egg
+	item_type = /obj/item/reagent_containers/food/snacks/rogue/egg
 
 /datum/trade_good/animal_fresh/butter
 	id = TRADE_GOOD_BUTTER

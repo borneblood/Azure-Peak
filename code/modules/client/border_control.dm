@@ -53,12 +53,12 @@ GLOBAL_VAR_INIT(whitelistLoaded, 0)
 /datum/admins/proc/BC_WhitelistKeyVerb()
 
 	set name = "BC - Whitelist Key"
-	set category = "SERVER"
+	set category = "Server"
 
-	var/key = input("CKey to Whitelist", "Whitelist Key") as null|text
+	var/key = input(usr, "CKey to Whitelist", "Whitelist Key") as null|text
 
 	if(key)
-		var/confirm = alert("Add [key] to the border control whitelist?", , "Yes", "No")
+		var/confirm = alert(usr, "Add [key] to the border control whitelist?", , "Yes", "No")
 		if(confirm == "Yes")
 			message_admins("[key_name(usr)] added [key] to the border whitelist.")
 			log_admin("[key_name(usr)] added [key] to the border whitelist.")
@@ -95,12 +95,12 @@ GLOBAL_VAR_INIT(whitelistLoaded, 0)
 ///client/proc/BC_RemoveKeyVerb()
 /datum/admins/proc/BC_RemoveKeyVerb()
 	set name = "BC - Remove Whitelist Key"
-	set category = "SERVER"
+	set category = "Server"
 
-	var/keyToRemove = input("CKey to Remove", "Remove Key") as null|anything in GLOB.whitelistedCkeys
+	var/keyToRemove = input(usr, "CKey to Remove", "Remove Key") as null|anything in GLOB.whitelistedCkeys
 
 	if(keyToRemove)
-		var/confirm = alert("Remove [keyToRemove] from the border control whitelist?", , "Yes", "No")
+		var/confirm = alert(usr, "Remove [keyToRemove] from the border control whitelist?", , "Yes", "No")
 		if(confirm == "Yes")
 			message_admins("[key_name(usr)] removed [keyToRemove] from the border whitelist.")
 			log_admin("[key_name(usr)] removed [keyToRemove] from the border whitelist.")
@@ -132,12 +132,12 @@ GLOBAL_VAR_INIT(whitelistLoaded, 0)
 /datum/admins/proc/BC_ToggleState()
 
 	set name = "BC - Toggle Mode"
-	set category = "SERVER"
+	set category = "Server"
 	set desc= "Enables or disables border control"
 
 	var/borderControlMode = CONFIG_GET(number/border_control)
 
-	var/choice = input("New State (Current state is: [BC_ModeToText(borderControlMode)])", "Border Control State") as null|anything in list("Disabled", "Learning", "Enforced")
+	var/choice = input(usr, "New State (Current state is: [BC_ModeToText(borderControlMode)])", "Border Control State") as null|anything in list("Disabled", "Learning", "Enforced")
 
 	switch(choice)
 		if("Disabled")
@@ -150,7 +150,7 @@ GLOBAL_VAR_INIT(whitelistLoaded, 0)
 				borderControlMode = BORDER_CONTROL_LEARNING
 				message_admins("has set border control to learn new keys on connection!")
 				log_admin("has set border control to learn new keys on connection!")
-			var/confirm = alert("Learn currently connected keys?", , "Yes", "No")
+			var/confirm = alert(usr, "Learn currently connected keys?", , "Yes", "No")
 			if(confirm == "Yes")
 				for(var/client/C in GLOB.clients)
 					if (BC_WhitelistKey(C.key))

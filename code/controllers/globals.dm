@@ -29,18 +29,16 @@ GLOBAL_REAL(GLOB, /datum/controller/global_vars)
 	SHOULD_CALL_PARENT(FALSE)
 	return QDEL_HINT_IWILLGC
 
-/datum/controller/global_vars/stat_entry()
-	if(!statclick)
-		statclick = new/obj/effect/statclick/debug(null, "Initializing...", src)
-	
-	stat("Globals:", statclick.update("Edit"))
+/datum/controller/global_vars/stat_entry(msg)
+	msg = "Edit"
+	return msg
 
 /datum/controller/global_vars/vv_edit_var(var_name, var_value)
 	if(gvars_datum_protected_varlist[var_name])
 		return FALSE
 	return ..()
 
-/datum/controller/global_vars/Initialize()
+/datum/controller/global_vars/Initialize(mapload)
 	gvars_datum_init_order = list()
 	gvars_datum_protected_varlist = list(NAMEOF(src, gvars_datum_protected_varlist) = TRUE)
 	var/list/global_procs = typesof(/datum/controller/global_vars/proc)
