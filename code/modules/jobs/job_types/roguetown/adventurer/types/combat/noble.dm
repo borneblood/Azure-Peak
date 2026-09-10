@@ -638,3 +638,253 @@
 			head = helmets[helmchoice]
 	H.set_blindness(0)
 	H.set_blindness(0)
+
+/datum/advclass/noble/tactician
+	name = "Tactician"
+	tutorial = "You were trained for knighthood, but never had the time, talent, or opportunity to truly master the martial arts. You are no knight, but you have learned enough to hold your own in a fight. Where your sword arm falls short, your voice does not. You rally your allies, recognize openings, and make others fight better than they would alone."
+	outfit = /datum/outfit/job/roguetown/adventurer/tactician
+	traits_applied = list(TRAIT_NOBLE)
+	noble_income = 15
+	subclass_stats = list(
+		STATKEY_STR = 1,
+		STATKEY_WIL = 1,
+		STATKEY_INT = 2,
+		STATKEY_SPD = 2,
+	)
+	subclass_skills = list(
+		/datum/skill/misc/riding = SKILL_LEVEL_JOURNEYMAN,
+		/datum/skill/combat/swords = SKILL_LEVEL_JOURNEYMAN,
+		/datum/skill/combat/knives = SKILL_LEVEL_APPRENTICE,
+		/datum/skill/combat/wrestling = SKILL_LEVEL_JOURNEYMAN,
+		/datum/skill/combat/unarmed = SKILL_LEVEL_JOURNEYMAN,
+		/datum/skill/misc/swimming = SKILL_LEVEL_JOURNEYMAN,
+		/datum/skill/misc/athletics = SKILL_LEVEL_JOURNEYMAN,
+		/datum/skill/misc/climbing = SKILL_LEVEL_JOURNEYMAN,
+		/datum/skill/misc/reading = SKILL_LEVEL_EXPERT,
+	)
+
+/datum/outfit/job/roguetown/adventurer/tactician/pre_equip(mob/living/carbon/human/H)
+	..()
+	if(H.mind)
+		to_chat(H, span_warning("You are a knight from a distant land, a scion of a noble house visiting Azuria for one reason or another."))
+		var/helmets = list(
+			"Pigface Bascinet" = /obj/item/clothing/head/roguetown/helmet/bascinet/pigface,
+			"Guard Helmet"		= /obj/item/clothing/head/roguetown/helmet/heavy/guard,
+			"Barred Helmet"		= /obj/item/clothing/head/roguetown/helmet/heavy/sheriff,
+			"Bucket Helmet"		= /obj/item/clothing/head/roguetown/helmet/heavy/bucket,
+			"Sugarloaf Helmet"	= /obj/item/clothing/head/roguetown/helmet/heavy/bucket/crusader,
+			"Knight's Armet"		= /obj/item/clothing/head/roguetown/helmet/heavy/knight,
+			"Knight's Helmet"		= /obj/item/clothing/head/roguetown/helmet/heavy/knight/old,
+			"Knight's Greatplumed Armet"		= /obj/item/clothing/head/roguetown/helmet/heavy/knight/greatplume,
+			"Visored Sallet"			= /obj/item/clothing/head/roguetown/helmet/sallet/visored,
+			"Snouted Visored Sallet"			= /obj/item/clothing/head/roguetown/helmet/sallet/visored/snouted,
+			"Armet"				= /obj/item/clothing/head/roguetown/helmet/heavy/knight/armet,
+			"Snouted Armet"				= /obj/item/clothing/head/roguetown/helmet/heavy/knight/armet/snouted,
+			"Hounskull Bascinet"		= /obj/item/clothing/head/roguetown/helmet/bascinet/pigface/hounskull,
+			"Etruscan Bascinet"		= /obj/item/clothing/head/roguetown/helmet/bascinet/etruscan,
+			"Slitted Kettle"		= /obj/item/clothing/head/roguetown/helmet/heavy/knight/skettle,
+			"Visored Barbute" = /obj/item/clothing/head/roguetown/helmet/heavy/barbute/visor,
+			"Great Barbute" = /obj/item/clothing/head/roguetown/helmet/heavy/barbute/great,
+			"Snouted Burgonet" = /obj/item/clothing/head/roguetown/helmet/heavy/burgonet,
+			"Volfskulle Bascinet"		= /obj/item/clothing/head/roguetown/helmet/heavy/volfplate,
+			"Roundface Bascinet"	= /obj/item/clothing/head/roguetown/helmet/bascinet/pigface/roundface,
+			"Snouted Roundface Bascinet"	= /obj/item/clothing/head/roguetown/helmet/bascinet/pigface/roundface/snouted,
+			"None"
+			)
+		var/helmchoice = input(H, "Choose your Helm.", "TAKE UP HELMS") as anything in helmets
+		if(helmchoice != "None")
+			head = helmets[helmchoice]
+
+	armor = /obj/item/clothing/suit/roguetown/armor/plate/cuirass,
+	gloves = /obj/item/clothing/gloves/roguetown/chain
+	pants = /obj/item/clothing/under/roguetown/chainlegs
+	cloak = /obj/item/clothing/cloak/tabard/stabard
+	neck = /obj/item/clothing/neck/roguetown/bevor
+	shirt = /obj/item/clothing/suit/roguetown/armor/chainmail
+	wrists = /obj/item/clothing/wrists/roguetown/bracers
+	shoes = /obj/item/clothing/shoes/roguetown/boots/armor
+	belt = /obj/item/storage/belt/rogue/leather/steel/tasset
+	backl = /obj/item/storage/backpack/rogue/satchel
+	beltl = /obj/item/flashlight/flare/torch/lantern
+	backpack_contents = list(
+		/obj/item/storage/belt/rogue/pouch/coins/poor = 1,
+		)
+	H.dna.species.soundpack_m = GLOB.voice_packs[/datum/voicepack/male/knight]
+	H.set_blindness(0)
+	if(H.mind)
+		var/weapons = list("Longsword + Shield","Shortsword + Shield","Mace + Shield","Flail + Shield","Lance + Shield","Billhook","Battle Axe","Greataxe","Greatflail")
+		var/weapon_choice = input(H, "Choose your weapon.", "TAKE UP ARMS") as anything in weapons
+		switch(weapon_choice)
+			if("Longsword + Shield")
+				H.adjust_skillrank_up_to(/datum/skill/combat/swords, SKILL_LEVEL_JOURNEYMAN, TRUE)
+				H.adjust_skillrank_up_to(/datum/skill/combat/shields, SKILL_LEVEL_JOURNEYMAN, TRUE)
+				beltr = /obj/item/rogueweapon/sword/long
+				r_hand = /obj/item/rogueweapon/scabbard/sword/noble
+				backr = /obj/item/rogueweapon/shield/tower/metal
+			if("Shortsword + Shield")
+				H.adjust_skillrank_up_to(/datum/skill/combat/swords, SKILL_LEVEL_JOURNEYMAN, TRUE)
+				H.adjust_skillrank_up_to(/datum/skill/combat/shields, SKILL_LEVEL_JOURNEYMAN, TRUE)
+				beltr = /obj/item/rogueweapon/sword/short
+				r_hand = /obj/item/rogueweapon/scabbard/sword/noble
+				backr = /obj/item/rogueweapon/shield/tower/metal
+			if("Mace + Shield")
+				H.adjust_skillrank_up_to(/datum/skill/combat/maces, SKILL_LEVEL_JOURNEYMAN, TRUE)
+				H.adjust_skillrank_up_to(/datum/skill/combat/shields, SKILL_LEVEL_JOURNEYMAN, TRUE)
+				beltr = /obj/item/rogueweapon/mace
+				backr = /obj/item/rogueweapon/shield/tower/metal
+			if("Flail + Shield")
+				H.adjust_skillrank_up_to(/datum/skill/combat/whipsflails, SKILL_LEVEL_JOURNEYMAN, TRUE)
+				H.adjust_skillrank_up_to(/datum/skill/combat/shields, SKILL_LEVEL_JOURNEYMAN, TRUE)
+				beltr = /obj/item/rogueweapon/flail
+				backr = /obj/item/rogueweapon/shield/tower/metal
+			if("Lance + Shield")
+				H.adjust_skillrank_up_to(/datum/skill/combat/polearms, SKILL_LEVEL_JOURNEYMAN, TRUE)
+				H.adjust_skillrank_up_to(/datum/skill/combat/shields, SKILL_LEVEL_JOURNEYMAN, TRUE)
+				r_hand = /obj/item/rogueweapon/spear/lance
+				backr = /obj/item/rogueweapon/shield/tower/metal
+			if("Greatflail")
+				H.adjust_skillrank_up_to(/datum/skill/combat/whipsflails, SKILL_LEVEL_JOURNEYMAN, TRUE)
+				r_hand = /obj/item/rogueweapon/flail/peasantwarflail/iron
+				backr = /obj/item/rogueweapon/scabbard/gwstrap
+			if("Billhook")
+				H.adjust_skillrank_up_to(/datum/skill/combat/polearms, SKILL_LEVEL_JOURNEYMAN, TRUE)
+				r_hand = /obj/item/rogueweapon/spear/billhook
+				backr = /obj/item/rogueweapon/scabbard/gwstrap
+			if("Battle Axe")
+				H.adjust_skillrank_up_to(/datum/skill/combat/axes, SKILL_LEVEL_JOURNEYMAN, TRUE)
+				r_hand = /obj/item/rogueweapon/stoneaxe/battle
+			if("Greataxe")
+				H.adjust_skillrank_up_to(/datum/skill/combat/axes, SKILL_LEVEL_JOURNEYMAN, TRUE)
+				r_hand = /obj/item/rogueweapon/greataxe
+				backr = /obj/item/rogueweapon/scabbard/gwstrap
+
+/datum/action/cooldown/spell/mark_ally
+	name = "Mark Ally"
+	desc = "Designates a chosen target as an ally. Allies are recognized as friendly by those under your command. Using Mark Ally on them again removes their status as an ally."
+	button_icon = 'icons/mob/actions/actions_clockcult.dmi'
+	button_icon_state = "Judicial Marker"
+	cast_range = 8
+	charge_required = FALSE
+	cooldown_time = 3 SECONDS
+	spell_requirements = SPELL_REQUIRES_SAME_Z
+	primary_resource_type = SPELL_COST_NONE
+	self_cast_possible = TRUE
+	has_visual_effects = FALSE
+	sound = null
+	zizo_spell = TRUE
+
+/datum/action/cooldown/spell/mark_ally/cast(atom/cast_on)
+	if(!owner)
+		return FALSE
+	var/mob/living/target = cast_on
+	if(!isliving(target))
+		return FALSE
+	var/faction_tag = "[owner.real_name]_faction"
+	if(target == owner)
+		var/list/allies = list()
+		for(var/mob/living/M as anything in GLOB.mob_list)
+			if(M == owner)
+				continue
+			if(M.mind?.current)
+				if(faction_tag in M.mind.current.faction)
+					allies += M.real_name
+			else if(istype(M, /mob/living/simple_animal))
+				if(faction_tag in M.faction)
+					allies += M.name
+		if(!length(allies))
+			to_chat(owner, span_notice("You have marked no allies."))
+		else
+			to_chat(owner, span_notice("Those marked as your allies: [english_list(allies)]."))
+		return TRUE
+	var/list/faction_list
+	if(!target.mind)
+		to_chat(owner, span_notice("You cannot mark something mindless as an ally."))
+		return FALSE
+	if(target.mind?.current)
+		faction_list = target.mind.current.faction
+	else if(istype(target, /mob/living/simple_animal))
+		faction_list = target.faction
+	else
+		return FALSE
+	. = ..()
+	if(faction_tag in faction_list)
+		faction_list -= faction_tag
+		to_chat(owner, span_notice("You remove your mark of alliance from [target]."))
+	else
+		faction_list += faction_tag
+		to_chat(owner, span_notice("You mark [target] as an ally."))
+	target.notify_faction_change()
+	return TRUE
+
+/datum/action/cooldown/spell/mark_ally/no_sprite
+	button_icon_state = ""
+
+/datum/action/cooldown/spell/bolster
+	name = "Bolster"
+	desc = "Rally nearby allies, reinforcing their resolve and fighting spirit. This will largely increase their willpower and staunch some bleeding."
+	button_icon = 'icons/mob/actions/actions_clockcult.dmi'
+	button_icon_state = "Kindle"
+	cast_range = 8
+	charge_required = FALSE
+	cooldown_time = 20 SECONDS
+	spell_requirements = SPELL_REQUIRES_SAME_Z
+	primary_resource_type = SPELL_COST_NONE
+	self_cast_possible = TRUE
+	has_visual_effects = FALSE
+	sound = null
+
+/datum/action/cooldown/spell/attack_order
+	name = "Attack Order"
+	desc = "Issue an order to nearby allies to press the attack. This will briefly increase their movement speed and their next strike is guaranteed."
+	button_icon = 'icons/mob/actions/actions_clockcult.dmi'
+	button_icon_state = "eminence_repair"
+	cast_range = 8
+	charge_required = FALSE
+	cooldown_time = 20 SECONDS
+	spell_requirements = SPELL_REQUIRES_SAME_Z
+	primary_resource_type = SPELL_COST_NONE
+	self_cast_possible = TRUE
+	has_visual_effects = FALSE
+	sound = null
+
+/datum/action/cooldown/spell/defend_order
+	name = "Defend Order"
+	desc = "Issue an order to nearby allies to hold their ground and defend. This will reduce the cooldown of their riposte and feint, if any. Otherwise, it will give them a free riposte that does not strain them."
+	button_icon = 'icons/mob/actions/actions_clockcult.dmi'
+	button_icon_state = "eminence_reinforce"
+	cast_range = 8
+	charge_required = FALSE
+	cooldown_time = 20 SECONDS
+	spell_requirements = SPELL_REQUIRES_SAME_Z
+	primary_resource_type = SPELL_COST_NONE
+	self_cast_possible = TRUE
+	has_visual_effects = FALSE
+	sound = null
+
+/datum/action/cooldown/spell/retreat_order
+	name = "Retreat Order"
+	desc = "Issue an order to nearby allies to withdraw from the fight. Everyone will be set to 'pacifist' temporarily and their movespeed will be increased."
+	button_icon = 'icons/mob/actions/actions_clockcult.dmi'
+	button_icon_state = "eminence_avoid"
+	cast_range = 8
+	charge_required = FALSE
+	cooldown_time = 20 SECONDS
+	spell_requirements = SPELL_REQUIRES_SAME_Z
+	primary_resource_type = SPELL_COST_NONE
+	self_cast_possible = TRUE
+	has_visual_effects = FALSE
+	sound = null
+
+/datum/action/cooldown/spell/spare_foe
+	name = "Spare Foe"
+	desc = "Order an incapacitated foe to withdraw from the field and never return. Those capable of fighting back may resist your command."
+	button_icon = 'icons/mob/actions/actions_clockcult.dmi'
+	button_icon_state = "Sentinel's Compromise"
+	cast_range = 8
+	charge_required = FALSE
+	cooldown_time = 30 SECONDS
+	spell_requirements = SPELL_REQUIRES_SAME_Z
+	primary_resource_type = SPELL_COST_NONE
+	self_cast_possible = FALSE
+	has_visual_effects = FALSE
+	sound = null
