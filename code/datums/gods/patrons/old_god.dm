@@ -13,7 +13,8 @@
 					/datum/action/cooldown/spell/psydon/bootcheck			= CLERIC_T0, // Personal spell - Summons a completely random item upon use. Your mileage might vary.
 					/datum/action/cooldown/spell/psydon/endure				= CLERIC_T1, // External spell - Seals bleeding wounds and helps to save people who've been critically injured.
 					/datum/action/cooldown/spell/psydon/persist				= CLERIC_T1, // Internal spell - Heals you while standing. Scales from Miracle skill level.
-					/obj/effect/proc_holder/spell/invoked/psydonlux_tamper 	= CLERIC_T3, // Experimental.  - Only Missionaries and Absolver get this, hopefully.
+					/obj/effect/proc_holder/spell/invoked/psydonlux_tamper	= CLERIC_T4
+					/obj/effect/proc_holder/spell/invoked/psydonabsolve		= CLERIC_T4
 	)
 	traits_tier = list(TRAIT_PSYDONITE = CLERIC_T0) //Requires a minimal holy skill or the 'Devotee' virtue to unlock. Offers passive wound regeneration, but prevents healing from most miracles.
 	confess_lines = list(

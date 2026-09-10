@@ -16,6 +16,9 @@
 #define GLOW_COLOR_WARD "#D4A844" // Warm amber-gold, for battlewardry / protective ward spells
 #define GLOW_COLOR_BARDIC "#E8837C" // Warm rose, for bardic songs and cadences
 
+//THE ONLY GOD - HIM
+#define GLOW_COLOR_PSYDON "#89daff" //Purity Blue
+
 //Gods - Tennite
 #define GLOW_COLOR_UNDIVIDED "#28908C" //Undivided Cyan
 #define GLOW_COLOR_ASTRATA "#F9B362" //Astratan Yellow/Orange
@@ -25,7 +28,7 @@
 
 //Gods - Ascendant
 #define GLOW_COLOR_GRAGGAR "#19345E" //Graggar Dark Blue
-#define GLOW_COLOR_ZIZO "#b76bff" //Graggar Dark Purple
+#define GLOW_COLOR_ZIZO "#b76bff" //Zizo Dark Purple
 #define GLOW_COLOR_BAOTHA "#ff008c" //Baotha Violent Rose
 #define GLOW_COLOR_MATTHIOS "#ffd900" //Matthios Golden
 

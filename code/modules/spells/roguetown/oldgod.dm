@@ -37,7 +37,8 @@
 	charge_required = FALSE
 	cooldown_time = 10 MINUTES
 
-	var/static/list/lootpool = list(/obj/item/flowercrown/rosa,
+	var/static/list/lootpool = list(
+	/obj/item/flowercrown/rosa,
 	/obj/item/bouquet/rosa,
 	/obj/item/jingle_bells,
 	/obj/item/bouquet/salvia,
@@ -50,6 +51,9 @@
 	/obj/item/alch/artemisia,
 	/obj/item/alch/rosa,
 	/obj/item/rogueweapon/huntingknife/idagger/navaja,
+	/obj/item/rogueweapon/huntingknife/combat,
+	/obj/item/rogueweapon/huntingknife/combat/silver, // go my child, do a crime
+	/obj/item/rogueweapon/huntingknife/throwingknife/silver,
 	/obj/item/lockpick,
 	/obj/item/reagent_containers/glass/bottle/alchemical/strpot,
 	/obj/item/reagent_containers/glass/bottle/alchemical/willpot,
@@ -67,11 +71,16 @@
 	/obj/item/reagent_containers/food/snacks/grown/apple,
 	/obj/item/natural/worms,
 	/obj/item/natural/worms/leech,
+	/obj/item/inqarticles/garrote,
+	/obj/item/inqarticles/indexer,
 	/obj/item/reagent_containers/food/snacks/rogue/psycrossbun,
 	/obj/item/reagent_containers/food/snacks/rogue/psycrossbun_jamtallowed,
 	/obj/item/reagent_containers/food/snacks/rogue/psycrossbun_marmaladed,
 	/obj/item/clothing/neck/roguetown/psicross,
 	/obj/item/clothing/neck/roguetown/psicross/wood,
+	/obj/item/clothing/neck/roguetown/psicross/bronze,
+	/obj/item/clothing/neck/roguetown/psicross/silver,
+	/obj/item/clothing/neck/roguetown/psicross/g,
 	/obj/item/rope/chain,
 	/obj/item/rope,
 	/obj/item/clothing/neck/roguetown/collar,
@@ -79,7 +88,8 @@
 	/obj/item/reagent_containers/glass/cup/wooden,
 	/obj/item/natural/glass,
 	/obj/item/clothing/shoes/roguetown/sandals,
-	/obj/item/alch/transisdust)
+	/obj/item/alch/transisdust,
+	)
 
 /datum/action/cooldown/spell/psydon/bootcheck/cast(atom/cast_on)
 	. = ..()
@@ -176,9 +186,11 @@
 
 	return TRUE
 
-////////////////////
-// T1~3 - PERSIST //
-////////////////////
+///////////////////
+// T1+ - PERSIST //
+///////////////////
+// We crunching the entirety of Psydon's tiers into one single spell. Now scales from Miracle instead of filling your skill bar with irrelevant buttons.
+// Given PSYDON is dead, this isn't really a miracle done purely by divinity, your body pays the toll along. So hunger/energy drain.
 
 /datum/action/cooldown/spell/psydon/persist
 	name = "PERSIST"
@@ -197,33 +209,26 @@
 
 /datum/action/cooldown/spell/psydon/persist/cast(atom/cast_on)
 	. = ..()
-
 	if(!ishuman(owner))
 		return FALSE
 
 	var/mob/living/carbon/human/H = owner
-
 	if(!check_psydon_favor(H))
 		return FALSE
 
 	show_visible_message(H, span_blue("[H] closes their eyes, and takes a deep breath..."), span_blue("I take a moment to collect myself..."))
 
 	for(var/i in 1 to 10)
-
 		if(!do_after(H, 50))
 			break
-
 		var/heal_amount = get_persist_healing(H)
-
 		playsound(H, 'sound/magic/psydonrespite.ogg', 100, TRUE)
 		new /obj/effect/temp_visual/psyheal_rogue(get_turf(H), "#e4e4e4")
 		new /obj/effect/temp_visual/psyheal_rogue(get_turf(H), "#e4e4e4")
-
 		H.adjustBruteLoss(-heal_amount)
 		H.adjustFireLoss(-heal_amount)
 		H.energy_add(-heal_amount/2)
 		H.nutrition -= heal_amount
-
 		if(!(i % 2))
 			to_chat(H, span_info("<i><font color='#71c6ff'>[get_persist_quote()]</i></font>"))
 
@@ -232,9 +237,8 @@
 	return TRUE
 
 ///////////////
-// T3 - WEEP //
+// T4 - WEEP //
 ///////////////
-// This is now a T3 Miracle, which means, Missionary can also get it. The idea will be fairly controversial, but we'll see if it's good or not sooner or later.
 
 /obj/effect/proc_holder/spell/invoked/psydonlux_tamper
 	name = "WEEP"
