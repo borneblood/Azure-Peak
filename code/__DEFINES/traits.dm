@@ -263,6 +263,7 @@
 //Temp Traits - Usually Short-Term Buffs
 #define TRAIT_ADRENALINE_RUSH "Adrenaline Rush"
 #define TRAIT_NODEF "Recklessness" //Inability to parry at all
+#define TRAIT_ENDURING "ENDURING!" // Psydonite advanced gaslighting modo.
 #define TRAIT_VAMPIRE_SPAWN_PROTECTION "Vampire Spawn Protection"
 
 // POWERFUL TRAITS WE SHOULD NOT GIVE OUT EASILY

@@ -60,17 +60,12 @@
 /datum/action/cooldown/spell/psydon/proc/get_suffering_bonus(mob/living/carbon/human/H)
 	if(!H)
 		return 0
-
 	var/total_damage = H.getBruteLoss() + H.getFireLoss()
-
 	if(total_damage < 100)
 		return 0
-
 	// Starts at 4 bonus at exactly 100 damage.
 	var/bonus = 4 + round((total_damage - 100) / 75)
-
 	var/wound_multiplier = 1 + (length(H.get_wounds()) * 0.10)
-
 	return round(bonus * wound_multiplier)
 
 /datum/action/cooldown/spell/psydon/proc/get_persist_quote()
@@ -119,4 +114,4 @@
 
 	var/multiplier = 1 + (total_damage / 1000)
 
-	return round(healing * multiplier)	
+	return round(healing * multiplier)

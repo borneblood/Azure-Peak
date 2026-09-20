@@ -170,19 +170,9 @@
 	psyhealing += get_suffering_bonus(target)
 
 	if(get_suffering_bonus(target))
-		to_chat(H, "<font color='#ffffff'><b>PAIN</b> is a <b>MINOR SETBACK</b>! Let it be <b>FUEL</b> for <b>RESOLVE</b>.</font>")
-		to_chat(target, "<font color='#c5c5c5'><i>You can't stay down. You won't stay down. CARRY. ON. DON'T. STOP.</i></font>")
-		to_chat(target, "<font color='#ffffff'><b><i>ENDURE!</b></i></font>")
-		if(H.resting)
-			H.remove_status_effect(/datum/status_effect/incapacitating/stun)
-			H.remove_status_effect(/datum/status_effect/incapacitating/knockdown)
-			H.set_resting(FALSE, FALSE)
+		target.visible_message(span_info("<font color='#ffffff'>[target] tenses at the spoken words, overflowing with sentimentality!</font>"), span_info("<font color='#ffffff'><b>PAIN</b> is a <b>MINOR SETBACK</b>! Let it be <b>FUEL</b> for <b>RESOLVE</b>.</font>"))
 
 	target.apply_status_effect(/datum/status_effect/buff/psyhealing, (psyhealing/3))
-
-	for(var/datum/wound/W as anything in target.get_wounds())
-		if(W?.bleed_rate > 0)
-			W.set_bleed_rate(0)
 
 	return TRUE
 

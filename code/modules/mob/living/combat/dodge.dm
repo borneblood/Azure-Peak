@@ -320,7 +320,7 @@
 		beast?.spend_dodge_reserve()
 	dodgecd = TRUE
 	playsound(src, 'sound/combat/dodge.ogg', 100, FALSE)
-	if(!HAS_TRAIT(src, TRAIT_DODGE_NO_MOVE))
+	if(!(HAS_TRAIT(src, TRAIT_DODGE_NO_MOVE) || HAS_TRAIT(src, TRAIT_ENDURING)))
 		throw_at(dodge_turf, 1, 2, src, FALSE)
 	if(drained > 0)
 		src.visible_message(span_warning("<b>[src]</b> dodges [user]'s attack!"))

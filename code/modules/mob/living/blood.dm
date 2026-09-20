@@ -141,7 +141,7 @@
 
 	//Effects of bloodloss - only if we're actually alive, though
 	if (stat != DEAD)
-		if(!HAS_TRAIT(src, TRAIT_BLOODLOSS_IMMUNE))
+		if(!HAS_TRAIT(src, TRAIT_BLOODLOSS_IMMUNE) && !HAS_TRAIT(src, TRAIT_ENDURING))
 			var/current_bleeding_tier
 			switch(blood_volume)
 				if(BLOOD_VOLUME_SAFE to INFINITY)

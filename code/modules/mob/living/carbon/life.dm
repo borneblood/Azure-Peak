@@ -161,7 +161,7 @@
 
 /mob/living/carbon/proc/get_complex_pain()
 	. = 0
-	var/has_adrenaline = HAS_TRAIT(src, TRAIT_ADRENALINE_RUSH)
+	var/has_adrenaline = HAS_TRAIT(src, TRAIT_ADRENALINE_RUSH) || HAS_TRAIT(src, TRAIT_ENDURING)
 	for(var/obj/item/bodypart/limb as anything in bodyparts)
 		if(limb.status == BODYPART_ROBOTIC || limb.skeletonized && !has_status_effect(/datum/status_effect/fire_handler/fire_stacks/sunder) && !has_status_effect(/datum/status_effect/fire_handler/fire_stacks/sunder/blessed))
 			continue //If we're not sundered, skeletonised limbs do not hurt.

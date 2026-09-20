@@ -865,7 +865,7 @@
 	id = "psyhealing"
 	alert_type = /atom/movable/screen/alert/status_effect/buff/psyhealing
 	duration = 15 SECONDS
-	examine_text = "SUBJECTPRONOUN stirs with a sense of ENDURING!"
+	examine_text = "<font color='#ffffff'>SUBJECTPRONOUN stirs with a sense of ENDURING!</font>"
 	var/healing_on_tick = 1
 	var/outline_colour = "#d3d3d3"
 
@@ -876,25 +876,39 @@
 /datum/status_effect/buff/psyhealing/on_apply()
 	SEND_SIGNAL(owner, COMSIG_LIVING_MIRACLE_HEAL_APPLY, healing_on_tick, src)
 	var/filter = owner.get_filter(PSYDON_HEALING_FILTER)
-	if (!filter)
+	if(!filter)
 		owner.add_filter(PSYDON_HEALING_FILTER, 2, list("type" = "outline", "color" = outline_colour, "alpha" = 60, "size" = 1))
+	if(owner.patron?.type in OLD_GOD_PATRON)
+		ADD_TRAIT(owner, TRAIT_ENDURING, "ENDURE")
+		ADD_TRAIT(owner, TRAIT_NOPAIN, "ENDURE")
 	return TRUE
 
 /datum/status_effect/buff/psyhealing/tick()
 	if(HAS_TRAIT(owner, TRAIT_NOHEAL) || HAS_TRAIT(owner, TRAIT_IRONMAN))
 		return
-	if(HAS_TRAIT(owner, TRAIT_HALFHEAL))
-		healing_on_tick /= 2
 	var/obj/effect/temp_visual/heal/H = new /obj/effect/temp_visual/psyheal_rogue(get_turf(owner))
 	H.color = "#d3d3d3"
 	var/list/wCount = owner.get_wounds()
 	if(wCount.len > 0)
-		owner.heal_wounds(healing_on_tick * 1.75)
+		owner.heal_wounds(healing_on_tick)
 		owner.update_damage_overlays()
+		for(var/datum/wound/wound as anything in wCount)
+			if(wound.bleed_rate > 0)
+				var/bleed_heal = max(wound.bleed_rate * 0.2, 0.1)
+				wound.set_bleed_rate(max(wound.bleed_rate - bleed_heal, 0.025))
+				if(wound.bleed_rate <= 0 && wound.sew_threshold)
+					wound.sew_progress = wound.sew_threshold
+					wound.sew_wound()
+					to_chat(owner, span_blue("<i>The [wound] closed itself...</i>"))
 	owner.adjustOxyLoss(-healing_on_tick, 0)
 	owner.adjustToxLoss(-healing_on_tick, 0)
 	owner.adjustOrganLoss(ORGAN_SLOT_BRAIN, -healing_on_tick)
 	owner.adjustCloneLoss(-healing_on_tick, 0)
+
+/datum/status_effect/buff/psyhealing/on_remove()
+	REMOVE_TRAIT(owner, TRAIT_ENDURING, "ENDURE")
+	REMOVE_TRAIT(owner, TRAIT_NOPAIN, "ENDURE")
+	return ..()
 
 /datum/status_effect/buff/psyvived
 	id = "psyvived"
