@@ -56,7 +56,7 @@
 
 	if(!path)
 		var/list/paths = list("Sunfyre", "Thievery", "Malchemy")
-		if(skill >= SKILL_LEVEL_EXPERT)
+		if(skill >= SKILL_LEVEL_JOURNEYMAN)
 			paths += "Greed"
 		path = tgui_input_list(H, "Commit to a path (NOTE: ONLY ONE CHOICE!)", "Freeman's Tools", paths)
 		if(!path)
@@ -327,11 +327,6 @@
 		return
 	if(isliving(cast_on))
 		var/mob/living/target = cast_on
-		if(HAS_TRAIT(target, TRAIT_BLACKBLOOD))
-			owner.playsound_local(owner, 'sound/magic/PSY.ogg', 100, FALSE, -1)
-			target.visible_message(span_info("[target] stirs for a moment, the miracle dissipates."), span_blue("A dull warmth swells in your heart, only to fade as quickly as it arrived."))
-			playsound(target, 'sound/magic/PSY.ogg', 100, FALSE, -1)
-			return FALSE
 		owner.visible_message(span_notice("The transaction is made! [target] is bathed in a golden light!"))
 		if(iscarbon(target))
 			var/mob/living/carbon/C = target
@@ -572,8 +567,7 @@
 
 	secondary_resource_cost = SPELLCOST_MIRACLE_MAJOR
 
-	invocation_type = INVOCATION_SHOUT
-	invocations = list("Balance the scales, equality for all!")
+	invocation_type = INVOCATION_NONE
 
 	charge_required = TRUE
 	charge_time = 4 SECONDS
