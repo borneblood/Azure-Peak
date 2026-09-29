@@ -1,7 +1,7 @@
 /obj/item/organ/eyes
 	name = "eyes"
 	icon_state = "eyeball"
-	desc = ""
+	desc = "Ocular globes of flesh and humors. Their future was looking bleak, but they never saw this coming."
 	zone = BODY_ZONE_PRECISE_R_EYE
 	slot = ORGAN_SLOT_EYES
 	gender = PLURAL
@@ -45,7 +45,6 @@
 		var/mutable_appearance/iris_overlay = mutable_appearance(src.icon, "eyeball-iris")
 		iris_overlay.color = "#" + eye_color
 		. += iris_overlay
-
 
 /obj/item/organ/eyes/update_accessory_colors()
 	var/list/colors_list = list()
@@ -114,10 +113,49 @@
 		C.clear_fullscreen("eye_damage")
 	return
 
+/obj/item/organ/eyes/construct
+	name = "construct eyes"
+	desc = "Some beast's eyes, preserved through artifice and with magical rock embedded in their back. Seems to fit a construct's head."
+	icon_state = "eyeball-con"
+
+/obj/item/organ/eyes/construct/on_life()
+	. = ..()
+	if(!istype(owner?.dna?.species, /datum/species/construct/metal))
+		spawn(100)
+			owner.emote("superagony")
+			owner.visible_message(span_artery("[owner]'s creature eyes are violently rejected from their sockets, tearing free with a wet, bloody pop and falling into a sickly red goop!"))
+			owner.reagents.add_reagent(/datum/reagent/infection/major, 25)
+			qdel(src)
+
+/obj/item/organ/eyes/elf
+	name = "elf eyes"
+	desc = "Keen, elegant eyes with an almost unnatural clarity, seeming to catch every detail that passes before them."
+
+/obj/item/organ/eyes/halfelf
+	name = "half-elf eyes"
+	desc = "Graceful eyes carrying a faint trace of elven refinement, though still unmistakably grounded in mortal flesh."
+
+/obj/item/organ/eyes/goblin
+	name = "goblin eyes"
+	desc = "Small, sharp eyes with an unsettlingly alert gaze. Built for dim burrows, cramped tunnels, and spotting trouble before it spots you."
+
+/obj/item/organ/eyes/moth
+	name = "fluvian eyes"
+	desc = "Large, sensitive eyes adapted to the dark. Their strange construction gives them an almost glassy, otherworldly appearance."
+	flash_protect = FLASH_PROTECTION_SENSITIVE
+	accessory_type = /datum/sprite_accessory/eyes/moth
+	eye_color = "000000"
+	second_color = "000000"
+
+/obj/item/organ/eyes/snail
+	name = "snail eyes"
+	desc = "Small, delicate eyes perched on flexible stalks. Somehow, they remain perfectly functional despite looking like they should snap off at the slightest touch."
+	eye_icon_state = "snail_eyes"
+	icon_state = "snail_eyeballs"
 
 /obj/item/organ/eyes/night_vision
 	name = "shadow eyes"
-	desc = ""
+	desc = "Eyes that are made to see in perfect darkness, their pupils adjust nicely to the amount of vision you wish to peruse."
 	see_in_dark = 8
 	lighting_alpha = LIGHTING_PLANE_ALPHA_MOSTLY_VISIBLE
 	actions_types = list(/datum/action/item_action/organ_action/use)
@@ -137,56 +175,78 @@
 			sight_flags &= ~SEE_BLACKNESS
 	owner.update_sight()
 
-
 /obj/item/organ/eyes/night_vision/argonian
 	name = "zardman eyes"
-	desc = ""
+	desc = "Luscious and fervent, with that unmistakable zardman intensity. Why are you staring at a zard's eyes like that, weirdo?"
 
 /obj/item/organ/eyes/night_vision/alien
 	name = "alien eyes"
-	desc = ""
+	desc = "Eyes that seem to belong to something far beyond this realm. Staring into them makes you wonder if humanity might one day reach Nocmos, or if it should."
 	sight_flags = SEE_MOBS
 
 /obj/item/organ/eyes/night_vision/zombie
-	name = "undead eyes"
-	desc = ""
-
-/obj/item/organ/eyes/construct
-	name = "construct eyes"
-	desc = "Some beast's eyes, preserved through artifice and with magical rock embedded in their back. Seems to fit a construct's head."
-	icon_state = "eyeball-con"
+	name = "deadite eyes"
+	desc = "Rotted to the core with a pungent stench, you'd wonder how Deadites are even capable of seeing through those lenses, and quickly deduct... Yeah, foul magicks."
 
 /obj/item/organ/eyes/night_vision/zombie/on_life()
 	. = ..()
-	if (!(owner.mob_biotypes & MOB_UNDEAD))
-		if (prob(10))
-			owner.adjustToxLoss(0.2)
+	if(!(owner.mob_biotypes & MOB_UNDEAD))
+		if(prob(10))
+			owner.emote("pain")
+			to_chat(owner, span_danger(pick("MY EYES HURT! GET THEM OUT OF ME!", "MY EYES! SOMETHING IS CRAWLING BEHIND THEM! TAKE THEM OUT!", "I CAN FEEL SOMETHING WRIGGLING INSIDE MY SKULL! RIP THEM OUT!", "GET THESE THINGS OUT OF MY SOCKETS! I DON'T WANT THEM!", "MY EYES ARE MOVING ON THEIR OWN! TEAR THEM OUT!")))
+			owner.reagents.add_reagent(/datum/reagent/infection/major, 5)
 
-/obj/item/organ/eyes/night_vision/werewolf
-	name = "moonlight eyes"
-	desc = ""
+/obj/item/organ/eyes/night_vision/monster
+	name = "creature eyes"
+	desc = "Eyes that should likely not be inside a non-monster's eye sockets. But what is really stopping you?"
+	icon_state = "burning_eyes"
+
+/obj/item/organ/eyes/night_vision/monster/on_life()
+	. = ..()
+	if(owner?.mind)
+		spawn(100)
+			owner.emote("superagony")
+			owner.visible_message(span_artery("[owner]'s creature eyes are violently rejected from their sockets, tearing free with a wet, bloody pop and falling into a sickly red goop!"))
+			owner.reagents.add_reagent(/datum/reagent/infection/major, 25)
+			qdel(src)
 
 /obj/item/organ/eyes/night_vision/nightmare
-	name = "burning red eyes"
-	desc = ""
+	name = "unnatural eyes"
+	desc = "Eyes that should never have been possible. Heresy to most, opportunity to those willing to look past the blasphemy."
 	icon_state = "burning_eyes"
+	color = "#006eff"
 
 /obj/item/organ/eyes/night_vision/wild_goblin
 	name = "wild goblin eyes"
-	desc = "What manner of madness have these reddened orbs espied in the darker places of the realm?"
+	desc = "Eyes that have been thoroughly corrupted by the madness within those War Rifts of Sinistar. Neither darkness nor nite has purchase into them."
 	icon_state = "burning_eyes"
 
 /obj/item/organ/eyes/night_vision/wild_goblin/on_life()
 	. = ..()
-	if (!istype(owner, /mob/living/carbon/human/species/goblin))
-		if (prob(10))
-			owner.adjustToxLoss(0.2)
+	if(!istype(owner, /mob/living/carbon/human/species/goblin) && !istype(owner?.dna?.species, /datum/species/goblin))
+		if(prob(10))
+			owner.emote("pain")
+			to_chat(owner, span_danger(pick("MY EYES HURT! GET THEM OUT OF ME!", "MY EYES! SOMETHING IS CRAWLING BEHIND THEM! TAKE THEM OUT!", "I CAN FEEL SOMETHING WRIGGLING INSIDE MY SKULL! RIP THEM OUT!", "GET THESE THINGS OUT OF MY SOCKETS! I DON'T WANT THEM!", "MY EYES ARE MOVING ON THEIR OWN! TEAR THEM OUT!")))
+			owner.reagents.add_reagent(/datum/reagent/infection/major, 5)
 
 /obj/item/organ/eyes/night_vision/mushroom
 	name = "fung-eye"
-	desc = ""
+	desc = "They still say he is a fun-guy to this very day!"
 
-/obj/item/organ/eyes/night_vision/vampire/ui_action_click()
+/obj/item/organ/eyes/night_vision/nitecreacher
+	name = "nitecreacher eyes"
+	desc = "Eyes that should likely not be inside a non-werevolf's eye sockets. But what is really stopping you?"
+
+/obj/item/organ/eyes/night_vision/nitecreacher/on_life()
+	. = ..()
+	if(!istype(owner?.mind?.special_role, /datum/antagonist/vampire) && !istype(owner?.mind?.special_role, /datum/antagonist/werewolf) && !istype(owner?.mind?.special_role, /datum/antagonist/gnoll))
+		spawn(100)
+			owner.emote("superagony")
+			owner.visible_message(span_artery("[owner]'s creature eyes are violently rejected from their sockets, tearing free with a wet, bloody pop and falling into a sickly red goop!"))
+			owner.reagents.add_reagent(/datum/reagent/infection/major, 25)
+			qdel(src)
+
+/obj/item/organ/eyes/night_vision/nitecreacher/ui_action_click()
 	sight_flags = initial(sight_flags)
 	var/atom/movable/screen/plane_master/weather_plane = usr.hud_used?.plane_masters?["[WEATHER_EFFECT_PLANE]"]
 	switch(lighting_alpha)
@@ -205,24 +265,12 @@
 			sight_flags &= ~SEE_BLACKNESS
 	owner.update_sight()
 
-/obj/item/organ/eyes/elf
-	name = "elf eyes"
-	desc = ""
-
-/obj/item/organ/eyes/halfelf
-	name = "half-elf eyes"
-	desc = ""
-
-/obj/item/organ/eyes/goblin
-	name = "goblin eyes"
-	desc = ""
-
 ///Robotic
 
 /obj/item/organ/eyes/robotic
 	name = "robotic eyes"
 	icon_state = "cybernetic_eyeballs"
-	desc = ""
+	desc = "Artificial eyes of polished metal and glass, built to replace the fragile organs of flesh with something a little more reliable."
 	status = ORGAN_ROBOTIC
 	organ_flags = ORGAN_SYNTHETIC
 
@@ -237,14 +285,14 @@
 
 /obj/item/organ/eyes/robotic/xray
 	name = "\improper X-ray eyes"
-	desc = ""
+	desc = "Artificial eyes that peer beyond ordinary sight, revealing the world through walls and solid matter as though they were barely there."
 	eye_color = "000"
 	see_in_dark = 8
 	sight_flags = SEE_MOBS | SEE_OBJS | SEE_TURFS
 
 /obj/item/organ/eyes/robotic/thermals
 	name = "thermal eyes"
-	desc = ""
+	desc = "Artificial eyes that perceive heat instead of light, allowing warm bodies to stand out clearly even through darkness."
 	eye_color = "FC0"
 	sight_flags = SEE_MOBS
 	lighting_alpha = LIGHTING_PLANE_ALPHA_MOSTLY_VISIBLE
@@ -253,7 +301,7 @@
 
 /obj/item/organ/eyes/robotic/flashlight
 	name = "flashlight eyes"
-	desc = ""
+	desc = "Artificial eyes fitted with compact lamps, letting their owner illuminate the darkness simply by looking through it."
 	eye_color ="fee5a3"
 	icon = 'icons/obj/lighting.dmi'
 	icon_state = "flashlight_eyes"
@@ -264,7 +312,7 @@
 // Welding shield implant
 /obj/item/organ/eyes/robotic/shield
 	name = "shielded robotic eyes"
-	desc = ""
+	desc = "Artificial eyes fitted with protective shielding, built to keep hostile electromagnetic interference from scrambling their vision."
 	flash_protect = FLASH_PROTECTION_WELDER
 
 /obj/item/organ/eyes/robotic/shield/emp_act(severity)
@@ -274,7 +322,7 @@
 
 /obj/item/organ/eyes/robotic/glow
 	name = "High Luminosity Eyes"
-	desc = ""
+	desc = "Artificial eyes built to channel light into a focused beam. Their inner workings hum with enough energy to make staring into them a poor idea."
 	eye_color = "000"
 	actions_types = list(/datum/action/item_action/organ_action/use, /datum/action/item_action/organ_action/toggle)
 	var/current_color_string = "#ffffff"
@@ -433,7 +481,6 @@
 		LAZYADD(eye_lighting, new /obj/effect/abstract/eye_lighting(src, light_object_range, light_object_power, current_color_string))
 	sync_light_effects()
 
-
 /obj/item/organ/eyes/robotic/glow/proc/sync_light_effects()
 	for(var/I in eye_lighting)
 		var/obj/effect/abstract/eye_lighting/L = I
@@ -449,21 +496,6 @@
 	parent = loc
 	if(!istype(parent))
 		return INITIALIZE_HINT_QDEL
-
-/obj/item/organ/eyes/moth
-	name = "fluvian eyes"
-	desc = ""
-	flash_protect = FLASH_PROTECTION_SENSITIVE
-	accessory_type = /datum/sprite_accessory/eyes/moth
-	eye_color = "000000"
-	second_color = "000000"
-
-/obj/item/organ/eyes/snail
-	name = "snail eyes"
-	desc = ""
-	eye_icon_state = "snail_eyes"
-	icon_state = "snail_eyeballs"
-
 
 /proc/set_eye_color(mob/living/carbon/mob, color_one, color_two)
 	var/obj/item/organ/eyes/eyes = mob.getorganslot(ORGAN_SLOT_EYES)

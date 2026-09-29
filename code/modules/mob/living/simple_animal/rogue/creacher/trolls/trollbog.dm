@@ -31,7 +31,7 @@
 	if(eyes)
 		eyes.Remove(src,1)
 		QDEL_NULL(eyes)
-	eyes = new /obj/item/organ/eyes/night_vision/nightmare
+	eyes = new /obj/item/organ/eyes/night_vision/monster
 	eyes.Insert(src)
 
 /mob/living/simple_animal/hostile/retaliate/rogue/troll/bog/LoseTarget()

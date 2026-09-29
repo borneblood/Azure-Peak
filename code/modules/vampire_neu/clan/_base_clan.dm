@@ -284,7 +284,7 @@ And it also helps for the character set panel
 
 	// Restore normal eyes
 	var/obj/item/organ/eyes/eyes = vampire.getorganslot(ORGAN_SLOT_EYES)
-	if(istype(eyes, /obj/item/organ/eyes/night_vision/vampire))
+	if(istype(eyes, /obj/item/organ/eyes/night_vision/nitecreacher))
 		var/list/eyecache = vampire.cache_eye_color()
 		eyes.Remove(vampire, TRUE)
 		QDEL_NULL(eyes)
@@ -523,7 +523,7 @@ And it also helps for the character set panel
 	if(eyes)
 		eyes.Remove(to_insert, TRUE)
 		QDEL_NULL(eyes)
-	eyes = new /obj/item/organ/eyes/night_vision/vampire
+	eyes = new /obj/item/organ/eyes/night_vision/nitecreacher
 	eyes.Insert(to_insert)
 	to_insert.set_eye_color(
 		eyecache["eye_color"],
