@@ -28,14 +28,9 @@
 	armor = ARMOR_CLOTHING
 	salvage_result = /obj/item/natural/hide/cured
 
-/obj/item/clothing/shoes/roguetown/boots/get_mechanics_examine(mob/user)
-	. = ..()
-	. += span_info("These shoes can hold a tossblade or laborer's knife. Left click them with one to sheathe it.")
-	. += span_info("Right click to draw a sheathed weapon.")
-
 /obj/item/clothing/shoes/roguetown/boots/ComponentInitialize()
 	. = ..()
-	AddComponent(/datum/component/holster/boot, /obj/item/rogueweapon/huntingknife/throwingknife, list(/obj/item/rogueweapon/huntingknife/idagger/steel/rotfang, /obj/item/rogueweapon/huntingknife/idagger/steel/profane), null)
+	AddComponent(/datum/component/holster, list(/obj/item/rogueweapon/huntingknife/throwingknife, /obj/item/rogueweapon/huntingknife/idagger))
 
 /obj/item/clothing/shoes/roguetown/boots/aalloy
 	name = "decrepit boots"
@@ -74,6 +69,7 @@
 	salvage_result = /obj/item/natural/hide/cured
 
 /obj/item/clothing/shoes/roguetown/boots/psydonboots/ComponentInitialize()
+	. = ..()
 	AddComponent(/datum/component/armour_filtering/positive, TRAIT_FENCERDEXTERITY)
 	AddComponent(/datum/component/armour_filtering/positive, TRAIT_HONORBOUND)
 
@@ -91,6 +87,7 @@
 	salvage_result = /obj/item/natural/hide/cured
 
 /obj/item/clothing/shoes/roguetown/boots/nobleboot/ComponentInitialize()
+	. = ..()
 	AddComponent(/datum/component/armour_filtering/positive, TRAIT_FENCERDEXTERITY)
 	AddComponent(/datum/component/armour_filtering/positive, TRAIT_HONORBOUND)
 
@@ -121,15 +118,6 @@
 	sewrepair = TRUE
 	salvage_amount = 1
 	salvage_result = /obj/item/natural/hide/cured
-
-/obj/item/clothing/shoes/roguetown/ridingboots/ComponentInitialize()
-	. = ..()
-	AddComponent(/datum/component/holster/boot, /obj/item/rogueweapon/huntingknife/throwingknife, list(/obj/item/rogueweapon/huntingknife/idagger/steel/rotfang, /obj/item/rogueweapon/huntingknife/idagger/steel/profane), null)
-
-/obj/item/clothing/shoes/roguetown/ridingboots/get_mechanics_examine(mob/user)
-	. = ..()
-	. += span_info("These boots can hold a tossblade or laborer's knife. Left click them with one to sheathe it.")
-	. += span_info("Right click to draw a sheathed weapon.")
 
 ///obj/item/clothing/shoes/roguetown/ridingboots/Initialize(mapload)
 //	. = ..()
@@ -166,20 +154,11 @@
 
 /obj/item/clothing/shoes/roguetown/gladiator
 	name = "leather sandals"
-	desc = "A pair of sturdy sandal-boots with extra straps on the shins."
+	desc = ""
 	gender = PLURAL
 	icon_state = "gladiator"
 	item_state = "gladiator"
 	sewrepair = TRUE
-
-/obj/item/clothing/shoes/roguetown/gladiator/ComponentInitialize()
-	. = ..()
-	AddComponent(/datum/component/holster/boot, /obj/item/rogueweapon/huntingknife/throwingknife, list(/obj/item/rogueweapon/huntingknife/idagger/steel/rotfang, /obj/item/rogueweapon/huntingknife/idagger/steel/profane), null)
-
-/obj/item/clothing/shoes/roguetown/gladiator/get_mechanics_examine(mob/user)
-	. = ..()
-	. += span_info("These sandals can hold a tossblade or laborer's knife. Left click them with one to sheathe it.")
-	. += span_info("Right click to draw a sheathed weapon.")
 
 /obj/item/clothing/shoes/roguetown/sandals
 	name = "sandals"
@@ -230,6 +209,7 @@
 	salvage_result = /obj/item/natural/hide/cured
 
 /obj/item/clothing/shoes/roguetown/boots/leather/ComponentInitialize()
+	. = ..()
 	AddComponent(/datum/component/armour_filtering/positive, TRAIT_FENCERDEXTERITY)
 	AddComponent(/datum/component/armour_filtering/positive, TRAIT_HONORBOUND)
 
@@ -277,15 +257,6 @@
 	salvage_amount = 1
 	salvage_result = /obj/item/natural/hide/cured
 	sewrepair = TRUE
-
-/obj/item/clothing/shoes/roguetown/grenzelhoft/ComponentInitialize()
-	. = ..()
-	AddComponent(/datum/component/holster/boot, /obj/item/rogueweapon/huntingknife/throwingknife, list(/obj/item/rogueweapon/huntingknife/idagger/steel/rotfang, /obj/item/rogueweapon/huntingknife/idagger/steel/profane), null)
-
-/obj/item/clothing/shoes/roguetown/grenzelhoft/get_mechanics_examine(mob/user)
-	. = ..()
-	. += span_info("These boots can hold a tossblade or laborer's knife. Left click them with one to sheathe it.")
-	. += span_info("Right click to draw a sheathed weapon.")
 
 /obj/item/clothing/shoes/roguetown/grenzelhoft/ComponentInitialize()
 	AddComponent(/datum/component/armour_filtering/positive, TRAIT_FENCERDEXTERITY)
@@ -673,6 +644,7 @@
 	sewrepair = TRUE
 	is_barefoot = TRUE
 	armor = ARMOR_CLOTHING
+	is_barefoot = TRUE
 	salvage_amount = 1
 	salvage_result = /obj/item/natural/fur
 
@@ -889,15 +861,6 @@
 	sewrepair = TRUE
 	salvage_result = /obj/item/natural/cloth
 
-/obj/item/clothing/shoes/roguetown/footwraps/ComponentInitialize()
-	. = ..()
-	AddComponent(/datum/component/holster/boot, /obj/item/rogueweapon/huntingknife/throwingknife, list(/obj/item/rogueweapon/huntingknife/idagger/steel/rotfang, /obj/item/rogueweapon/huntingknife/idagger/steel/profane), null)
-
-/obj/item/clothing/shoes/roguetown/footwraps/get_mechanics_examine(mob/user)
-	. = ..()
-	. += span_info("These footwraps can hold a tossblade or laborer's knife. Left click them with one to sheathe it.")
-	. += span_info("Right click to draw a sheathed weapon.")
-
 /obj/item/clothing/shoes/roguetown/footwraps/padded
 	name = "padded cloth footwraps"
 	desc = "Thickly-woven padded bandages wrapped about one's ankles to maintain mobility for climbing and kicking."
@@ -920,15 +883,6 @@
 	item_state = "togasandals"
 	salvage_amount = 1
 	salvage_result = /obj/item/natural/cloth
-
-/obj/item/clothing/shoes/roguetown/sandals/toga/ComponentInitialize()
-	. = ..()
-	AddComponent(/datum/component/holster/boot, /obj/item/rogueweapon/huntingknife/throwingknife, list(/obj/item/rogueweapon/huntingknife/idagger/steel/rotfang, /obj/item/rogueweapon/huntingknife/idagger/steel/profane), null)
-
-/obj/item/clothing/shoes/roguetown/sandals/toga/get_mechanics_examine(mob/user)
-	. = ..()
-	. += span_info("These sandals can hold a tossblade or laborer's knife. Left click them with one to sheathe it.")
-	. += span_info("Right click to draw a sheathed weapon.")
 
 /obj/item/clothing/shoes/roguetown/rosa
 	name = "ivory shoes"
@@ -973,4 +927,3 @@
 /obj/item/clothing/shoes/roguetown/rosa/ten
 	name = "stately shoes"
 	icon_state = "rosashoes10"
-
