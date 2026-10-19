@@ -919,3 +919,32 @@ GLOBAL_LIST_INIT(averse_factions, list(
 /datum/charflaw/dnr/on_mob_creation(mob/user)
 	. = ..()
 	ADD_TRAIT(user, TRAIT_LASTLEGS, "[type]")
+
+/datum/charflaw/pacifist
+	name = "Pacifist"
+	desc = "I have sworn never to harm another, directly or indirectly. Violence is abhorrent to me, and I will not break my vows."
+	ui_fa_icon = ""
+
+/datum/charflaw/pacifist/on_mob_creation(mob/user)
+	. = ..()
+	ADD_TRAIT(user, TRAIT_PACIFISM, "[type]")
+
+/datum/charflaw/goodnatured
+	name = "Good Natured"
+	desc = "I am good natured at heart, to a fault. I am more prone to solving problems with my mind, rather than violence. My attacks are slow and predictable and my ability to cast spells is stunted, though I can spare exhausted or bound foes, and may persuade certain enemies to leave me in peace. NOTE: This only works against NPCs!"
+	ui_fa_icon = ""
+	needs_extra_vice = TRUE
+
+/datum/charflaw/goodnatured/on_mob_creation(mob/user)
+	. = ..()
+	ADD_TRAIT(user, TRAIT_GOODHEART, "[type]")
+
+/datum/charflaw/compassionate
+	name = "Compassionate"
+	desc = "Something in my past has traumatized me about death, which makes me reluctant to pursue it as the end of my deeds. I refuse to wield blades or anything that can cause someone to bleed, and my attacks will never critically hit into lethal or bleeding wounds. Hearing someone scream in pain or attacking someone who is bleeding, will make me freak out and drop my weapons."
+	ui_fa_icon = ""
+	needs_extra_vice = TRUE
+
+/datum/charflaw/compassionate/on_mob_creation(mob/user)
+	. = ..()
+	ADD_TRAIT(user, TRAIT_COMPASSIONATE, "[type]")
