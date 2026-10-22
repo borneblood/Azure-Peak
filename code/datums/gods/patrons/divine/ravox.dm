@@ -1,7 +1,7 @@
 /datum/patron/divine/ravox
 	name = "Ravox"
 	domain = "God of Justice, Glory, Battle"
-	desc = "Stalwart warrior, glorious justicar; legends say he came down to the Basin to repel the vile hordes of demons with his own hands, and that he seeks warriors for his divine army among mortals."
+	desc = "A stalwart warrior, the glorious Justicar. A God who stands at the forefront of the struggle against all that threatens creation. Legends say he descended into the Basin to repel the vile hordes of demons with his own hands, and that he continues to seek worthy warriors among mortals to join his divine army. He is stern but fair, demanding much of those who bear arms in his name, yet never asking of them a courage he would not show himself. To Ravox, strength is a sacred duty, meant to defend the innocent, confront injustice, and carry the fight against evil wherever it may hide. He does not promise his champions an easy victory, only that their struggle will have meaning. For as long as there are battles worth fighting, Ravox shall be among the first to draw his blade."
 	worshippers = "Warriors, Sellswords, and those who seek Justice"
 	mob_traits = list(TRAIT_SHARPER_BLADES)
 	traits_tier = list(TRAIT_BATTLEMASTER = CLERIC_T1, TRAIT_JUSTICARSIGHT = CLERIC_T3)

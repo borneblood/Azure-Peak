@@ -1,7 +1,7 @@
 /datum/patron/divine/malum
 	name = "Malum"
 	domain = "God of Fire, Destruction and Rebirth"
-	desc = "Opinionless god of the crafts. He teaches that great works for killing or saving are great works, either way. The well-oiled guillotine and the well-sharpened axe are tools, and there is no good and evil to their craft."
+	desc = "Malum, the god of crafts, is a quiet and impartial patron of those who make, build, and shape the world with their hands. He concerns himself little with the purpose of a creation, caring instead for the skill, patience, and ingenuity that brought it into being. To Malum, a surgeon's scalpel and an executioner's blade are equally deserving of a master's touch, for the worth of a craft lies in its execution, not the deeds it enables. He does not preach goodness, nor does he condemn wickedness; such judgments belong to those who wield the tools, not those who forge them. He admires a well-made thing regardless of its purpose, and expects his followers to pursue mastery without allowing sentiment to spoil their work. For Malum, there is no evil in the hammer, no virtue in the chisel, and no greater satisfaction than seeing a job done well."
 	worshippers = "Smiths, Miners, Engineers"
 	mob_traits = list(TRAIT_FORGEBLESSED, TRAIT_MALUM_CRAFTER)
 	miracles = list(/datum/action/cooldown/spell/touch/orison				= CLERIC_ORI,

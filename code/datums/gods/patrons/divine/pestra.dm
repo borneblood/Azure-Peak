@@ -1,7 +1,7 @@
 /datum/patron/divine/pestra
 	name = "Pestra"
 	domain = "Goddess of Decay, Disease and Medicine"
-	desc = "Goddess that blessed many a saint with healing hands, Pestra taught man the arts of medicine and its benefits."
+	desc = "Pestra taught mortalkind to understand the ailments of the flesh and the means by which they might be treated. Clever, pragmatic, and thoroughly jaded, she has little patience for those who believe the world can be made free of suffering. She knows that decay is as natural as growth, that disease respects neither virtue nor wickedness, and that even the finest physician must sometimes choose who can be saved. Yet she has never mistaken acceptance for surrender. She blesses those who study, experiment, and persevere, caring little for grand promises or pretty prayers when a life hangs in the balance. To Pestra, medicine is a discipline, not a miracle, and compassion is worth little without the wisdom to put it to use. She expects no gratitude from the dying and offers no false comfort to the living. There is work to be done, wounds to be mended, and knowledge yet to be gained. She would rather see a physician learn from one failure than watch a thousand fools pray for a cure."
 	worshippers = "Physicians, Apothecaries, and the Sick"
 	mob_traits = list(TRAIT_EMPATH, TRAIT_ROT_EATER)
 	miracles = list(/datum/action/cooldown/spell/touch/orison					= CLERIC_ORI,

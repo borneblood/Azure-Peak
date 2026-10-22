@@ -1,11 +1,7 @@
 /datum/patron/old_god
 	name = "Psydon"
 	domain = "Otava, Naledi, Rockhill, and most of Psydonia's outermost fiefs."
-	desc = "''God. The manifestation of maximal good, and the father of all.'' \
-	</br>''He, who created reality for His children to frollick within.'' \
-	</br>''He, who breathed lyfe into the Pantheon to shepherd His virtues.'' \
-	</br>''He, who sacrificed His strength to strike down the Archdevil with the Comet Syon.'' \
-	</br>''He, who yet slumbers to this dae; and who may yet still return.''"
+	desc = "PSYDON, the Allfather and God of Creation, was said to be beloved beyond measure, broad of shoulder, mighty of arm, and gentle of heart. He was the sort to kneel in the mud to comfort a crying child, to laugh alongside His people at their merrymaking, and to stand between the helpless and any harm without a moment's hesitation. No soul was too lowly for His affection, no burden too small for His concern, and no sinner too wretched for His mercy. He was strength without cruelty, wisdom without arrogance, and love without condition. The world was His home, mortalkind His children, and their happiness His greatest joy.<br><br>Though He has fallen silent since the Comet Syon, His children remember the warmth of His embrace, the certainty of His protection, and the boundless kindness of the Father who never asked them to bear a burden He would not bear Himself. ENDURE, for He would have wished you to live."
 	worshippers = "Commonfolk, Zealots, Heroes, Villains, and the Esoteric"
 	associated_faith = /datum/faith/old_god
 	mob_traits = list(TRAIT_PSYDONIAN_GRIT) //Assigned to all mobs with Psydon as the chosen patron. Gives a Willpower-scaling chance to resist succumbing to pain.

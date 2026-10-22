@@ -1,7 +1,7 @@
 /datum/patron/inhumen/zizo
 	name = "Zizo"
 	domain = "Progress, Undeath, Hubris, Artifice, Left Hand Magicks"
-	desc = "A once-mortal snow elf turned goddess. Her hubris in thinking she could harvest lux from the planet itself led to the elimination of her entire race. Her works are still used to this dae in some cases."
+	desc = "Once a mortal snow elf, Zizo sought to harvest the essence of the world woven into creation. Her hubris doomed her entire race, creating the very first deadites, while she herself became the first incomplete Lich. Yet her transformation did not end there; through this profane achievement, she ascended to godhood and claimed dominion over undeath itself.<br><br>Now as the Archlych, the Dame of Progress watches mortals with idle curiosity, waiting to see what they might achieve. She favors the unorthodox, the profane, and those whose deeds push the world beyond its old limits. The greater the result and the less conventional the means, the more likely She is to take notice. Show Her something worth witnessing, and She may grant you Her favor."
 	worshippers = "Necromancers, Researchers, Wizards, Warlocks and the Undead"
 	mob_traits = list(TRAIT_CABAL, TRAIT_ZIZOSIGHT)
 	miracles = list(/datum/action/cooldown/spell/touch/orison							= CLERIC_ORI,

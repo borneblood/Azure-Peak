@@ -1,7 +1,7 @@
 /datum/patron/inhumen/graggar
 	name = "Graggar"
 	domain = "God of Conquest, War, Strategy, Bind-Breaking"
-	desc = "Slave orc turned deity, said by the Holy Ecclesial to have been blessed by Ravox himself. He took his blessings to wage a bloody war against his once-captors, and then continued his conquest in his own name. Some Graggarites might care for honor, however many do not- what matters are results, and victory at a reasonable cost."
+	desc = "Once a slave orc blessed by Ravox, Graggar became a terror upon the battlefield, until his lust for slaughter eclipsed all honor and he turned against his own god. Ravox tore him asunder, but too late. Graggar had become the very embodiment of the Motive Force, the will to harm made manifest. No broken body could undo what he had become, a mistake Ravox regrets to this dae.<br><br>Now, Graggar whispers to those itching for violence, urging them to crack skulls, break bones, and leave their enemies choking in the dirt. He offers no grand wisdom, only the approving snicker of a brute who loves a good slaughter. When blood runs and screams fill the air, you might feel Him grinning at your shoulder, pleased with the carnage."
 	worshippers = "Prisoners, Slaves, Militants, and the Cruel"
 	mob_traits = list(TRAIT_HORDE, TRAIT_ORGAN_EATER)
 	traits_tier = list(TRAIT_NASTY_EATER = CLERIC_T1)

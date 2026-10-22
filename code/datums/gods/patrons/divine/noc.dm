@@ -1,7 +1,7 @@
 /datum/patron/divine/noc
 	name = "Noc"
 	domain = "God of the Moon, Nite, Knowledge and Arcyne"
-	desc = "The Nite-Scholar, brother and rival to Astrata. His wisdom paves the way in the moonlight. Tales of esoteric magicka at the destination are sung - in the words of decaying scripts."
+	desc = "The Nite-Scholar, Noc is the brother and rival of Astrata, a keeper of hidden wisdom and the mysteries that stir beneath the moonlight. Where his sister shines her light upon the world, he invites mortalkind to peer into the shadows and question what they find there. Quiet, secretive, and endlessly curious, Noc delights in knowledge long forgotten, truths yet uncovered, and secrets that others fear to seek. His wisdom is scattered across crumbling tomes and decaying scripts, waiting for those clever or foolish enough to decipher them. He holds little regard for those who fear what they do not understand, believing that even the darkest mysteries deserve to be studied. To follow Noc is to accept that knowledge rarely comes without consequence, and that some questions only lead to stranger ones."
 	worshippers = "Wizards, Alchemists, and Scholars"
 	mob_traits = list(TRAIT_NIGHT_OWL)
 	miracles = list(/datum/action/cooldown/spell/touch/orison					= CLERIC_ORI,
