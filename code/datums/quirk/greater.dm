@@ -64,3 +64,11 @@
 	var/datum/language/langpath = choices[tgui_input_list(recipient, "Which language do you study?", "LINGUISTIC BOON", choices)]
 	if(langpath && ispath(langpath, /datum/language))
 		holder.grant_language(langpath)
+
+/datum/quirk/darksight
+	name = "Darkvision"
+	desc = "Due to my upbringing, I can somewhat see well in the dark."
+	added_traits = list(TRAIT_DARKSIGHT)
+	greater = TRUE
+	allowed_species = list(/datum/species/anthromorph, /datum/species/anthromorphsmall, /datum/species/lupian, /datum/species/tabaxi, /datum/species/akula, /datum/species/vulpkanin, /datum/species/demihuman, /datum/species/dwarf, /datum/species/goblin)
+	ui_fa_icon = "eye"
