@@ -655,8 +655,8 @@
 	healing_on_tick = 5 // quarter strength, sorry! it's soap, what'd you expect
 
 /atom/movable/screen/alert/status_effect/buff/healing/campfire
-	name = "Camp Rest"
-	desc = "The warmth of a fire and a bed soothes my ails."
+	name = "Comfortable Rest"
+	desc = "The warmth of a fire and a bed eases my pain."
 	icon_state = "campfire"
 
 /atom/movable/screen/alert/status_effect/buff/campfire_stamina
@@ -704,25 +704,17 @@
 		return
 	if(HAS_TRAIT(owner, TRAIT_NOHEAL) || HAS_TRAIT(owner, TRAIT_IRONMAN))
 		return
+	var/pain_reduction = healing_on_tick
 	if(HAS_TRAIT(owner, TRAIT_HALFHEAL))
-		healing_on_tick /= 2
+		pain_reduction *= 0.5
 	var/obj/effect/temp_visual/heal/H = new /obj/effect/temp_visual/heal_rogue/campfire(get_turf(owner))
 	H.color = "#c7aa5c"
-	var/bleeding = owner.bleed_rate > 1 ? TRUE : FALSE
-	var/wound_heal = bleeding ? 1 : healing_on_tick
-	if(owner.blood_volume < BLOOD_VOLUME_OKAY && !bleeding)
-		owner.blood_volume = min(owner.blood_volume+healing_on_tick, BLOOD_VOLUME_OKAY)
 	var/list/wCount = owner.get_wounds()
-	if(length(wCount))
-		owner.heal_wounds(wound_heal, list(/datum/wound/slash, /datum/wound/puncture, /datum/wound/bite, /datum/wound/bruise, /datum/wound/dynamic, /datum/wound/dislocation))
-		owner.update_damage_overlays()
-	owner.adjustBruteLoss(-healing_on_tick, 0)
-	owner.adjustFireLoss(-healing_on_tick, 0)
-	if(!bleeding)
-		owner.adjustOxyLoss(-healing_on_tick, 0)
-	owner.adjustToxLoss(-healing_on_tick, 0)
-	owner.adjustOrganLoss(ORGAN_SLOT_BRAIN, -healing_on_tick)
-	owner.adjustCloneLoss(-healing_on_tick, 0)
+	for(var/datum/wound/wound as anything in wCount)
+		if(wound.woundpain)
+			to_chat(owner, span_notice("DEBUG: Wound pain before: [wound.woundpain]"))
+			wound.woundpain = max(0, wound.woundpain - 0.5)
+			to_chat(owner, span_notice("DEBUG: Wound pain after: [wound.woundpain]"))
 
 #undef CAMPFIRE_BASE_FILTER
 
