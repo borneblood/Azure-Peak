@@ -166,7 +166,7 @@
 		H.adaptive_name_title = "Homesteader"
 		add_verb(H, /datum/advclass/homesteader/proc/choose_homesteader_title)
 
-		H.mind.AddSpell(new /obj/effect/proc_holder/spell/invoked/diagnose/secular)
+		H.mind.AddSpell(new /datum/action/cooldown/spell/pestra/diagnose/secular)
 	if(H.mind)
 		SStreasury.grant_savings(ECONOMIC_LOWER_CLASS, H)
 

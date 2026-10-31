@@ -3,7 +3,7 @@
 	tutorial = "Wielding crude tools and accumulated knowledge, you are something of a 'freelance physician' even if the local apothecary declined your application, and over the yils have probably cut into more people than the average knight."
 	allowed_sexes = list(MALE, FEMALE)
 	forbidden_races = list(RACES_DESPISED)
-	
+
 	outfit = /datum/outfit/job/roguetown/adventurer/doctor
 	category_tags = list(CTAG_PILGRIM, CTAG_TOWNER)
 	traits_applied = list(TRAIT_EMPATH, TRAIT_NOSTINK, TRAIT_MEDICINE_EXPERT, TRAIT_ALCHEMY_EXPERT)
@@ -55,9 +55,9 @@
 						/obj/item/clothing/cloak/apron/cook{
 							name = "barber's apron";
 							desc = "An apron meant to keep the hands clean of blood, as well as tools"
-							} = 1,							
-						/obj/item/folding_alchcauldron_stored = 1,	
-						/obj/item/rogueweapon/huntingknife/scissors/steel = 1,						
+							} = 1,
+						/obj/item/folding_alchcauldron_stored = 1,
+						/obj/item/rogueweapon/huntingknife/scissors/steel = 1,
 						/obj/item/flashlight/flare/torch/lantern = 1,
 						/obj/item/natural/worms/leech/cheele = 1,
 						/obj/item/recipe_book/alchemy = 1,
@@ -67,7 +67,7 @@
 						/obj/item/clothing/suit/roguetown/shirt/robe/physician = 1,
 						)
 	if(H.mind)
-		H.mind.AddSpell(new /obj/effect/proc_holder/spell/invoked/diagnose/secular)
+		H.mind.AddSpell(new /datum/action/cooldown/spell/pestra/diagnose/secular)
 	if(H.mind)
 		SStreasury.grant_savings(ECONOMIC_UPPER_MIDDLE_CLASS, H)
 

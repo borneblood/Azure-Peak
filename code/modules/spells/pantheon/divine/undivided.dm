@@ -261,7 +261,7 @@
 		/datum/action/cooldown/spell/darkvision/undivided::name		=/datum/action/cooldown/spell/darkvision/undivided,
 		/datum/action/cooldown/spell/noc/invisibility::name			=/datum/action/cooldown/spell/noc/invisibility,
 		/datum/action/cooldown/spell/noc/enlightenment::name		=/datum/action/cooldown/spell/noc/enlightenment,
-		/obj/effect/proc_holder/spell/invoked/diagnose::name		=/obj/effect/proc_holder/spell/invoked/diagnose,
+		/datum/action/cooldown/spell/pestra/diagnose::name			=/datum/action/cooldown/spell/pestra/diagnose,
 		/obj/effect/proc_holder/spell/invoked/bless_food::name		=/obj/effect/proc_holder/spell/invoked/bless_food,
 		/datum/action/cooldown/spell/arcyne_forge/miracle::name		=/datum/action/cooldown/spell/arcyne_forge/miracle,
 	)

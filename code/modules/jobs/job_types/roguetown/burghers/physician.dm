@@ -114,6 +114,6 @@
 		pants = /obj/item/clothing/under/roguetown/trou/leather/courtphysician
 		shoes = /obj/item/clothing/shoes/roguetown/courtphysician
 	if(H.mind)
-		H.mind.AddSpell(new /obj/effect/proc_holder/spell/invoked/diagnose/secular)
+		H.mind.AddSpell(new /datum/action/cooldown/spell/pestra/diagnose/secular)
 	if(H.mind)
 		SStreasury.grant_savings(ECONOMIC_RICH, H)

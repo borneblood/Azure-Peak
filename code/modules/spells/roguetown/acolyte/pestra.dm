@@ -3,21 +3,37 @@
 #define DIAGNOSE_HAS_INCISION (1<<1)
 #define DIAGNOSE_HAS_HEMOSTAT (1<<2)
 
+/datum/action/cooldown/spell/pestra
+	background_icon = 'icons/mob/actions/pestraspells.dmi'
+	button_icon = 'icons/mob/actions/pestraspells.dmi'
+	attunement_school = null
+	primary_resource_type = SPELL_COST_DEVOTION
+	secondary_resource_type = SPELL_COST_STAMINA
+	ignore_armor_penalty = TRUE
+	has_visual_effects = FALSE
+	spell_impact_intensity = SPELL_IMPACT_NONE
+	associated_stat = null
+	associated_skill = /datum/skill/magic/holy
+	spell_tier = 0
+	point_cost = 0
+
 // Diagnose
 /datum/action/cooldown/spell/pestra/diagnose
 	name = "Diagnose"
-	desc = "Call upon Pestra's medical wisdom to read the body's humors and hidden ailments at a distance. Reveals a target's condition with perfect clarity. To perceive one's blood content, all you'll need is but an incision."
-	button_icon = 'icons/mob/actions/pestraspells.dmi'
+	desc = "Reveals a target's physical condition with perfect clarity, identifying injuries, ailments, and bodily functions. An incision is required to accurately perceive their blood content."
+	fluff_desc = "Among the first Miracles taught by Pestra, a humble lesson in understanding the truths of lyfe. Through the goddess's wisdom, the faithful are taught to peer into the body's humors and hidden ailments, gaining an instinctive understanding of another's physical condition. For before one may mend the flesh, they must first learn to understand it."
 	button_icon_state = "diagnose"
-	sound = 'sound/magic/diagnose.ogg'
-	spell_type = SPELL_MIRACLE
+	sound = null
+	click_to_activate = TRUE
+	self_cast_possible = TRUE
+	cast_range = 4
+	primary_resource_cost = 5
+	secondary_resource_cost = 10
 	invocation_type = INVOCATION_NONE
-	antimagic_flags = NONE
-	associated_skill = /datum/skill/magic/holy
 	charge_required = FALSE
-	cast_range = 4 // just in case free wants to demolish me for changing that, but 4 range is essential for this skill's functionality
 	cooldown_time = 3 SECONDS
-	devotion_cost = 5
+	spell_requirements = SPELL_REQUIRES_HUMAN
+	required_items = list(/obj/item/clothing/neck/roguetown/psicross/pestra, /obj/item/clothing/neck/roguetown/psicross/undivided, /obj/item/clothing/neck/roguetown/psicross/silver/undivided)
 	/// Miracle casts act as if capped on medicine; the secular version does not.
 	var/is_miracle = TRUE
 
@@ -46,25 +62,19 @@
 		"I can see the Black Rot in its terminal stage, 'Necrosis'.",
 	)
 
-/datum/action/cooldown/spell/pestra/diagnose/is_valid_target(atom/cast_on)
+/datum/action/cooldown/spell/pestra/diagnose/cast(atom/cast_on)
 	. = ..()
-	if(!.)
+	if(!ishuman(cast_on))
 		return FALSE
-	return ishuman(owner) && ishuman(cast_on)
-
-/datum/action/cooldown/spell/pestra/diagnose/cast(mob/living/carbon/human/cast_on)
-	. = ..()
 	var/mob/living/user = owner
 	var/mob/living/carbon/human/target = cast_on
-
 	var/skill_level = user.get_skill_level(associated_skill)
 	var/is_mid_tier = (skill_level >= SKILL_LEVEL_JOURNEYMAN && skill_level <= SKILL_LEVEL_EXPERT)
 	// miracle/secular share this proc; a miracle always acts as if capped on medicine, the "cheating" of being a miracle
 	var/is_high_tier = (skill_level >= SKILL_LEVEL_MASTER) || is_miracle
-
 	// skill happens as per normal
+	playsound(user, 'sound/magic/diagnose.ogg')
 	target.check_for_injuries(user)
-
 	report_missing_organs(user, target)
 	report_deadite(user, target, is_high_tier)
 	report_suffocation(user, target, is_high_tier)
@@ -76,8 +86,6 @@
 		report_high_tier(user, target)
 	report_blood(user, target, is_mid_tier, is_high_tier)
 	return TRUE
-
-/********************REPORTS********************/
 
 /// One line listing every organ the target should have but doesn't.
 /datum/action/cooldown/spell/pestra/diagnose/proc/report_missing_organs(mob/living/user, mob/living/carbon/human/target)
@@ -186,8 +194,6 @@
 		return 1
 	return 0
 
-/********************BLOOD ANALYSIS********************/
-
 /// Looks for a leech and a hemostat embedded anywhere, and an incision anywhere. Returns DIAGNOSE_HAS_* flags.
 /datum/action/cooldown/spell/pestra/diagnose/proc/scan_instruments(mob/living/carbon/human/target)
 	var/found = 0
@@ -256,11 +262,13 @@
 
 /datum/action/cooldown/spell/pestra/diagnose/secular
 	name = "Secular Diagnosis"
-	desc = "A practiced reading of the body's humors and hidden ailments. Reveals a target's condition, with greater skill granting deeper detail. By embedding a Forceps on your patient, you may even identify substances within the blood; but even the most unskilled physicker can tell from a Cheele or Leech's reactions."
+	desc = "Reveals a target's condition, with greater skill granting deeper detail. By embedding a Forceps on your patient, you may even identify substances within the blood; but even the most unskilled physicker can tell from a Cheele or Leech's reactions."
+	fluff_desc = "What began as one of Pestra's earliest teachings has, over generations, become a subject of mortal study. Through careful observation, dissection, and the accumulated knowledge of countless physicians, mankind has sought to understand the body's humors and hidden ailments. No divine blessing is required, only a trained eye and the patience to understand the intricacies of lyfe."
 	cast_range = 4 // 2 range doesn't let you see over a meeting table, 4 range is just enough for that, it also falls in line with normal miracle
 	associated_skill = /datum/skill/misc/medicine
 	is_miracle = FALSE
-	devotion_cost = 0 //Doctors are not clerics
+	primary_resource_cost = 0 //Doctors are not clerics
+	required_items = null
 	// cooldown should be 1:1 with the parent skill
 
 #undef DIAGNOSE_HAS_LEECH

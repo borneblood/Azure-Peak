@@ -72,6 +72,6 @@
 	beltl = /obj/item/rogueweapon/scabbard/sheath
 	// medico morbo adhebe *stabs U
 	if(H.mind)
-		H.mind.AddSpell(new /obj/effect/proc_holder/spell/invoked/diagnose/secular)
+		H.mind.AddSpell(new /datum/action/cooldown/spell/pestra/diagnose/secular)
 
 

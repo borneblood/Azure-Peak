@@ -78,8 +78,8 @@
 				added_skills.Add(list(list(/datum/skill/craft/alchemy, 2, 2)))
 				added_skills.Add(list(list(/datum/skill/misc/medicine, 2, 2)))
 				added_traits.Add(TRAIT_MEDICINE_EXPERT, TRAIT_ALCHEMY_EXPERT)
-				if(!recipient.mind?.has_spell(/obj/effect/proc_holder/spell/invoked/diagnose/secular))
-					recipient.mind?.AddSpell(new /obj/effect/proc_holder/spell/invoked/diagnose/secular)
+				if(!recipient.mind?.has_spell(/datum/action/cooldown/spell/pestra/diagnose/secular))
+					recipient.mind?.AddSpell(new /datum/action/cooldown/spell/pestra/diagnose/secular)
 				recipient.mind?.special_items["Medicine Pouch"] = /obj/item/storage/belt/rogue/pouch/medicine
 				recipient.mind?.special_items["Improv. Surgery Kit"] = /obj/item/storage/belt/rogue/surgery_bag/full/bad
 			if(SKILLED_COOK)

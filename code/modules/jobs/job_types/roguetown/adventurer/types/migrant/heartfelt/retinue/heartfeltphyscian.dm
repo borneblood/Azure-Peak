@@ -69,7 +69,7 @@
 		shoes = /obj/item/clothing/shoes/roguetown/courtphysician
 
 	if(H.mind)
-		H.mind.AddSpell(new /obj/effect/proc_holder/spell/invoked/diagnose/secular)
+		H.mind.AddSpell(new /datum/action/cooldown/spell/pestra/diagnose/secular)
 		backpack_contents += /obj/item/clothing/mask/rogue/physician
 	if(H.age == AGE_OLD)
 		H.change_stat("speed", -1)

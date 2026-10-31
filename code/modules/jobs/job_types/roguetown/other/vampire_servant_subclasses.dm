@@ -222,4 +222,4 @@
 		/obj/item/storage/belt/rogue/pouch/coins/mid = 1
 		)
 	if(H.mind)
-		H.mind.AddSpell(new /obj/effect/proc_holder/spell/invoked/diagnose/secular)
+		H.mind.AddSpell(new /datum/action/cooldown/spell/pestra/diagnose/secular)
