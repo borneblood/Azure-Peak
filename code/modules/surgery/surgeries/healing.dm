@@ -78,6 +78,9 @@
 	if(target.getBruteLoss() > 0 || target.getFireLoss() > 0)
 		return null
 	for(var/obj/item/bodypart/BP as anything in target.bodyparts)
+		if(length(get_treatable_wounds(BP)))
+			return null
+	for(var/obj/item/bodypart/BP as anything in target.bodyparts)
 		if(locate(/datum/wound/slash/incision) in BP.wounds)
 			return BP
 	return null
@@ -181,15 +184,15 @@
 	// Limb is recomputed here because step datums are shared.
 	var/obj/item/bodypart/affecting = get_worst_limb(H)
 
-	// Everything else is cured: pull any embeds, then sew the surgical incision.
+	// Everything else is cured: sew the surgical incision, then pull any embeds.
 	if(!affecting)
 		var/obj/item/bodypart/incision_limb = get_incision_limb(H)
 		if(!incision_limb)
 			return TRUE
-		pull_embeds(user, target)
 		var/datum/wound/incision = locate(/datum/wound/slash/incision) in incision_limb.wounds
 		if(incision)
 			incision.sew_wound()
+		pull_embeds(user, target)
 		display_results(user, target, span_blue("I sew shut the incision on [target]'s [incision_limb.name]."),
 			span_blue("[user] sews shut the incision on [target]'s [incision_limb.name]."),
 			span_blue("[user] sews shut the incision on [target]'s [incision_limb.name]."))
@@ -317,14 +320,14 @@
 
 /********************STEPS********************/
 /datum/surgery_step/heal/form
-	name = "Cure damage"
+	name = "Cure damage surgery"
 	brutehealing = 5
 	burnhealing = 5
 	requires_tech = FALSE
 	replaced_by = null
 
 /datum/surgery_step/heal/wounds
-	name = "Cure wounds"
+	name = "Cure wounds surgery"
 	woundhealing = 5
 	requires_tech = FALSE
 	replaced_by = null

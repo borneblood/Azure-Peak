@@ -357,8 +357,8 @@
 	var/list/detailed_mobs = get_hearers_in_view(1, user) //Only the surgeon and people looking over his shoulder can see the operation clearly
 	if(!target_detailed)
 		detailed_mobs -= target //The patient can't see well what's going on, unless it's something like getting cut
-	user.visible_message(detailed_message, self_message, vision_distance = 1, ignored_mobs = target_detailed ? null : target)
-	user.visible_message(vague_message, "", ignored_mobs = detailed_mobs)
+	user.visible_message(detailed_message, self_message, vision_distance = 1, ignored_mobs = (target == user || target_detailed) ? null : target)
+	user.visible_message(vague_message, "", ignored_mobs = detailed_mobs + (target == user ? list(user) : list()))
 	return TRUE
 
 /// General proc for notifying people of a tool embedding inside deliberately.
