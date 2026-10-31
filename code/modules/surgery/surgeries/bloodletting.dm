@@ -81,12 +81,15 @@
 
 /datum/surgery_step/bloodlet/success(mob/user, mob/living/target, target_zone, obj/item/tool, datum/intent/intent)
 	var/surgeon_level = user.get_skill_level(skill_used)
-
 	display_results(user, target, span_notice("I force blood out [target]'s vein in [parse_zone(target_zone)]."),
 		span_notice("[user] forces blood out [target]'s vein in [parse_zone(target_zone)]!"),
 		span_notice("[user] forces blood out [target]'s vein in [parse_zone(target_zone)]!"))
-	target.adjustToxLoss (-15, 0)
-	target.blood_volume -= (50 - (surgeon_level*2))
+	// Removes 20% of the current toxin damage, plus 15 flat.
+	// Read the value before adjusting so the percentage uses the pre-surgery amount.
+	var/tox_reduction = (target.getToxLoss() * 0.2) + 15
+	target.adjustToxLoss(-tox_reduction, 0)
+	// Always costs 5% of the maximum blood volume, regardless of skill.
+	target.blood_volume -= (BLOOD_VOLUME_NORMAL * 0.05)
 	// bloodletting will also allow you to remove "infection" reagent from people.
 	// roundabout and hacky solution for people that somehow get like 400 of the thing from ppl's shitty surgery.
 	// that makes them unrevivable, btw. they spawn and die again.
