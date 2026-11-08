@@ -6,16 +6,15 @@
 	mob_traits = list(TRAIT_EMPATH, TRAIT_ROT_EATER)
 	miracles = list(/datum/action/cooldown/spell/touch/orison					= CLERIC_ORI,
 					/datum/action/cooldown/spell/pestra/diagnose				= CLERIC_ORI,
-					/obj/effect/proc_holder/spell/invoked/pestra_leech			= CLERIC_T0,
+					/datum/action/cooldown/spell/pestra/panacea					= CLERIC_T0, // less disgusting leech miracle
 					/datum/action/cooldown/spell/miracle/heal					= CLERIC_T1,
 					/datum/action/cooldown/spell/miracle/bloodmiracle			= CLERIC_T1,
-					/obj/effect/proc_holder/spell/invoked/infestation			= CLERIC_T1,
-					/obj/effect/proc_holder/spell/invoked/pestilent_blade		= CLERIC_T2,
-					/obj/effect/proc_holder/spell/invoked/pestra_heal			= CLERIC_T2,
-					/obj/effect/proc_holder/spell/invoked/attach_bodypart		= CLERIC_T2,
+					/datum/action/cooldown/spell/pestra/bio						= CLERIC_T1, // remote tox infection on target that worsens the more you use on them, use on self for pestilent blade, only gains stacks when used on others, can stack all the way up by praying at a cross outside cmode
+					/datum/action/cooldown/spell/pestra/fleshcraft				= CLERIC_T2, // this is a cantrip for the love of god
+					/datum/action/cooldown/spell/pestra/regenesis				= CLERIC_T2, // classic pestra omegaheal, requires max stacks of bio
+					/datum/action/cooldown/spell/pestra/regrowth				= CLERIC_T3, // pmuch regrows organs and limbs, if limbs are around, consume them to refresh cooldown
 					/datum/action/cooldown/spell/miracle/fortify				= CLERIC_T3,
-					/obj/effect/proc_holder/spell/invoked/cure_rot				= CLERIC_T3,
-					/obj/effect/proc_holder/spell/invoked/fleshcraft			= CLERIC_T3,
+					/datum/action/cooldown/spell/pestra/cleanse					= CLERIC_T3, // removes rot instantly, cures all diseases and toxins, as well as the zombified effects and atrophy. severely CCs deadites.
 					/obj/effect/proc_holder/spell/invoked/resurrect/pestra		= CLERIC_T4,
 	)
 	confess_lines = list(
